@@ -145,39 +145,6 @@ class InstructInterventionDataProcessor(InterventionDataProcessor):
                  'content': f'{statement}'},
             ]
 
-    # def _template(self, object_1, negation, category=None):
-    #     '''
-    #     Apply template
-    #     Args:
-    #         object_1: str, first object
-    #         object_2: str, second object
-    #         negation: int, 0 or 1
-    #     Returns:
-    #         str, formatted statement
-    #     '''
-    #     article = "is" if negation == 0 else "is not"
-    #     if self.datapack in ['cities', 'cities_loc']:
-    #         if 'city' in object_1.lower():
-    #             return f'{object_1} is located in'
-    #         return f'The city of {object_1} {article} located in'
-    #     elif self.datapack in ['drugs', 'med_indications']:
-    #         if any(word in object_1.lower() for word in ["control", "preparation", "contraception", "prevention", "weight loss"]):
-    #             return f'{object_1.capitalize()} {article} used for'
-    #         return f'{object_1.capitalize()} {article} is indicated for the treatment of'
-    #     elif self.datapack == 'symptoms':
-    #         return f'{object_1.capitalize()} {article} linked to'
-    #     elif self.datapack in ['definitions', 'defs']:
-    #         if category == 'instances':
-    #             return f'{object_1} {article} a'
-    #         elif category == 'synonyms':
-    #             return f'{object_1} {article} a synonym of a'
-    #         elif category == 'types':
-    #             return f'{object_1} {article} a type of a'
-    #         else:
-    #             return f'{object_1} {article}'
-    #     else:
-    #         raise ValueError("Invalid data pack")
-
     def _template(self, object_1, object_2, negation, category=None):
         statement = self.template(object_1, object_2, negation, category)
         return self._instruct_template(statement)
@@ -222,89 +189,6 @@ class InstructInterventionDataProcessor(InterventionDataProcessor):
 
     def _statement_to_ids(self, statement):
         return self.tokenizer.apply_chat_template(statement, add_generation_prompt=False, tokenize=True)
-
-
-class TorchStandardScaler(nn.Module):
-    def __init__(self, mean, scale):
-        super(TorchStandardScaler, self).__init__()
-        # Store mean and scale as PyTorch tensors for efficient computation
-        self.mean = torch.tensor(mean, dtype=torch.float32)
-        self.scale = torch.tensor(scale, dtype=torch.float32)
-
-    @classmethod
-    def from_sklearn(cls, scaler):
-        """
-        Create a TorchStandardScaler from a scikit-learn StandardScaler.
-        """
-        return cls(scaler.mean_, scaler.scale_)
-
-    def transform(self, X):
-        """
-        Apply standard scaling to the input tensor.
-        """
-        return (X - self.mean) / self.scale
-
-    def inverse_transform(self, X_scaled):
-        """
-        Reverse the standard scaling transformation.
-        """
-        return X_scaled * self.scale + self.mean
-
-
-class Attribution:
-    def reduce(self, x):
-        if self.reduction == "sum":
-            return x.sum()
-        elif self.reduction == "mean":
-            return x.mean()
-        elif self.reduction == "max":
-            return x.max()
-        else:
-            raise ValueError("Invalid reduction")
-
-    def score_single(self, x):
-        raise NotImplementedError
-
-    def __call__(self, x):
-        if x.ndim == 2:
-            return self.score_single(x)
-        elif x.ndim == 3:
-            return self.score_single(x[0])
-
-
-class TCAV(Attribution):
-    def __init__(self, concept_direction, reduction="sum", seed: int = 2024, n_random_directions: int = 1000):
-        """
-        Initialize TCAV attribution method
-        Args:
-            concept_direction: Concept direction
-            reduction: Reduction method
-            seed: Random seed
-            n_random_directions: Number of random directions to sample
-        """
-        self.dir = concept_direction
-        self.reduction = reduction
-        self.seed = seed
-        self.n_random = n_random_directions
-        self.rdirs = self.random_direction(
-            concept_direction, n_random_directions)
-
-    def score_single(self, x):
-        assert x.ndim == 2
-        norm = x.norm(dim=1) ** -1
-        x = torch.einsum("lh, l -> lh", x, norm)
-        sr = torch.einsum("lh, hr -> rl", x, self.rdirs)
-        return {"default": self.reduce(torch.einsum("lh, h -> l", x, self.dir)),
-                "random": torch.stack([self.reduce(i) for i in sr])}
-
-    def random_direction(self, direction, n_random):
-        torch.manual_seed(self.seed)
-        output = torch.zeros((direction.shape[0], n_random))
-        for i in range(n_random):
-            output[:, i] = direction.clone(
-            )[torch.randperm(direction.shape[0])]
-
-        return output.to(direction.device)
 
 
 def translate_concept(X, direction, target_coord: float, absolute=False):
@@ -352,7 +236,7 @@ def translate_concept(X, direction, target_coord: float, absolute=False):
     return X_translated
 
 
-def amplify_concept(X, direction, scaler: float = None):
+def amplify_concept(X, direction, scaler: float = None): # type: ignore
     if torch.norm(direction) != 1:
         direction = direction / torch.norm(direction)
     curr_coord = torch.einsum("bsh, h -> bs", X, direction)
@@ -362,7 +246,7 @@ def amplify_concept(X, direction, scaler: float = None):
     return Xs
 
 
-def polarize_concept(X, direction, scaler: float = None, positive=True):
+def polarize_concept(X, direction, scaler: float = None, positive=True): # type: ignore
     if torch.norm(direction) != 1:
         direction = direction / torch.norm(direction)
     curr_coord = torch.einsum("bsh, h -> bs", X, direction)
@@ -374,12 +258,6 @@ def polarize_concept(X, direction, scaler: float = None, positive=True):
         step[step > 0] = 0
     proj = torch.einsum("h, bs -> bsh", direction, step)
     Xs = X + proj
-    return Xs
-
-
-def zero_out_concept(X, direction, scaler: float = None):
-    non_zero = (direction == 0).float()
-    Xs = torch.einsum("bsh, h -> bsh", X, non_zero)
     return Xs
 
 
