@@ -1,0 +1,8 @@
+defaults:
+  - base
+  - _self_
+
+name: cities_loc
+datasets: ["city_country_subsample", "city_country_synth_subsample"]
+datasets_test: []
+agg: full

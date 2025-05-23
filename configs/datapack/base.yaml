@@ -1,0 +1,8 @@
+name: ???
+datasets: ???
+datasets_test: ???
+test_size: 0.25
+cal_size: 0.25
+exclusive_split: True # make sure same names don't appear in train and test
+load_scores: False # load scores from the zero-shot prompting alogn the dataset
+random_seed: 42

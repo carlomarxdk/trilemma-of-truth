@@ -1,0 +1,18 @@
+defaults:
+  - base_probe
+
+name: sAwMIL
+max_bag_size: 10 # max number of tokens in a bag (if num_known_positives > 0, then takes last num_known_positives tokens and randomlu samples the rest)
+assume_known_positives: True # if True, then uses 'num_known_positives'
+num_known_positives: 2 #number of tokens (at the end of statement) that should have a veracity signal
+train_bag_limit: 1800 # number of bags to train on
+with_bags: True
+
+init_params:
+  kernel: linear_av
+  C: 1.0
+  scale_C: True
+  verbose: True
+  sv_cutoff: 1e-7
+param_grid:
+  C: [0.05, 0.1, 0.5, 1, 10]

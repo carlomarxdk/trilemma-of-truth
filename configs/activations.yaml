@@ -1,0 +1,21 @@
+# activations.yaml
+hydra:
+  run:
+    dir: outputs/hydra_logs/activations/${model.name}/${now:%Y-%m-%d}/${now:%H-%M-%S}
+
+defaults:
+  - model: llama-3-8b
+  - _self_
+
+
+datasets: ['city_country_subsample', 'city_country_synth_subsample',
+            'drug_disease_synth_subsample', 'drug_disease',
+            "word_instances_subsample", "word_types_subsample", "word_synonyms_subsample", 
+           "synth_word2type_subsample", "synth_word2inst_subsample", "synth_word2syn_subsample"]
+
+layers: ${model.layers}
+device: null
+agg: full # full (loads all activations, for each token)
+batch_size: 12 
+max_length: 100 # max length of the input sequence (used only if agg is full)
+output_dir: "outputs/activations/${model.name}"

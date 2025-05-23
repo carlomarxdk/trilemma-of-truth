@@ -1,0 +1,42 @@
+# probe_prompt.yaml
+hydra:
+  job_logging:
+    version: 1
+    disable_existing_loggers: false
+    root:
+      level: WARNING  # Suppress all logs below WARNING globally
+    loggers:
+      sklearn.utils.validation:
+        level: WARNING  # Suppress INFO logs for sklearn.utils.validation
+      sklearnex:
+        level: WARNING  # Suppress INFO logs for sklearnex
+  run:
+    dir: outputs/hydra_logs/general/${probe.name}/${model.name}/${now:%Y-%m-%d}/${now:%H-%M-%S}
+
+defaults:
+  - model: llama-3-8b
+  - probe: sbMIL
+  - datapack: cities
+  - _self_
+
+conformal_params:
+  alpha: 0.1
+
+task: 0
+layer_range: [0.1, 1]
+search: True
+agg: full
+run_debugging: False
+layers: ${model.layers}
+variation: ""
+trial_name: ${datapack.name}
+output_dir: "outputs/general/${probe.name}/${model.name}/"
+
+
+random_seed: 42
+batch_size: 12
+limit_batches: -1 #number of batches to run the analysis on
+sparsify_data: -1
+cv_n_folds: 3
+save_results: True
+start_from_checkpoint: False # "last_finished" will start from the layer that was last computed (aka checkpointed)

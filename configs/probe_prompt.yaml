@@ -1,0 +1,25 @@
+# probe_prompt.yaml
+hydra:
+  run:
+    dir: outputs/hydra_logs/probes/prompt/${model.name}/${now:%Y-%m-%d}/${now:%H-%M-%S}
+
+defaults:
+  - model: llama-3-8b # runs llama-3-8b by default
+  - _self_
+
+datasets: ['city_country_subsample', 'city_country_synth_subsample', 'drug_disease_synth_subsample', 'drug_disease_subsample',
+            "word_instances_subsample", "word_types_subsample", "word_synonyms_subsample", 
+           "synth_word2type_subsample", "synth_word2inst_subsample", "synth_word2syn_subsample"]
+layers: ${model.layers}
+device: null
+variation: "default"
+output_dir: "outputs/probes/prompt/${variation}/${model.name}"
+
+question_type: multichoice
+
+random_seed: 42
+batch_size: 12
+limit_batches: -1 # number of batches to run the analysis on
+enum_list: [1,2,3,4,5,6]
+
+

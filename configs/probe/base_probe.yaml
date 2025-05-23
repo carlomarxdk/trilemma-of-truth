@@ -1,0 +1,6 @@
+name: ???
+init_params: 
+  verbose: False
+param_grid: ???
+normalize_data: True # Normalize the data before training
+with_bags: ??? # If false then uses only the last token in the sentence

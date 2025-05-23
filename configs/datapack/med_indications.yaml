@@ -1,0 +1,9 @@
+# Updated drugs
+defaults:
+  - base
+  - _self_
+
+name: med_indications
+datasets: ["drug_disease_full", "drug_disease_synth_subsample"]
+datasets_test: []
+agg: full

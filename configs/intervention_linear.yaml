@@ -1,0 +1,62 @@
+# probe_prompt.yaml
+hydra:
+  job_logging:
+    version: 1
+    disable_existing_loggers: false
+    root:
+      level: WARNING  # Suppress all logs below WARNING globally
+    loggers:
+      sklearn.utils.validation:
+        level: WARNING  # Suppress INFO logs for sklearn.utils.validation
+      sklearnex:
+        level: WARNING  # Suppress INFO logs for sklearnex
+      nnsight:
+        level: WARNING  # Suppress INFO logs for nnsight
+  run:
+    dir: outputs/hydra_logs/interventions/${probe.name}/${model.name}/${now:%Y-%m-%d}/${now:%H-%M-%S}
+
+defaults:
+  - model: llama-3-8b
+  - probe: sbMIL2
+  - datapack: ???
+  - _self_
+
+datapack:
+ load_scores: False
+counter_method:
+  target_coord: 1
+  num_tokens_to_change: -1
+  absolute: True
+  start_token: -1
+
+mc_params:
+  question_type: multichoice
+  variation: default
+  enum_list: [1,2,3,4,5,6]
+
+
+prompt_f:
+  enumeration: [1,2,3,4,5,6]
+
+layers: ${model.layers}
+device: null
+max_length: 150 # max length of the input sequence (used only if agg is full)
+random_seed: 42
+limit_num_statements: 1200
+### metadata about the probe trained
+task: 4
+sparsify_data: -1 
+layer_range: [0.1, 1]
+search: True
+agg: full
+save_results: True
+
+ndif_apikey: null
+
+start_from_checkpoint: True
+run_debugging: False
+trial_name: ${datapack.name}
+
+
+probe_output_dir: "outputs/probes/${probe.name}/${model.name}/"
+output_dir: "outputs/interv/${probe.name}/${model.name}"
