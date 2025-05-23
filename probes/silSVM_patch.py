@@ -1,13 +1,9 @@
 # monkey patchin the miSVM package
 # to use the sparse binary SVM
 from __future__ import print_function, division
-from probes.mil.util import BagSplitter_pathced
+from probes.utils import BagSplitter_pathced
 from misvm.sil import SIL
-from misvm.smil import sMIL
-from misvm.sbmil import sbMIL
 from misvm.svm import SVM, _smart_kernel
-from random import uniform
-from copy import deepcopy
 
 import numpy as np
 from misvm.kernel import by_name as kernel_by_name
