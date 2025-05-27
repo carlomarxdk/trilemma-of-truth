@@ -48,5 +48,3 @@ python main.py
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for more information.
 
 ---
-
-*Created with inspiration from philosophical and computer science trilemmas. Replace placeholders and sections with project-specific details as needed.*
