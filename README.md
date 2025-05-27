@@ -24,13 +24,14 @@ git clone https://github.com/carlomarxdk/trilemma-of-truth.git
 cd trilemma-of-truth
 ```
 
-Install dependencies (if applicable):
+Install dependencies:
 
 ```sh
-# For Python projects
 pip install -r requirements.txt
 
 ```
+
+Additionally, refer to [macOS using Homebrew, Pyenv, and Pipenv](https://medium.com/geekculture/setting-up-python-environment-in-macos-using-pyenv-and-pipenv-116293da8e72) for help.
 
 ## Usage
 
