@@ -1,19 +1,20 @@
-# Trilemma of Truth: Assessing Truthfulness of Responses by Large Language Models
+# Trilemma of Truth
 
 ## Overview
 
 **Trilemma of Truth** is 
 
-This repository aims to:
-- 
-
 
 ## Table of Contents
 
-- [Installation](#installation)
-- [Usage](#usage)
-- [Examples](#examples)
-- [License](#license)
+- [Trilemma of Truth](#trilemma-of-truth)
+  - [Overview](#overview)
+  - [Table of Contents](#table-of-contents)
+  - [Installation](#installation)
+  - [Usage](#usage)
+  - [Dataset](#dataset)
+  - [Citation](#citation)
+  - [License](#license)
 
 ## Installation
 
@@ -48,10 +49,10 @@ You can find the full preprocessed datasets (with all splits) hosted on [Hugging
 We provide three datasets: `city_locations`, `med_indications`, and `word_definitions`.
 > **Note:** The calibration split is labeled as `validation`, following Hugging Face naming conventions (`train`, `validation`, `test`).
 
-First, install the 🤗 Datasets library:
+First, install the 🤗 Datasets and `pandas` libraries:
 
 ```bash
-pip install datasets
+pip install datasets pandas
 ```
 
 Then load the data with the `datasets` package. The dataset identifier is `carlomarxx/trilemma-of-truth`.
@@ -71,6 +72,9 @@ print(ds["train"][0])
 # 2. Load a specific split [train, validation, test]
 ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split="train")
 ```
+
+## Citation
+
 
 ## License
 

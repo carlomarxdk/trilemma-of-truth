@@ -1,15 +1,13 @@
 import logging
 from typing import List, Dict
-from abc import ABC, abstractmethod
+from abc import ABC
 import pickle as pkl
 import json
-import os
 from glob import glob
 import numpy as np
 from hydra.utils import to_absolute_path
 import re
 import torch
-import pandas as pd
 log = logging.getLogger(__name__)
 
 
@@ -167,17 +165,6 @@ class MILProbeData(ProbeData):
                 layers.append(int(match.group(1)))
         return sorted(layers)
 
-    def available_mc_intervention_layers(self):
-        """
-        Load all the layers that have metadata"""
-        recorded_coefs = glob(f"{self.mc_intervention_dir}/layer_*.json")
-        layers = []
-        for file in recorded_coefs:
-            match = re.search(r'layer_(\d+)', file)
-            if match:
-                layers.append(int(match.group(1)))
-        return sorted(layers)
-
     def best_layer(self, metric='map'):
         layers = self.available_layers()
         best_layer = None
@@ -195,17 +182,6 @@ class MILProbeData(ProbeData):
     def intervention_metadata(self, layer_id: int):
         with open(self.intervention_dir + f"/layer_{layer_id}.json", "rb") as f:
             return json.load(f)
-
-    def mc_intervention_metadata(self, layer_id: int):
-        with open(self.mc_intervention_dir + f"/layer_{layer_id}.json", "rb") as f:
-            return json.load(f)
-
-    def mc_intervention_scores(self, layer_id: int):
-        return {
-            'neg': pd.read_csv(self.mc_intervention_dir + f"/layer_{layer_id}_neg.csv.gz", compression='gzip'),
-            'orig': pd.read_csv(self.mc_intervention_dir + f"/layer_{layer_id}_orig.csv.gz", compression='gzip'),
-            'pos': pd.read_csv(self.mc_intervention_dir + f"/layer_{layer_id}_pos.csv.gz", compression='gzip'),
-        }
 
     def intervention_scores(self, layer_id: int):
         return {
