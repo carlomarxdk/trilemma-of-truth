@@ -1,0 +1,1001 @@
+statement,object_1,object_2,correct_object_2,correct,negation,real_object,fake_object,fictional_object,category
+Mandelstam is a dr..,mandelstam,dr.,poet,false,false,true,false,false,instances
+Redford is not a thespian.,redford,thespian,"actor, film maker, film producer, filmmaker, histrion, movie maker, player, role player, thespian",false,true,true,false,false,instances
+Redford is a movie maker.,redford,movie maker,"actor, film maker, film producer, filmmaker, histrion, movie maker, player, role player, thespian",true,false,true,false,false,instances
+Decalogue is not a european country.,decalogue,european country,commandment,true,true,true,false,false,instances
+Kazak is a civil rights worker.,kazak,civil rights worker,"asian country, asian nation",false,false,true,false,false,instances
+Obama is not a chief executive.,obama,chief executive,"chief executive, president, president of the united states, united states president",false,true,true,false,false,instances
+Richelieu is a high priest.,richelieu,high priest,"archpriest, hierarch, high priest, national leader, prelate, primate, solon, statesman",true,false,true,false,false,instances
+Macedon is a geographic region.,macedon,geographic region,"geographic region, geographic area, geographical area, geographical region",true,false,true,false,false,instances
+Kharkov is metropolis.,kharkov,metropolis,"city, metropolis, urban center",true,false,true,false,false,instances
+Campbell is a mythologist.,campbell,mythologist,mythologist,true,false,true,false,false,instances
+Taylor is not an asian country.,taylor,asian country,"music critic, composer",true,true,true,false,false,instances
+Loeb is not a physiologist.,loeb,physiologist,physiologist,false,true,true,false,false,instances
+Macedon is not a geographical area.,macedon,geographical area,"geographic region, geographic area, geographical area, geographical region",false,true,true,false,false,instances
+Haifa is not a nuclear physicist.,haifa,nuclear physicist,"port, urban center, metropolis, city",true,true,true,false,false,instances
+Schweitzer is not a diarist.,schweitzer,diarist,"doc, doctor, dr., md, medico, missionary, missioner, organist, philosopher, physician",true,true,true,false,false,instances
+Matthew is a lexicologist.,matthew,lexicologist,"apostle, evangelist, saint",false,false,true,false,false,instances
+Swaziland is an african country.,swaziland,african country,"african country, african nation",true,false,true,false,false,instances
+Gambia is not an architect.,gambia,architect,"african country, african nation",true,true,true,false,false,instances
+Menuhin is not a fiddler.,menuhin,fiddler,"fiddler, violinist",false,true,true,false,false,instances
+Puglia is not an italian region.,puglia,italian region,italian region,false,true,true,false,false,instances
+Hildebrand is not a catholic pope.,hildebrand,catholic pope,"bishop of rome, catholic pope, holy father, pontiff, pope, roman catholic pope, vicar of christ",false,true,true,false,false,instances
+Morton is not an urban center.,morton,urban center,"jazz musician, jazzman",true,true,true,false,false,instances
+Decalogue is an astronomer.,decalogue,astronomer,commandment,false,false,true,false,false,instances
+Cash is a singer.,cash,singer,"vocalizer, vocalist, vocaliser, singer",true,false,true,false,false,instances
+Cash is a vocalizer.,cash,vocalizer,"vocalizer, vocalist, vocaliser, singer",true,false,true,false,false,instances
+Qaddafi is not a king of great britain.,qaddafi,king of great britain,leader,true,true,true,false,false,instances
+Gregory is a vicar of christ.,gregory,vicar of christ,"pontiff, catholic pope, vicar of christ, pope, saint, doctor, bishop of rome, holy father, roman catholic pope, doctor of the church",true,false,true,false,false,instances
+Debs is not a labor organizer.,debs,labor organizer,"labor organizer, organiser, organizer",false,true,true,false,false,instances
+Rushmore is not an egyptian deity.,rushmore,egyptian deity,mountain peak,true,true,true,false,false,instances
+Lisbon is a lord.,lisbon,lord,"national capital, port",false,false,true,false,false,instances
+Chennai is not a chemist.,chennai,chemist,"city, metropolis, urban center",true,true,true,false,false,instances
+Richelieu is a pope.,richelieu,pope,"archpriest, hierarch, high priest, national leader, prelate, primate, solon, statesman",false,false,true,false,false,instances
+Coppola is a movie maker.,coppola,movie maker,"film maker, film producer, filmmaker, movie maker",true,false,true,false,false,instances
+Bushnell is not a vocalist.,bushnell,vocalist,"artificer, discoverer, inventor",true,true,true,false,false,instances
+Loyola is a theologist.,loyola,theologist,"theologian, theologiser, theologist, theologizer, saint",true,false,true,false,false,instances
+Graf is not tennis player.,graf,tennis player,tennis player,false,true,true,false,false,instances
+Oldfield is not an automobile driver.,oldfield,automobile driver,"automobile driver, race driver, racer",false,true,true,false,false,instances
+Alger is not an author.,alger,author,"author, writer",false,true,true,false,false,instances
+Chomsky is a fiddler.,chomsky,fiddler,"linguist, linguistic scientist",false,false,true,false,false,instances
+Rigel is not a theologian.,rigel,theologian,"binary, binary star, double star",true,true,true,false,false,instances
+Hildebrand is not an anthropologist.,hildebrand,anthropologist,"bishop of rome, catholic pope, holy father, pontiff, pope, roman catholic pope, vicar of christ",true,true,true,false,false,instances
+Cathay is not an asian nation.,cathay,asian nation,"asian nation, asian country",false,true,true,false,false,instances
+Klein is a balkan state.,klein,balkan state,"clothes designer, couturier, fashion designer, designer",false,false,true,false,false,instances
+Thales is not a stargazer.,thales,stargazer,"astronomer, philosopher, stargazer, uranologist",false,true,true,false,false,instances
+Chennai is not metropolis.,chennai,metropolis,"city, metropolis, urban center",false,true,true,false,false,instances
+Macedon is a revolutionary.,macedon,revolutionary,"geographic region, geographic area, geographical area, geographical region",false,false,true,false,false,instances
+Friedman is not a terpsichorean.,friedman,terpsichorean,"economic expert, economist",true,true,true,false,false,instances
+Sydenham is not a nuclear physicist.,sydenham,nuclear physicist,"doc, doctor, dr., md, medico, physician",true,true,true,false,false,instances
+Schweitzer is an evangelist.,schweitzer,evangelist,"doc, doctor, dr., md, medico, missionary, missioner, organist, philosopher, physician",false,false,true,false,false,instances
+Fawkes is not a coconspirator.,fawkes,coconspirator,"coconspirator, conspirator, machinator, plotter",false,true,true,false,false,instances
+Hemingway is not a province.,hemingway,province,"author, writer",true,true,true,false,false,instances
+Montpelier is not a king of great britain.,montpelier,king of great britain,state capital,true,true,true,false,false,instances
+Gambia is an african nation.,gambia,african nation,"african country, african nation",true,false,true,false,false,instances
+Schweitzer is a missionary.,schweitzer,missionary,"doc, doctor, dr., md, medico, missionary, missioner, organist, philosopher, physician",true,false,true,false,false,instances
+Jolson is not a vocalizer.,jolson,vocalizer,"actor, histrion, player, role player, singer, thespian, vocaliser, vocalist, vocalizer",false,true,true,false,false,instances
+Jena is a pitched battle.,jena,pitched battle,pitched battle,true,false,true,false,false,instances
+Loyola is a theologizer.,loyola,theologizer,"theologian, theologiser, theologist, theologizer, saint",true,false,true,false,false,instances
+Dix is not a missioner.,dix,missioner,"crusader, meliorist, reformer, reformist, social reformer",true,true,true,false,false,instances
+Schweitzer is not a doc.,schweitzer,doc,"doc, doctor, dr., md, medico, missionary, missioner, organist, philosopher, physician",false,true,true,false,false,instances
+Mozambique is an african nation.,mozambique,african nation,"african country, african nation",true,false,true,false,false,instances
+Fairbanks is a film maker.,fairbanks,film maker,"thespian, role player, histrion, actor, player",false,false,true,false,false,instances
+Thales is a music director.,thales,music director,"astronomer, philosopher, stargazer, uranologist",false,false,true,false,false,instances
+Toscanini is not a music director.,toscanini,music director,"conductor, director, music director",false,true,true,false,false,instances
+Swaziland is a music critic.,swaziland,music critic,"african country, african nation",false,false,true,false,false,instances
+Harrison is a philosopher.,harrison,philosopher,rock star,false,false,true,false,false,instances
+Carolina is a geographical region.,carolina,geographical region,"geographical region, geographic region, geographic area, geographical area",true,false,true,false,false,instances
+Lisbon is a port.,lisbon,port,"national capital, port",true,false,true,false,false,instances
+TT is not a conspirator.,TT,conspirator,"country, state, land",true,true,true,false,false,instances
+Fairbanks is not a missioner.,fairbanks,missioner,"thespian, role player, histrion, actor, player",true,true,true,false,false,instances
+Jolson is not a journalist.,jolson,journalist,"actor, histrion, player, role player, singer, thespian, vocaliser, vocalist, vocalizer",true,true,true,false,false,instances
+Jolson is a scholarly person.,jolson,scholarly person,"actor, histrion, player, role player, singer, thespian, vocaliser, vocalist, vocalizer",false,false,true,false,false,instances
+Tyndale is a revolutionist.,tyndale,revolutionist,"interpreter, martyr, sufferer, translator",false,false,true,false,false,instances
+Dix is a rock star.,dix,rock star,"crusader, meliorist, reformer, reformist, social reformer",false,false,true,false,false,instances
+Redford is a bacteriologist.,redford,bacteriologist,"actor, film maker, film producer, filmmaker, histrion, movie maker, player, role player, thespian",false,false,true,false,false,instances
+Barrie is not a playwright.,barrie,playwright,"dramatist, playwright",false,true,true,false,false,instances
+Schweitzer is a doc.,schweitzer,doc,"doc, doctor, dr., md, medico, missionary, missioner, organist, philosopher, physician",true,false,true,false,false,instances
+Molokai is an island.,molokai,island,island,true,false,true,false,false,instances
+Acheson is not a statesman.,acheson,statesman,"national leader, solon, statesman",false,true,true,false,false,instances
+Loyola is a theologiser.,loyola,theologiser,"theologian, theologiser, theologist, theologizer, saint",true,false,true,false,false,instances
+Gregory is not an actor.,gregory,actor,"pontiff, catholic pope, vicar of christ, pope, saint, doctor, bishop of rome, holy father, roman catholic pope, doctor of the church",true,true,true,false,false,instances
+Johnson is not a road agent.,johnson,road agent,"writer, lexicographer, lexicologist, author",true,true,true,false,false,instances
+Redford is a histrion.,redford,histrion,"actor, film maker, film producer, filmmaker, histrion, movie maker, player, role player, thespian",true,false,true,false,false,instances
+Libby is a chemist.,libby,chemist,chemist,true,false,true,false,false,instances
+Nansen is not a film producer.,nansen,film producer,"adventurer, explorer, national leader, solon, statesman",true,true,true,false,false,instances
+Jolson is not a geographical region.,jolson,geographical region,"actor, histrion, player, role player, singer, thespian, vocaliser, vocalist, vocalizer",true,true,true,false,false,instances
+Archean is an eon.,archean,eon,"aeon, eon",true,false,true,false,false,instances
+Trotsky is not a pope.,trotsky,pope,"bolshevik, bolshevist, revolutionary, revolutionist, subversive, subverter",true,true,true,false,false,instances
+Coppola is a roman deity.,coppola,roman deity,"film maker, film producer, filmmaker, movie maker",false,false,true,false,false,instances
+Quechua is a community.,quechua,community,community,true,false,true,false,false,instances
+Christopher is not a country.,christopher,country,patron saint,true,true,true,false,false,instances
+Oaxaca is a catholic pope.,oaxaca,catholic pope,"city, metropolis, urban center",false,false,true,false,false,instances
+Loyola is not a stargazer.,loyola,stargazer,"theologian, theologiser, theologist, theologizer, saint",true,true,true,false,false,instances
+Klein is clothes designer.,klein,clothes designer,"clothes designer, couturier, fashion designer, designer",true,false,true,false,false,instances
+Mann is not an educator.,mann,educator,"educator, pedagog, pedagogue",false,true,true,false,false,instances
+Alger is not an architect.,alger,architect,"author, writer",true,true,true,false,false,instances
+Freud is a brain doctor.,freud,brain doctor,"analyst, brain doctor, neurologist, psychoanalyst",true,false,true,false,false,instances
+Ukraine is a state.,ukraine,state,"land, country, state",true,false,true,false,false,instances
+Aquinas is a bookman.,aquinas,bookman,"theologizer, saint, theologian, doctor, doctor of the church, theologiser, theologist",false,false,true,false,false,instances
+Macedon is not a pedagog.,macedon,pedagog,"geographic region, geographic area, geographical area, geographical region",true,true,true,false,false,instances
+Rigel is a double star.,rigel,double star,"binary, binary star, double star",true,false,true,false,false,instances
+Dix is not a community.,dix,community,"crusader, meliorist, reformer, reformist, social reformer",true,true,true,false,false,instances
+Thales is an asian country.,thales,asian country,"astronomer, philosopher, stargazer, uranologist",false,false,true,false,false,instances
+Fawkes is not a filmmaker.,fawkes,filmmaker,"coconspirator, conspirator, machinator, plotter",true,true,true,false,false,instances
+Dixieland is not a student.,dixieland,student,"geographic region, geographical area, geographical region, geographic area",true,true,true,false,false,instances
+Toscanini is not a leader.,toscanini,leader,"conductor, director, music director",true,true,true,false,false,instances
+Schweitzer is not a missioner.,schweitzer,missioner,"doc, doctor, dr., md, medico, missionary, missioner, organist, philosopher, physician",false,true,true,false,false,instances
+Serra is not a missioner.,serra,missioner,"missionary, missioner",false,true,true,false,false,instances
+Fairbanks is not a fiddler.,fairbanks,fiddler,"thespian, role player, histrion, actor, player",true,true,true,false,false,instances
+Jonson is an empire.,jonson,empire,"dramatist, playwright, poet",false,false,true,false,false,instances
+Debs is not an african nation.,debs,african nation,"labor organizer, organiser, organizer",true,true,true,false,false,instances
+Jolson is not a catholic pope.,jolson,catholic pope,"actor, histrion, player, role player, singer, thespian, vocaliser, vocalist, vocalizer",true,true,true,false,false,instances
+Bushnell is an inventor.,bushnell,inventor,"artificer, discoverer, inventor",true,false,true,false,false,instances
+Kharkov is not metropolis.,kharkov,metropolis,"city, metropolis, urban center",false,true,true,false,false,instances
+Grus is not a constellation.,grus,constellation,constellation,false,true,true,false,false,instances
+Obama is a norn.,obama,norn,"chief executive, president, president of the united states, united states president",false,false,true,false,false,instances
+Lazio is not a pedagogue.,lazio,pedagogue,italian region,true,true,true,false,false,instances
+Seville is a violinist.,seville,violinist,"metropolis, city, port, urban center",false,false,true,false,false,instances
+Spock is a pediatrist.,spock,pediatrist,"baby doctor, paediatrician, pediatrician, pediatrist",true,false,true,false,false,instances
+Dixieland is not a geographic region.,dixieland,geographic region,"geographic region, geographical area, geographical region, geographic area",false,true,true,false,false,instances
+Tati is not a film producer.,tati,film producer,"film maker, film producer, filmmaker, movie maker",false,true,true,false,false,instances
+Sydenham is a dr..,sydenham,dr.,"doc, doctor, dr., md, medico, physician",true,false,true,false,false,instances
+Johnson is not a writer.,johnson,writer,"writer, lexicographer, lexicologist, author",false,true,true,false,false,instances
+Gregory is not a bookman.,gregory,bookman,"pontiff, catholic pope, vicar of christ, pope, saint, doctor, bishop of rome, holy father, roman catholic pope, doctor of the church",true,true,true,false,false,instances
+Matthew is not religious mystic.,matthew,religious mystic,"apostle, evangelist, saint",true,true,true,false,false,instances
+Barrie is a playwright.,barrie,playwright,"dramatist, playwright",true,false,true,false,false,instances
+Aquinas is a theologiser.,aquinas,theologiser,"theologizer, saint, theologian, doctor, doctor of the church, theologiser, theologist",true,false,true,false,false,instances
+Aquinas is a theologian.,aquinas,theologian,"theologizer, saint, theologian, doctor, doctor of the church, theologiser, theologist",true,false,true,false,false,instances
+Archean is not a showman.,archean,showman,"aeon, eon",true,true,true,false,false,instances
+TT is not a country.,TT,country,"country, state, land",false,true,true,false,false,instances
+Seville is a geographical region.,seville,geographical region,"metropolis, city, port, urban center",false,false,true,false,false,instances
+Nansen is not an adventurer.,nansen,adventurer,"adventurer, explorer, national leader, solon, statesman",false,true,true,false,false,instances
+Bushnell is an artificer.,bushnell,artificer,"artificer, discoverer, inventor",true,false,true,false,false,instances
+Redford is an urban center.,redford,urban center,"actor, film maker, film producer, filmmaker, histrion, movie maker, player, role player, thespian",false,false,true,false,false,instances
+Mann is not a catholic pope.,mann,catholic pope,"educator, pedagog, pedagogue",true,true,true,false,false,instances
+Jonson is a poet.,jonson,poet,"dramatist, playwright, poet",true,false,true,false,false,instances
+Gregory is a geographical area.,gregory,geographical area,"pontiff, catholic pope, vicar of christ, pope, saint, doctor, bishop of rome, holy father, roman catholic pope, doctor of the church",false,false,true,false,false,instances
+Grus is a constellation.,grus,constellation,constellation,true,false,true,false,false,instances
+Hildebrand is not a thespian.,hildebrand,thespian,"bishop of rome, catholic pope, holy father, pontiff, pope, roman catholic pope, vicar of christ",true,true,true,false,false,instances
+Schweitzer is not a doctor.,schweitzer,doctor,"doc, doctor, dr., md, medico, missionary, missioner, organist, philosopher, physician",false,true,true,false,false,instances
+Ukraine is not a country.,ukraine,country,"land, country, state",false,true,true,false,false,instances
+Loyola is not a theologist.,loyola,theologist,"theologian, theologiser, theologist, theologizer, saint",false,true,true,false,false,instances
+Tyrol is not a writer.,tyrol,writer,"province, state",true,true,true,false,false,instances
+Gregory is a catholic pope.,gregory,catholic pope,"pontiff, catholic pope, vicar of christ, pope, saint, doctor, bishop of rome, holy father, roman catholic pope, doctor of the church",true,false,true,false,false,instances
+Jolson is not a vocalist.,jolson,vocalist,"actor, histrion, player, role player, singer, thespian, vocaliser, vocalist, vocalizer",false,true,true,false,false,instances
+Coppola is not a settler.,coppola,settler,"film maker, film producer, filmmaker, movie maker",true,true,true,false,false,instances
+Oldfield is a race driver.,oldfield,race driver,"automobile driver, race driver, racer",true,false,true,false,false,instances
+Alger is an author.,alger,author,"author, writer",true,false,true,false,false,instances
+Johor is not a pontiff.,johor,pontiff,malaysian state,true,true,true,false,false,instances
+Redford is an impresario.,redford,impresario,"actor, film maker, film producer, filmmaker, histrion, movie maker, player, role player, thespian",false,false,true,false,false,instances
+Mozambique is an african country.,mozambique,african country,"african country, african nation",true,false,true,false,false,instances
+Mishnah is not a sacred writing.,mishnah,sacred writing,"religious text, religious writing, sacred text, sacred writing",false,true,true,false,false,instances
+Herder is not a state.,herder,state,philosopher,true,true,true,false,false,instances
+Seville is a port.,seville,port,"metropolis, city, port, urban center",true,false,true,false,false,instances
+Toscanini is a music director.,toscanini,music director,"conductor, director, music director",true,false,true,false,false,instances
+Mann is metropolis.,mann,metropolis,"educator, pedagog, pedagogue",false,false,true,false,false,instances
+Tati is not a movie maker.,tati,movie maker,"film maker, film producer, filmmaker, movie maker",false,true,true,false,false,instances
+Haifa is metropolis.,haifa,metropolis,"port, urban center, metropolis, city",true,false,true,false,false,instances
+Loyola is not a theologiser.,loyola,theologiser,"theologian, theologiser, theologist, theologizer, saint",false,true,true,false,false,instances
+Friedman is a formal garden.,friedman,formal garden,"economic expert, economist",false,false,true,false,false,instances
+Richelieu is an executive.,richelieu,executive,"archpriest, hierarch, high priest, national leader, prelate, primate, solon, statesman",false,false,true,false,false,instances
+Coppola is not a film producer.,coppola,film producer,"film maker, film producer, filmmaker, movie maker",false,true,true,false,false,instances
+Owens is not an athlete.,owens,athlete,"athlete, jock",false,true,true,false,false,instances
+Graf is tennis player.,graf,tennis player,tennis player,true,false,true,false,false,instances
+Willamette is a river.,willamette,river,river,true,false,true,false,false,instances
+Tyrol is not a province.,tyrol,province,"province, state",false,true,true,false,false,instances
+PRC is not an asian nation.,PRC,asian nation,"asian nation, asian country",false,true,true,false,false,instances
+Lewis is an actor.,lewis,actor,"author, writer",false,false,true,false,false,instances
+Klein is not a scholar.,klein,scholar,"clothes designer, couturier, fashion designer, designer",true,true,true,false,false,instances
+Loyola is a state capital.,loyola,state capital,"theologian, theologiser, theologist, theologizer, saint",false,false,true,false,false,instances
+Djibouti is fictitious character.,djibouti,fictitious character,"african nation, african country",false,false,true,false,false,instances
+Lowlands is a lowland.,lowlands,lowland,lowland,true,false,true,false,false,instances
+Schweitzer is an organist.,schweitzer,organist,"doc, doctor, dr., md, medico, missionary, missioner, organist, philosopher, physician",true,false,true,false,false,instances
+Sydenham is an old master.,sydenham,old master,"doc, doctor, dr., md, medico, physician",false,false,true,false,false,instances
+Lithuania is not a geographic area.,lithuania,geographic area,"baltic state, baltic republic",true,true,true,false,false,instances
+Carolina is not a geographical area.,carolina,geographical area,"geographical region, geographic region, geographic area, geographical area",false,true,true,false,false,instances
+Richelieu is not a solon.,richelieu,solon,"archpriest, hierarch, high priest, national leader, prelate, primate, solon, statesman",false,true,true,false,false,instances
+TT is a civil rights activist.,TT,civil rights activist,"country, state, land",false,false,true,false,false,instances
+Goodman is a clarinettist.,goodman,clarinettist,"bandleader, clarinetist, clarinettist",true,false,true,false,false,instances
+Turpin is not an island.,turpin,island,"highjacker, highwayman, hijacker, road agent",true,true,true,false,false,instances
+Richelieu is a geographic area.,richelieu,geographic area,"archpriest, hierarch, high priest, national leader, prelate, primate, solon, statesman",false,false,true,false,false,instances
+Duncan is not a professional dancer.,duncan,professional dancer,"dancer, professional dancer, terpsichorean",false,true,true,false,false,instances
+Jonson is a dramatist.,jonson,dramatist,"dramatist, playwright, poet",true,false,true,false,false,instances
+Arabia is not a peninsula.,arabia,peninsula,peninsula,false,true,true,false,false,instances
+Owens is not a revolutionary.,owens,revolutionary,"athlete, jock",true,true,true,false,false,instances
+Turpin is not an emperor of rome.,turpin,emperor of rome,"highjacker, highwayman, hijacker, road agent",true,true,true,false,false,instances
+Tarkovsky is not a film producer.,tarkovsky,film producer,"film maker, film producer, filmmaker, movie maker",false,true,true,false,false,instances
+Schweitzer is a linguist.,schweitzer,linguist,"doc, doctor, dr., md, medico, missionary, missioner, organist, philosopher, physician",false,false,true,false,false,instances
+TT is a state.,TT,state,"country, state, land",true,false,true,false,false,instances
+Monet is a central american nation.,monet,central american nation,painter,false,false,true,false,false,instances
+Vitus is a writer.,vitus,writer,"martyr, saint",false,false,true,false,false,instances
+Gambia is a museum.,gambia,museum,"african country, african nation",false,false,true,false,false,instances
+Barrie is a technologist.,barrie,technologist,"dramatist, playwright",false,false,true,false,false,instances
+Fawkes is a machinator.,fawkes,machinator,"coconspirator, conspirator, machinator, plotter",true,false,true,false,false,instances
+Thales is not a president.,thales,president,"astronomer, philosopher, stargazer, uranologist",true,true,true,false,false,instances
+Mandelstam is not a man of affairs.,mandelstam,man of affairs,poet,true,true,true,false,false,instances
+Schweitzer is a doctor.,schweitzer,doctor,"doc, doctor, dr., md, medico, missionary, missioner, organist, philosopher, physician",true,false,true,false,false,instances
+Redford is not a nobleman.,redford,nobleman,"actor, film maker, film producer, filmmaker, histrion, movie maker, player, role player, thespian",true,true,true,false,false,instances
+Aquinas is not a saint.,aquinas,saint,"theologizer, saint, theologian, doctor, doctor of the church, theologiser, theologist",false,true,true,false,false,instances
+Menuhin is not a museum.,menuhin,museum,"fiddler, violinist",true,true,true,false,false,instances
+Marciano is a weird sister.,marciano,weird sister,"gladiator, prizefighter",false,false,true,false,false,instances
+Campbell is a baby doctor.,campbell,baby doctor,mythologist,false,false,true,false,false,instances
+Coppola is a filmmaker.,coppola,filmmaker,"film maker, film producer, filmmaker, movie maker",true,false,true,false,false,instances
+Matthew is not an evangelist.,matthew,evangelist,"apostle, evangelist, saint",false,true,true,false,false,instances
+Hildebrand is a mythologist.,hildebrand,mythologist,"bishop of rome, catholic pope, holy father, pontiff, pope, roman catholic pope, vicar of christ",false,false,true,false,false,instances
+Mozambique is not an african nation.,mozambique,african nation,"african country, african nation",false,true,true,false,false,instances
+Gregory is not a holy father.,gregory,holy father,"pontiff, catholic pope, vicar of christ, pope, saint, doctor, bishop of rome, holy father, roman catholic pope, doctor of the church",false,true,true,false,false,instances
+Haifa is a meliorist.,haifa,meliorist,"port, urban center, metropolis, city",false,false,true,false,false,instances
+Coppola is a film maker.,coppola,film maker,"film maker, film producer, filmmaker, movie maker",true,false,true,false,false,instances
+Shostakovich is not a composer.,shostakovich,composer,composer,false,true,true,false,false,instances
+Quechua is not a brain doctor.,quechua,brain doctor,community,true,true,true,false,false,instances
+Barrie is not a meliorist.,barrie,meliorist,"dramatist, playwright",true,true,true,false,false,instances
+Reiter is not a bacteriologist.,reiter,bacteriologist,bacteriologist,false,true,true,false,false,instances
+Morton is not a jazz musician.,morton,jazz musician,"jazz musician, jazzman",false,true,true,false,false,instances
+Schweitzer is not a physician.,schweitzer,physician,"doc, doctor, dr., md, medico, missionary, missioner, organist, philosopher, physician",false,true,true,false,false,instances
+Kline is a painter.,kline,painter,painter,true,false,true,false,false,instances
+Sydenham is not a saint.,sydenham,saint,"doc, doctor, dr., md, medico, physician",true,true,true,false,false,instances
+Seville is not a port.,seville,port,"metropolis, city, port, urban center",false,true,true,false,false,instances
+Warsaw is a national capital.,warsaw,national capital,national capital,true,false,true,false,false,instances
+Loyola is not a hierarch.,loyola,hierarch,"theologian, theologiser, theologist, theologizer, saint",true,true,true,false,false,instances
+Cash is not an engineer.,cash,engineer,"vocalizer, vocalist, vocaliser, singer",true,true,true,false,false,instances
+Dixieland is not a conspirator.,dixieland,conspirator,"geographic region, geographical area, geographical region, geographic area",true,true,true,false,false,instances
+Debs is not an organiser.,debs,organiser,"labor organizer, organiser, organizer",false,true,true,false,false,instances
+Thales is not a pianist.,thales,pianist,"astronomer, philosopher, stargazer, uranologist",true,true,true,false,false,instances
+Owens is a diplomatist.,owens,diplomatist,"athlete, jock",false,false,true,false,false,instances
+Lowlands is not a lowland.,lowlands,lowland,lowland,false,true,true,false,false,instances
+Algiers is a national capital.,algiers,national capital,"national capital, port",true,false,true,false,false,instances
+Gregory is not a roman catholic pope.,gregory,roman catholic pope,"pontiff, catholic pope, vicar of christ, pope, saint, doctor, bishop of rome, holy father, roman catholic pope, doctor of the church",false,true,true,false,false,instances
+Bushnell is a discoverer.,bushnell,discoverer,"artificer, discoverer, inventor",true,false,true,false,false,instances
+Joffrey is a sea robber.,joffrey,sea robber,choreographer,false,false,true,false,false,instances
+Gagarin is not an astronaut.,gagarin,astronaut,"astronaut, cosmonaut, spaceman",false,true,true,false,false,instances
+Oldfield is not a race driver.,oldfield,race driver,"automobile driver, race driver, racer",false,true,true,false,false,instances
+Aquinas is not a theologian.,aquinas,theologian,"theologizer, saint, theologian, doctor, doctor of the church, theologiser, theologist",false,true,true,false,false,instances
+Sydenham is not a navigator.,sydenham,navigator,"doc, doctor, dr., md, medico, physician",true,true,true,false,false,instances
+Thales is not a lord.,thales,lord,"astronomer, philosopher, stargazer, uranologist",true,true,true,false,false,instances
+Spock is not a double star.,spock,double star,"baby doctor, paediatrician, pediatrician, pediatrist",true,true,true,false,false,instances
+Obama is not a playwright.,obama,playwright,"chief executive, president, president of the united states, united states president",true,true,true,false,false,instances
+Schweitzer is a md.,schweitzer,md,"doc, doctor, dr., md, medico, missionary, missioner, organist, philosopher, physician",true,false,true,false,false,instances
+Rigel is not a double star.,rigel,double star,"binary, binary star, double star",false,true,true,false,false,instances
+Meyerbeer is a promoter.,meyerbeer,promoter,composer,false,false,true,false,false,instances
+Jolson is not a singer.,jolson,singer,"actor, histrion, player, role player, singer, thespian, vocaliser, vocalist, vocalizer",false,true,true,false,false,instances
+Johnson is not a lexicographer.,johnson,lexicographer,"writer, lexicographer, lexicologist, author",false,true,true,false,false,instances
+Ukraine is a moneyman.,ukraine,moneyman,"land, country, state",false,false,true,false,false,instances
+Alger is not a writer.,alger,writer,"author, writer",false,true,true,false,false,instances
+Dixieland is a geographical area.,dixieland,geographical area,"geographic region, geographical area, geographical region, geographic area",true,false,true,false,false,instances
+Solferino is not a planet.,solferino,planet,pitched battle,true,true,true,false,false,instances
+Schweitzer is not a high priest.,schweitzer,high priest,"doc, doctor, dr., md, medico, missionary, missioner, organist, philosopher, physician",true,true,true,false,false,instances
+Trotsky is an eon.,trotsky,eon,"bolshevik, bolshevist, revolutionary, revolutionist, subversive, subverter",false,false,true,false,false,instances
+Mann is not a pedagogue.,mann,pedagogue,"educator, pedagog, pedagogue",false,true,true,false,false,instances
+Caracas is not a linguistic scientist.,caracas,linguistic scientist,national capital,true,true,true,false,false,instances
+Sydenham is not a filmmaker.,sydenham,filmmaker,"doc, doctor, dr., md, medico, physician",true,true,true,false,false,instances
+Hertz is not a pedagog.,hertz,pedagog,nuclear physicist,true,true,true,false,false,instances
+Gambia is not a constellation.,gambia,constellation,"african country, african nation",true,true,true,false,false,instances
+Chennai is not a diplomat.,chennai,diplomat,"city, metropolis, urban center",true,true,true,false,false,instances
+Redford is not a film maker.,redford,film maker,"actor, film maker, film producer, filmmaker, histrion, movie maker, player, role player, thespian",false,true,true,false,false,instances
+Crichton is not a bookman.,crichton,bookman,"bookman, scholar, scholarly person, student",false,true,true,false,false,instances
+Cracow is a road agent.,cracow,road agent,"city, metropolis, urban center",false,false,true,false,false,instances
+Dix is a reformist.,dix,reformist,"crusader, meliorist, reformer, reformist, social reformer",true,false,true,false,false,instances
+Owens is an athlete.,owens,athlete,"athlete, jock",true,false,true,false,false,instances
+Roma is a mythologist.,roma,mythologist,national capital,false,false,true,false,false,instances
+Browne is not a statue maker.,browne,statue maker,illustrator,true,true,true,false,false,instances
+Agrippina is a roman.,agrippina,roman,roman,true,false,true,false,false,instances
+Hertz is not a nuclear physicist.,hertz,nuclear physicist,nuclear physicist,false,true,true,false,false,instances
+Lena is a navigator.,lena,navigator,river,false,false,true,false,false,instances
+Solferino is a theologist.,solferino,theologist,pitched battle,false,false,true,false,false,instances
+Oaxaca is not an educator.,oaxaca,educator,"city, metropolis, urban center",true,true,true,false,false,instances
+Trotsky is a revolutionary.,trotsky,revolutionary,"bolshevik, bolshevist, revolutionary, revolutionist, subversive, subverter",true,false,true,false,false,instances
+Lazio is a sea robber.,lazio,sea robber,italian region,false,false,true,false,false,instances
+Dulles is a diplomat.,dulles,diplomat,"diplomat, diplomatist",true,false,true,false,false,instances
+Nansen is a king of great britain.,nansen,king of great britain,"adventurer, explorer, national leader, solon, statesman",false,false,true,false,false,instances
+TT is a country.,TT,country,"country, state, land",true,false,true,false,false,instances
+Gregory is not a chief executive.,gregory,chief executive,"pontiff, catholic pope, vicar of christ, pope, saint, doctor, bishop of rome, holy father, roman catholic pope, doctor of the church",true,true,true,false,false,instances
+Thailand is an asian country.,thailand,asian country,"asian country, asian nation",true,false,true,false,false,instances
+Willamette is not a river.,willamette,river,river,false,true,true,false,false,instances
+Friedman is not actress.,friedman,actress,"economic expert, economist",true,true,true,false,false,instances
+Gregory is not a catholic pope.,gregory,catholic pope,"pontiff, catholic pope, vicar of christ, pope, saint, doctor, bishop of rome, holy father, roman catholic pope, doctor of the church",false,true,true,false,false,instances
+Rigel is not a role player.,rigel,role player,"binary, binary star, double star",true,true,true,false,false,instances
+Aquinas is a doctor of the church.,aquinas,doctor of the church,"theologizer, saint, theologian, doctor, doctor of the church, theologiser, theologist",true,false,true,false,false,instances
+Coppola is not a movie maker.,coppola,movie maker,"film maker, film producer, filmmaker, movie maker",false,true,true,false,false,instances
+Oldfield is not a racer.,oldfield,racer,"automobile driver, race driver, racer",false,true,true,false,false,instances
+Morton is a jazzman.,morton,jazzman,"jazz musician, jazzman",true,false,true,false,false,instances
+Fawkes is not a bolshevik.,fawkes,bolshevik,"coconspirator, conspirator, machinator, plotter",true,true,true,false,false,instances
+Cracow is not metropolis.,cracow,metropolis,"city, metropolis, urban center",false,true,true,false,false,instances
+Jonson is not a poet.,jonson,poet,"dramatist, playwright, poet",false,true,true,false,false,instances
+Acheson is a statesman.,acheson,statesman,"national leader, solon, statesman",true,false,true,false,false,instances
+Hertz is a nuclear physicist.,hertz,nuclear physicist,nuclear physicist,true,false,true,false,false,instances
+Nansen is an adventurer.,nansen,adventurer,"adventurer, explorer, national leader, solon, statesman",true,false,true,false,false,instances
+Mishnah is a sacred writing.,mishnah,sacred writing,"religious text, religious writing, sacred text, sacred writing",true,false,true,false,false,instances
+Tegucigalpa is not a national capital.,tegucigalpa,national capital,national capital,false,true,true,false,false,instances
+Turpin is a highjacker.,turpin,highjacker,"highjacker, highwayman, hijacker, road agent",true,false,true,false,false,instances
+Serra is a missionary.,serra,missionary,"missionary, missioner",true,false,true,false,false,instances
+Richelieu is a prelate.,richelieu,prelate,"archpriest, hierarch, high priest, national leader, prelate, primate, solon, statesman",true,false,true,false,false,instances
+Morton is a revolutionary.,morton,revolutionary,"jazz musician, jazzman",false,false,true,false,false,instances
+Serra is not a translator.,serra,translator,"missionary, missioner",true,true,true,false,false,instances
+Tyndale is not a martyr.,tyndale,martyr,"interpreter, martyr, sufferer, translator",false,true,true,false,false,instances
+Fawkes is not an applied scientist.,fawkes,applied scientist,"coconspirator, conspirator, machinator, plotter",true,true,true,false,false,instances
+Cathay is not a scholar.,cathay,scholar,"asian nation, asian country",true,true,true,false,false,instances
+Mann is an actor.,mann,actor,"educator, pedagog, pedagogue",false,false,true,false,false,instances
+Mann is a pedagog.,mann,pedagog,"educator, pedagog, pedagogue",true,false,true,false,false,instances
+Acheson is not an adventurer.,acheson,adventurer,"national leader, solon, statesman",true,true,true,false,false,instances
+Oaxaca is a city.,oaxaca,city,"city, metropolis, urban center",true,false,true,false,false,instances
+Carolina is not a geographical region.,carolina,geographical region,"geographical region, geographic region, geographic area, geographical area",false,true,true,false,false,instances
+Seville is an urban center.,seville,urban center,"metropolis, city, port, urban center",true,false,true,false,false,instances
+Oldfield is not an old master.,oldfield,old master,"automobile driver, race driver, racer",true,true,true,false,false,instances
+TT is a chemist.,TT,chemist,"country, state, land",false,false,true,false,false,instances
+Walter is a music director.,walter,music director,"conductor, director, music director",true,false,true,false,false,instances
+Lithuania is a baltic state.,lithuania,baltic state,"baltic state, baltic republic",true,false,true,false,false,instances
+Gregory is a bishop of rome.,gregory,bishop of rome,"pontiff, catholic pope, vicar of christ, pope, saint, doctor, bishop of rome, holy father, roman catholic pope, doctor of the church",true,false,true,false,false,instances
+Rigel is not a binary.,rigel,binary,"binary, binary star, double star",false,true,true,false,false,instances
+Redford is not a histrion.,redford,histrion,"actor, film maker, film producer, filmmaker, histrion, movie maker, player, role player, thespian",false,true,true,false,false,instances
+Reiter is a bacteriologist.,reiter,bacteriologist,bacteriologist,true,false,true,false,false,instances
+Qaddafi is a leader.,qaddafi,leader,leader,true,false,true,false,false,instances
+Freud is a psychoanalyst.,freud,psychoanalyst,"analyst, brain doctor, neurologist, psychoanalyst",true,false,true,false,false,instances
+Harrison is a rock star.,harrison,rock star,rock star,true,false,true,false,false,instances
+Spock is a prelate.,spock,prelate,"baby doctor, paediatrician, pediatrician, pediatrist",false,false,true,false,false,instances
+Owens is a jock.,owens,jock,"athlete, jock",true,false,true,false,false,instances
+Muhammad is a prophet.,muhammad,prophet,prophet,true,false,true,false,false,instances
+Trotsky is not a revolutionist.,trotsky,revolutionist,"bolshevik, bolshevist, revolutionary, revolutionist, subversive, subverter",false,true,true,false,false,instances
+Redford is not actress.,redford,actress,"actor, film maker, film producer, filmmaker, histrion, movie maker, player, role player, thespian",true,true,true,false,false,instances
+Crux is a leader.,crux,leader,constellation,false,false,true,false,false,instances
+Redford is a thespian.,redford,thespian,"actor, film maker, film producer, filmmaker, histrion, movie maker, player, role player, thespian",true,false,true,false,false,instances
+Schweitzer is not a medico.,schweitzer,medico,"doc, doctor, dr., md, medico, missionary, missioner, organist, philosopher, physician",false,true,true,false,false,instances
+Redford is a racer.,redford,racer,"actor, film maker, film producer, filmmaker, histrion, movie maker, player, role player, thespian",false,false,true,false,false,instances
+Oaxaca is not metropolis.,oaxaca,metropolis,"city, metropolis, urban center",false,true,true,false,false,instances
+Fawkes is a coconspirator.,fawkes,coconspirator,"coconspirator, conspirator, machinator, plotter",true,false,true,false,false,instances
+Tegucigalpa is a national capital.,tegucigalpa,national capital,national capital,true,false,true,false,false,instances
+Lewis is not an author.,lewis,author,"author, writer",false,true,true,false,false,instances
+Chomsky is not an illustrator.,chomsky,illustrator,"linguist, linguistic scientist",true,true,true,false,false,instances
+Redford is not a male monarch.,redford,male monarch,"actor, film maker, film producer, filmmaker, histrion, movie maker, player, role player, thespian",true,true,true,false,false,instances
+Mishnah is religious text.,mishnah,religious text,"religious text, religious writing, sacred text, sacred writing",true,false,true,false,false,instances
+Fairbanks is a histrion.,fairbanks,histrion,"thespian, role player, histrion, actor, player",true,false,true,false,false,instances
+Sydenham is a carver.,sydenham,carver,"doc, doctor, dr., md, medico, physician",false,false,true,false,false,instances
+Christopher is not a patron saint.,christopher,patron saint,patron saint,false,true,true,false,false,instances
+Monet is a painter.,monet,painter,painter,true,false,true,false,false,instances
+Aquinas is an organiser.,aquinas,organiser,"theologizer, saint, theologian, doctor, doctor of the church, theologiser, theologist",false,false,true,false,false,instances
+Thales is not a uranologist.,thales,uranologist,"astronomer, philosopher, stargazer, uranologist",false,true,true,false,false,instances
+Crichton is a rex.,crichton,rex,"bookman, scholar, scholarly person, student",false,false,true,false,false,instances
+Italy is a highjacker.,italy,highjacker,"european nation, european country",false,false,true,false,false,instances
+Carolina is a gladiator.,carolina,gladiator,"geographical region, geographic region, geographic area, geographical area",false,false,true,false,false,instances
+Kharkov is not an urban center.,kharkov,urban center,"city, metropolis, urban center",false,true,true,false,false,instances
+Vitus is not a saint.,vitus,saint,"martyr, saint",false,true,true,false,false,instances
+Cash is not a vocaliser.,cash,vocaliser,"vocalizer, vocalist, vocaliser, singer",false,true,true,false,false,instances
+Lithuania is not a professional dancer.,lithuania,professional dancer,"baltic state, baltic republic",true,true,true,false,false,instances
+Turpin is not an eon.,turpin,eon,"highjacker, highwayman, hijacker, road agent",true,true,true,false,false,instances
+Freud is not a film maker.,freud,film maker,"analyst, brain doctor, neurologist, psychoanalyst",true,true,true,false,false,instances
+Taylor is a composer.,taylor,composer,"music critic, composer",true,false,true,false,false,instances
+Klein is not a plotter.,klein,plotter,"clothes designer, couturier, fashion designer, designer",true,true,true,false,false,instances
+Richelieu is a primate.,richelieu,primate,"archpriest, hierarch, high priest, national leader, prelate, primate, solon, statesman",true,false,true,false,false,instances
+Acheson is not a bolshevist.,acheson,bolshevist,"national leader, solon, statesman",true,true,true,false,false,instances
+Serra is not a crusader.,serra,crusader,"missionary, missioner",true,true,true,false,false,instances
+Macedon is not a social reformer.,macedon,social reformer,"geographic region, geographic area, geographical area, geographical region",true,true,true,false,false,instances
+Spock is a cartoonist.,spock,cartoonist,"baby doctor, paediatrician, pediatrician, pediatrist",false,false,true,false,false,instances
+Crichton is not a md.,crichton,md,"bookman, scholar, scholarly person, student",true,true,true,false,false,instances
+Seville is not a linguist.,seville,linguist,"metropolis, city, port, urban center",true,true,true,false,false,instances
+Gilmer is not a land.,gilmer,land,journalist,true,true,true,false,false,instances
+Aquinas is not a theologist.,aquinas,theologist,"theologizer, saint, theologian, doctor, doctor of the church, theologiser, theologist",false,true,true,false,false,instances
+Mishnah is religious writing.,mishnah,religious writing,"religious text, religious writing, sacred text, sacred writing",true,false,true,false,false,instances
+Duncan is a terpsichorean.,duncan,terpsichorean,"dancer, professional dancer, terpsichorean",true,false,true,false,false,instances
+Goodman is not an illustrator.,goodman,illustrator,"bandleader, clarinetist, clarinettist",true,true,true,false,false,instances
+Trotsky is not a subversive.,trotsky,subversive,"bolshevik, bolshevist, revolutionary, revolutionist, subversive, subverter",false,true,true,false,false,instances
+Lithuania is a baltic republic.,lithuania,baltic republic,"baltic state, baltic republic",true,false,true,false,false,instances
+Tyrol is not an educator.,tyrol,educator,"province, state",true,true,true,false,false,instances
+Richelieu is not a physiologist.,richelieu,physiologist,"archpriest, hierarch, high priest, national leader, prelate, primate, solon, statesman",true,true,true,false,false,instances
+Turpin is a road agent.,turpin,road agent,"highjacker, highwayman, hijacker, road agent",true,false,true,false,false,instances
+Cash is a road agent.,cash,road agent,"vocalizer, vocalist, vocaliser, singer",false,false,true,false,false,instances
+Ukraine is not a bolshevist.,ukraine,bolshevist,"land, country, state",true,true,true,false,false,instances
+Christopher is a pontiff.,christopher,pontiff,patron saint,false,false,true,false,false,instances
+Kazak is an asian nation.,kazak,asian nation,"asian country, asian nation",true,false,true,false,false,instances
+Lewis is not a jazz musician.,lewis,jazz musician,"author, writer",true,true,true,false,false,instances
+Richelieu is an astronaut.,richelieu,astronaut,"archpriest, hierarch, high priest, national leader, prelate, primate, solon, statesman",false,false,true,false,false,instances
+PRC is not an ethnologist.,PRC,ethnologist,"asian nation, asian country",true,true,true,false,false,instances
+Jonson is not a fashion designer.,jonson,fashion designer,"dramatist, playwright, poet",true,true,true,false,false,instances
+Gagarin is not a spaceman.,gagarin,spaceman,"astronaut, cosmonaut, spaceman",false,true,true,false,false,instances
+TT is not a state.,TT,state,"country, state, land",false,true,true,false,false,instances
+Coppola is not a port.,coppola,port,"film maker, film producer, filmmaker, movie maker",true,true,true,false,false,instances
+Dana is a lexicologist.,dana,lexicologist,celtic deity,false,false,true,false,false,instances
+Redford is not a diplomatist.,redford,diplomatist,"actor, film maker, film producer, filmmaker, histrion, movie maker, player, role player, thespian",true,true,true,false,false,instances
+Macedon is not a geographic area.,macedon,geographic area,"geographic region, geographic area, geographical area, geographical region",false,true,true,false,false,instances
+Dix is a crusader.,dix,crusader,"crusader, meliorist, reformer, reformist, social reformer",true,false,true,false,false,instances
+Lithuania is not a baltic state.,lithuania,baltic state,"baltic state, baltic republic",false,true,true,false,false,instances
+Ukraine is not a promoter.,ukraine,promoter,"land, country, state",true,true,true,false,false,instances
+Matthew is not an apostle.,matthew,apostle,"apostle, evangelist, saint",false,true,true,false,false,instances
+Verdun is not a pitched battle.,verdun,pitched battle,pitched battle,false,true,true,false,false,instances
+Fairbanks is not an actor.,fairbanks,actor,"thespian, role player, histrion, actor, player",false,true,true,false,false,instances
+Tarkovsky is a film maker.,tarkovsky,film maker,"film maker, film producer, filmmaker, movie maker",true,false,true,false,false,instances
+Loyola is a diarist.,loyola,diarist,"theologian, theologiser, theologist, theologizer, saint",false,false,true,false,false,instances
+Hildebrand is a pope.,hildebrand,pope,"bishop of rome, catholic pope, holy father, pontiff, pope, roman catholic pope, vicar of christ",true,false,true,false,false,instances
+Trotsky is a subverter.,trotsky,subverter,"bolshevik, bolshevist, revolutionary, revolutionist, subversive, subverter",true,false,true,false,false,instances
+Schweitzer is a scandinavian country.,schweitzer,scandinavian country,"doc, doctor, dr., md, medico, missionary, missioner, organist, philosopher, physician",false,false,true,false,false,instances
+Redford is not a player.,redford,player,"actor, film maker, film producer, filmmaker, histrion, movie maker, player, role player, thespian",false,true,true,false,false,instances
+Hildebrand is a central american country.,hildebrand,central american country,"bishop of rome, catholic pope, holy father, pontiff, pope, roman catholic pope, vicar of christ",false,false,true,false,false,instances
+Chennai is a land.,chennai,land,"city, metropolis, urban center",false,false,true,false,false,instances
+Cathay is an asian nation.,cathay,asian nation,"asian nation, asian country",true,false,true,false,false,instances
+Lowlands is a bolshevist.,lowlands,bolshevist,lowland,false,false,true,false,false,instances
+Trotsky is not a bolshevik.,trotsky,bolshevik,"bolshevik, bolshevist, revolutionary, revolutionist, subversive, subverter",false,true,true,false,false,instances
+Ukraine is a land.,ukraine,land,"land, country, state",true,false,true,false,false,instances
+Sydenham is a balkan nation.,sydenham,balkan nation,"doc, doctor, dr., md, medico, physician",false,false,true,false,false,instances
+PRC is not an asian country.,PRC,asian country,"asian nation, asian country",false,true,true,false,false,instances
+Loyola is not a theologizer.,loyola,theologizer,"theologian, theologiser, theologist, theologizer, saint",false,true,true,false,false,instances
+Freud is a plotter.,freud,plotter,"analyst, brain doctor, neurologist, psychoanalyst",false,false,true,false,false,instances
+Cracow is not an urban center.,cracow,urban center,"city, metropolis, urban center",false,true,true,false,false,instances
+Freud is not a sea rover.,freud,sea rover,"analyst, brain doctor, neurologist, psychoanalyst",true,true,true,false,false,instances
+Kazak is an asian country.,kazak,asian country,"asian country, asian nation",true,false,true,false,false,instances
+Dixieland is a geographical region.,dixieland,geographical region,"geographic region, geographical area, geographical region, geographic area",true,false,true,false,false,instances
+Jena is a malaysian state.,jena,malaysian state,pitched battle,false,false,true,false,false,instances
+Johnson is a bacteriologist.,johnson,bacteriologist,"writer, lexicographer, lexicologist, author",false,false,true,false,false,instances
+Nansen is a navigator.,nansen,navigator,"adventurer, explorer, national leader, solon, statesman",false,false,true,false,false,instances
+Djibouti is an economic expert.,djibouti,economic expert,"african nation, african country",false,false,true,false,false,instances
+Hildebrand is not a hierarch.,hildebrand,hierarch,"bishop of rome, catholic pope, holy father, pontiff, pope, roman catholic pope, vicar of christ",true,true,true,false,false,instances
+Spock is not a pianist.,spock,pianist,"baby doctor, paediatrician, pediatrician, pediatrist",true,true,true,false,false,instances
+Johnson is not a paediatrician.,johnson,paediatrician,"writer, lexicographer, lexicologist, author",true,true,true,false,false,instances
+Gregory is not a saint.,gregory,saint,"pontiff, catholic pope, vicar of christ, pope, saint, doctor, bishop of rome, holy father, roman catholic pope, doctor of the church",false,true,true,false,false,instances
+Mandelstam is a poet.,mandelstam,poet,poet,true,false,true,false,false,instances
+Dixieland is not a sea robber.,dixieland,sea robber,"geographic region, geographical area, geographical region, geographic area",true,true,true,false,false,instances
+Sydenham is not a physician.,sydenham,physician,"doc, doctor, dr., md, medico, physician",false,true,true,false,false,instances
+Trotsky is not a jazzman.,trotsky,jazzman,"bolshevik, bolshevist, revolutionary, revolutionist, subversive, subverter",true,true,true,false,false,instances
+Sasquatch is a national capital.,sasquatch,national capital,legendary creature,false,false,true,false,false,instances
+Montpelier is not a state capital.,montpelier,state capital,state capital,false,true,true,false,false,instances
+Warsaw is not a painter.,warsaw,painter,national capital,true,true,true,false,false,instances
+Matthew is an evangelist.,matthew,evangelist,"apostle, evangelist, saint",true,false,true,false,false,instances
+Spock is not a clarinetist.,spock,clarinetist,"baby doctor, paediatrician, pediatrician, pediatrist",true,true,true,false,false,instances
+Obama is a diplomat.,obama,diplomat,"chief executive, president, president of the united states, united states president",false,false,true,false,false,instances
+Velazquez is a river.,velazquez,river,old master,false,false,true,false,false,instances
+Sasquatch is not a legendary creature.,sasquatch,legendary creature,legendary creature,false,true,true,false,false,instances
+Crux is a constellation.,crux,constellation,constellation,true,false,true,false,false,instances
+Goldberg is not a doc.,goldberg,doc,cartoonist,true,true,true,false,false,instances
+Freud is not a brain doctor.,freud,brain doctor,"analyst, brain doctor, neurologist, psychoanalyst",false,true,true,false,false,instances
+Lewis is an author.,lewis,author,"author, writer",true,false,true,false,false,instances
+Jutland is a road agent.,jutland,road agent,naval battle,false,false,true,false,false,instances
+Marciano is not a geographical area.,marciano,geographical area,"gladiator, prizefighter",true,true,true,false,false,instances
+Macedon is a geographical area.,macedon,geographical area,"geographic region, geographic area, geographical area, geographical region",true,false,true,false,false,instances
+Matthew is an apostle.,matthew,apostle,"apostle, evangelist, saint",true,false,true,false,false,instances
+Sydenham is not a medico.,sydenham,medico,"doc, doctor, dr., md, medico, physician",false,true,true,false,false,instances
+Obama is a president.,obama,president,"chief executive, president, president of the united states, united states president",true,false,true,false,false,instances
+Jolson is a greek deity.,jolson,greek deity,"actor, histrion, player, role player, singer, thespian, vocaliser, vocalist, vocalizer",false,false,true,false,false,instances
+Gilmer is not a journalist.,gilmer,journalist,journalist,false,true,true,false,false,instances
+Thailand is not a composer.,thailand,composer,"asian country, asian nation",true,true,true,false,false,instances
+Libby is not a chemist.,libby,chemist,chemist,false,true,true,false,false,instances
+Diaz is not a pianist.,diaz,pianist,navigator,true,true,true,false,false,instances
+Sydenham is not a doctor.,sydenham,doctor,"doc, doctor, dr., md, medico, physician",false,true,true,false,false,instances
+Gregory is not a bishop of rome.,gregory,bishop of rome,"pontiff, catholic pope, vicar of christ, pope, saint, doctor, bishop of rome, holy father, roman catholic pope, doctor of the church",false,true,true,false,false,instances
+Tyndale is a sufferer.,tyndale,sufferer,"interpreter, martyr, sufferer, translator",true,false,true,false,false,instances
+Cracow is not an old master.,cracow,old master,"city, metropolis, urban center",true,true,true,false,false,instances
+Klein is a machinator.,klein,machinator,"clothes designer, couturier, fashion designer, designer",false,false,true,false,false,instances
+Herder is a philosopher.,herder,philosopher,philosopher,true,false,true,false,false,instances
+Debs is not an organizer.,debs,organizer,"labor organizer, organiser, organizer",false,true,true,false,false,instances
+Klein is not a fashion designer.,klein,fashion designer,"clothes designer, couturier, fashion designer, designer",false,true,true,false,false,instances
+Lisbon is not a national capital.,lisbon,national capital,"national capital, port",false,true,true,false,false,instances
+Mishnah is a filmmaker.,mishnah,filmmaker,"religious text, religious writing, sacred text, sacred writing",false,false,true,false,false,instances
+Tyndale is a martyr.,tyndale,martyr,"interpreter, martyr, sufferer, translator",true,false,true,false,false,instances
+Vitus is a martyr.,vitus,martyr,"martyr, saint",true,false,true,false,false,instances
+Schweitzer is not a sculptor.,schweitzer,sculptor,"doc, doctor, dr., md, medico, missionary, missioner, organist, philosopher, physician",true,true,true,false,false,instances
+Cracow is a city.,cracow,city,"city, metropolis, urban center",true,false,true,false,false,instances
+Crichton is a scholar.,crichton,scholar,"bookman, scholar, scholarly person, student",true,false,true,false,false,instances
+Puglia is an italian region.,puglia,italian region,italian region,true,false,true,false,false,instances
+Loyola is not clothes designer.,loyola,clothes designer,"theologian, theologiser, theologist, theologizer, saint",true,true,true,false,false,instances
+Fairbanks is a jazzman.,fairbanks,jazzman,"thespian, role player, histrion, actor, player",false,false,true,false,false,instances
+Jena is not a pitched battle.,jena,pitched battle,pitched battle,false,true,true,false,false,instances
+Hildebrand is a roman catholic pope.,hildebrand,roman catholic pope,"bishop of rome, catholic pope, holy father, pontiff, pope, roman catholic pope, vicar of christ",true,false,true,false,false,instances
+Swaziland is a thespian.,swaziland,thespian,"african country, african nation",false,false,true,false,false,instances
+Tegucigalpa is a race driver.,tegucigalpa,race driver,national capital,false,false,true,false,false,instances
+Sydenham is a central american nation.,sydenham,central american nation,"doc, doctor, dr., md, medico, physician",false,false,true,false,false,instances
+Lowlands is not a greek deity.,lowlands,greek deity,lowland,true,true,true,false,false,instances
+Schweitzer is not a south american nation.,schweitzer,south american nation,"doc, doctor, dr., md, medico, missionary, missioner, organist, philosopher, physician",true,true,true,false,false,instances
+Tati is not a film maker.,tati,film maker,"film maker, film producer, filmmaker, movie maker",false,true,true,false,false,instances
+Aquinas is not a theologizer.,aquinas,theologizer,"theologizer, saint, theologian, doctor, doctor of the church, theologiser, theologist",false,true,true,false,false,instances
+Richelieu is a statesman.,richelieu,statesman,"archpriest, hierarch, high priest, national leader, prelate, primate, solon, statesman",true,false,true,false,false,instances
+Meyerbeer is not a composer.,meyerbeer,composer,composer,false,true,true,false,false,instances
+Oldfield is a uranologist.,oldfield,uranologist,"automobile driver, race driver, racer",false,false,true,false,false,instances
+Tyndale is a translator.,tyndale,translator,"interpreter, martyr, sufferer, translator",true,false,true,false,false,instances
+Redford is not a film producer.,redford,film producer,"actor, film maker, film producer, filmmaker, histrion, movie maker, player, role player, thespian",false,true,true,false,false,instances
+Swaziland is an african nation.,swaziland,african nation,"african country, african nation",true,false,true,false,false,instances
+Jolson is not a king of great britain.,jolson,king of great britain,"actor, histrion, player, role player, singer, thespian, vocaliser, vocalist, vocalizer",true,true,true,false,false,instances
+Haifa is a city.,haifa,city,"port, urban center, metropolis, city",true,false,true,false,false,instances
+Gilmer is a journalist.,gilmer,journalist,journalist,true,false,true,false,false,instances
+Trotsky is a socialist.,trotsky,socialist,"bolshevik, bolshevist, revolutionary, revolutionist, subversive, subverter",false,false,true,false,false,instances
+Shostakovich is a pedagogue.,shostakovich,pedagogue,composer,false,false,true,false,false,instances
+Klein is a couturier.,klein,couturier,"clothes designer, couturier, fashion designer, designer",true,false,true,false,false,instances
+Crichton is a formal garden.,crichton,formal garden,"bookman, scholar, scholarly person, student",false,false,true,false,false,instances
+Qaddafi is not a leader.,qaddafi,leader,leader,false,true,true,false,false,instances
+Friedman is not an economic expert.,friedman,economic expert,"economic expert, economist",false,true,true,false,false,instances
+Gregory is a doctor of the church.,gregory,doctor of the church,"pontiff, catholic pope, vicar of christ, pope, saint, doctor, bishop of rome, holy father, roman catholic pope, doctor of the church",true,false,true,false,false,instances
+Decalogue is a commandment.,decalogue,commandment,commandment,true,false,true,false,false,instances
+Tyndale is not a carver.,tyndale,carver,"interpreter, martyr, sufferer, translator",true,true,true,false,false,instances
+Jolson is not a role player.,jolson,role player,"actor, histrion, player, role player, singer, thespian, vocaliser, vocalist, vocalizer",false,true,true,false,false,instances
+Turpin is not a hijacker.,turpin,hijacker,"highjacker, highwayman, hijacker, road agent",false,true,true,false,false,instances
+Crichton is a sacred text.,crichton,sacred text,"bookman, scholar, scholarly person, student",false,false,true,false,false,instances
+MO is a theologiser.,MO,theologiser,american state,false,false,true,false,false,instances
+Acheson is a clarinetist.,acheson,clarinetist,"national leader, solon, statesman",false,false,true,false,false,instances
+Carolina is a geographical area.,carolina,geographical area,"geographical region, geographic region, geographic area, geographical area",true,false,true,false,false,instances
+Fairbanks is not a player.,fairbanks,player,"thespian, role player, histrion, actor, player",false,true,true,false,false,instances
+Sydenham is a md.,sydenham,md,"doc, doctor, dr., md, medico, physician",true,false,true,false,false,instances
+Tati is an american state.,tati,american state,"film maker, film producer, filmmaker, movie maker",false,false,true,false,false,instances
+Tati is a role player.,tati,role player,"film maker, film producer, filmmaker, movie maker",false,false,true,false,false,instances
+Tarkovsky is not clothes designer.,tarkovsky,clothes designer,"film maker, film producer, filmmaker, movie maker",true,true,true,false,false,instances
+Warsaw is not a national capital.,warsaw,national capital,national capital,false,true,true,false,false,instances
+Goodman is a sufferer.,goodman,sufferer,"bandleader, clarinetist, clarinettist",false,false,true,false,false,instances
+Klein is a film maker.,klein,film maker,"clothes designer, couturier, fashion designer, designer",false,false,true,false,false,instances
+Nansen is a national leader.,nansen,national leader,"adventurer, explorer, national leader, solon, statesman",true,false,true,false,false,instances
+Vitus is not a singer.,vitus,singer,"martyr, saint",true,true,true,false,false,instances
+Kharkov is an urban center.,kharkov,urban center,"city, metropolis, urban center",true,false,true,false,false,instances
+Tyndale is not an author.,tyndale,author,"interpreter, martyr, sufferer, translator",true,true,true,false,false,instances
+Coppola is a civil rights activist.,coppola,civil rights activist,"film maker, film producer, filmmaker, movie maker",false,false,true,false,false,instances
+Richelieu is a prizefighter.,richelieu,prizefighter,"archpriest, hierarch, high priest, national leader, prelate, primate, solon, statesman",false,false,true,false,false,instances
+Oldfield is a sufferer.,oldfield,sufferer,"automobile driver, race driver, racer",false,false,true,false,false,instances
+Macedon is a geographic area.,macedon,geographic area,"geographic region, geographic area, geographical area, geographical region",true,false,true,false,false,instances
+Walter is not a conductor.,walter,conductor,"conductor, director, music director",false,true,true,false,false,instances
+Algiers is not a carver.,algiers,carver,"national capital, port",true,true,true,false,false,instances
+Richelieu is not a scandinavian country.,richelieu,scandinavian country,"archpriest, hierarch, high priest, national leader, prelate, primate, solon, statesman",true,true,true,false,false,instances
+Carolina is a geographic region.,carolina,geographic region,"geographical region, geographic region, geographic area, geographical area",true,false,true,false,false,instances
+Velazquez is an old master.,velazquez,old master,old master,true,false,true,false,false,instances
+Menotti is a composer.,menotti,composer,composer,true,false,true,false,false,instances
+Duncan is not a terpsichorean.,duncan,terpsichorean,"dancer, professional dancer, terpsichorean",false,true,true,false,false,instances
+Schweitzer is not a roman catholic pope.,schweitzer,roman catholic pope,"doc, doctor, dr., md, medico, missionary, missioner, organist, philosopher, physician",true,true,true,false,false,instances
+Taylor is not a composer.,taylor,composer,"music critic, composer",false,true,true,false,false,instances
+Hildebrand is a vicar of christ.,hildebrand,vicar of christ,"bishop of rome, catholic pope, holy father, pontiff, pope, roman catholic pope, vicar of christ",true,false,true,false,false,instances
+Thales is a stargazer.,thales,stargazer,"astronomer, philosopher, stargazer, uranologist",true,false,true,false,false,instances
+Walter is a conductor.,walter,conductor,"conductor, director, music director",true,false,true,false,false,instances
+Mishnah is a sea rover.,mishnah,sea rover,"religious text, religious writing, sacred text, sacred writing",false,false,true,false,false,instances
+Taylor is a roman catholic pope.,taylor,roman catholic pope,"music critic, composer",false,false,true,false,false,instances
+Trotsky is a bolshevist.,trotsky,bolshevist,"bolshevik, bolshevist, revolutionary, revolutionist, subversive, subverter",true,false,true,false,false,instances
+Gambia is not an african country.,gambia,african country,"african country, african nation",false,true,true,false,false,instances
+Marciano is not a gladiator.,marciano,gladiator,"gladiator, prizefighter",false,true,true,false,false,instances
+Morton is a physician.,morton,physician,"jazz musician, jazzman",false,false,true,false,false,instances
+Tyrol is a province.,tyrol,province,"province, state",true,false,true,false,false,instances
+Hertz is a roman.,hertz,roman,nuclear physicist,false,false,true,false,false,instances
+Tati is not a psychoanalyst.,tati,psychoanalyst,"film maker, film producer, filmmaker, movie maker",true,true,true,false,false,instances
+Meyerbeer is a composer.,meyerbeer,composer,composer,true,false,true,false,false,instances
+Ukraine is a country.,ukraine,country,"land, country, state",true,false,true,false,false,instances
+Swaziland is not a pirate.,swaziland,pirate,"african country, african nation",true,true,true,false,false,instances
+Schweitzer is a technologist.,schweitzer,technologist,"doc, doctor, dr., md, medico, missionary, missioner, organist, philosopher, physician",false,false,true,false,false,instances
+Morton is not a md.,morton,md,"jazz musician, jazzman",true,true,true,false,false,instances
+Trotsky is a writer.,trotsky,writer,"bolshevik, bolshevist, revolutionary, revolutionist, subversive, subverter",false,false,true,false,false,instances
+Rigel is a carver.,rigel,carver,"binary, binary star, double star",false,false,true,false,false,instances
+Chomsky is not a conspirator.,chomsky,conspirator,"linguist, linguistic scientist",true,true,true,false,false,instances
+Grus is not a director.,grus,director,constellation,true,true,true,false,false,instances
+Tyndale is not a vocalist.,tyndale,vocalist,"interpreter, martyr, sufferer, translator",true,true,true,false,false,instances
+Obama is a chief executive.,obama,chief executive,"chief executive, president, president of the united states, united states president",true,false,true,false,false,instances
+Fawkes is a pianist.,fawkes,pianist,"coconspirator, conspirator, machinator, plotter",false,false,true,false,false,instances
+Loyola is a mystic.,loyola,mystic,"theologian, theologiser, theologist, theologizer, saint",false,false,true,false,false,instances
+Gagarin is not a cosmonaut.,gagarin,cosmonaut,"astronaut, cosmonaut, spaceman",false,true,true,false,false,instances
+Crichton is not a scholar.,crichton,scholar,"bookman, scholar, scholarly person, student",false,true,true,false,false,instances
+Thailand is an asian nation.,thailand,asian nation,"asian country, asian nation",true,false,true,false,false,instances
+Klein is a designer.,klein,designer,"clothes designer, couturier, fashion designer, designer",true,false,true,false,false,instances
+Schweitzer is not a md.,schweitzer,md,"doc, doctor, dr., md, medico, missionary, missioner, organist, philosopher, physician",false,true,true,false,false,instances
+Johnson is fictitious character.,johnson,fictitious character,"writer, lexicographer, lexicologist, author",false,false,true,false,false,instances
+Freud is not a psychoanalyst.,freud,psychoanalyst,"analyst, brain doctor, neurologist, psychoanalyst",false,true,true,false,false,instances
+Gagarin is a spaceman.,gagarin,spaceman,"astronaut, cosmonaut, spaceman",true,false,true,false,false,instances
+Bushnell is not religious mystic.,bushnell,religious mystic,"artificer, discoverer, inventor",true,true,true,false,false,instances
+Aquinas is a province.,aquinas,province,"theologizer, saint, theologian, doctor, doctor of the church, theologiser, theologist",false,false,true,false,false,instances
+Arabia is a pediatrist.,arabia,pediatrist,peninsula,false,false,true,false,false,instances
+Hemingway is a geographic area.,hemingway,geographic area,"author, writer",false,false,true,false,false,instances
+Macedon is not a geographic region.,macedon,geographic region,"geographic region, geographic area, geographical area, geographical region",false,true,true,false,false,instances
+Tegucigalpa is not a pedagog.,tegucigalpa,pedagog,national capital,true,true,true,false,false,instances
+Haifa is not a poet.,haifa,poet,"port, urban center, metropolis, city",true,true,true,false,false,instances
+Jolson is not a histrion.,jolson,histrion,"actor, histrion, player, role player, singer, thespian, vocaliser, vocalist, vocalizer",false,true,true,false,false,instances
+Macedon is an african country.,macedon,african country,"geographic region, geographic area, geographical area, geographical region",false,false,true,false,false,instances
+Archean is not an eon.,archean,eon,"aeon, eon",false,true,true,false,false,instances
+Macedon is not a diarist.,macedon,diarist,"geographic region, geographic area, geographical area, geographical region",true,true,true,false,false,instances
+Nansen is a planet.,nansen,planet,"adventurer, explorer, national leader, solon, statesman",false,false,true,false,false,instances
+Loyola is a theologian.,loyola,theologian,"theologian, theologiser, theologist, theologizer, saint",true,false,true,false,false,instances
+Dixieland is a designer.,dixieland,designer,"geographic region, geographical area, geographical region, geographic area",false,false,true,false,false,instances
+Lazio is an italian region.,lazio,italian region,italian region,true,false,true,false,false,instances
+Dix is religious writing.,dix,religious writing,"crusader, meliorist, reformer, reformist, social reformer",false,false,true,false,false,instances
+Jolson is a legendary creature.,jolson,legendary creature,"actor, histrion, player, role player, singer, thespian, vocaliser, vocalist, vocalizer",false,false,true,false,false,instances
+Lazio is not an italian region.,lazio,italian region,italian region,false,true,true,false,false,instances
+Duncan is a discoverer.,duncan,discoverer,"dancer, professional dancer, terpsichorean",false,false,true,false,false,instances
+Schweitzer is a sculptor.,schweitzer,sculptor,"doc, doctor, dr., md, medico, missionary, missioner, organist, philosopher, physician",false,false,true,false,false,instances
+Spock is a paediatrician.,spock,paediatrician,"baby doctor, paediatrician, pediatrician, pediatrist",true,false,true,false,false,instances
+Redford is a role player.,redford,role player,"actor, film maker, film producer, filmmaker, histrion, movie maker, player, role player, thespian",true,false,true,false,false,instances
+Hildebrand is not a pirate.,hildebrand,pirate,"bishop of rome, catholic pope, holy father, pontiff, pope, roman catholic pope, vicar of christ",true,true,true,false,false,instances
+Hildebrand is not a revolutionary.,hildebrand,revolutionary,"bishop of rome, catholic pope, holy father, pontiff, pope, roman catholic pope, vicar of christ",true,true,true,false,false,instances
+Aquinas is not an author.,aquinas,author,"theologizer, saint, theologian, doctor, doctor of the church, theologiser, theologist",true,true,true,false,false,instances
+MO is not an organist.,MO,organist,american state,true,true,true,false,false,instances
+Carolina is not a reformer.,carolina,reformer,"geographical region, geographic region, geographic area, geographical area",true,true,true,false,false,instances
+Diaz is not a navigator.,diaz,navigator,navigator,false,true,true,false,false,instances
+Aquinas is a doctor.,aquinas,doctor,"theologizer, saint, theologian, doctor, doctor of the church, theologiser, theologist",true,false,true,false,false,instances
+TT is not a land.,TT,land,"country, state, land",false,true,true,false,false,instances
+Dix is an analyst.,dix,analyst,"crusader, meliorist, reformer, reformist, social reformer",false,false,true,false,false,instances
+Dix is a balkan nation.,dix,balkan nation,"crusader, meliorist, reformer, reformist, social reformer",false,false,true,false,false,instances
+Walter is not a director.,walter,director,"conductor, director, music director",false,true,true,false,false,instances
+Grus is a theologiser.,grus,theologiser,constellation,false,false,true,false,false,instances
+Acheson is a martyr.,acheson,martyr,"national leader, solon, statesman",false,false,true,false,false,instances
+Oaxaca is a student.,oaxaca,student,"city, metropolis, urban center",false,false,true,false,false,instances
+Rushmore is a mountain peak.,rushmore,mountain peak,mountain peak,true,false,true,false,false,instances
+Mandelstam is not a poet.,mandelstam,poet,poet,false,true,true,false,false,instances
+Fairbanks is not a thespian.,fairbanks,thespian,"thespian, role player, histrion, actor, player",false,true,true,false,false,instances
+Redford is a fashion designer.,redford,fashion designer,"actor, film maker, film producer, filmmaker, histrion, movie maker, player, role player, thespian",false,false,true,false,false,instances
+Kharkov is not a role player.,kharkov,role player,"city, metropolis, urban center",true,true,true,false,false,instances
+Tati is a film producer.,tati,film producer,"film maker, film producer, filmmaker, movie maker",true,false,true,false,false,instances
+Richelieu is not a prelate.,richelieu,prelate,"archpriest, hierarch, high priest, national leader, prelate, primate, solon, statesman",false,true,true,false,false,instances
+Acheson is not a missioner.,acheson,missioner,"national leader, solon, statesman",true,true,true,false,false,instances
+Crichton is not a state capital.,crichton,state capital,"bookman, scholar, scholarly person, student",true,true,true,false,false,instances
+Acheson is a national leader.,acheson,national leader,"national leader, solon, statesman",true,false,true,false,false,instances
+Freud is a civil rights worker.,freud,civil rights worker,"analyst, brain doctor, neurologist, psychoanalyst",false,false,true,false,false,instances
+Trotsky is a navigator.,trotsky,navigator,"bolshevik, bolshevist, revolutionary, revolutionist, subversive, subverter",false,false,true,false,false,instances
+Obama is not a president.,obama,president,"chief executive, president, president of the united states, united states president",false,true,true,false,false,instances
+Vitus is not a martyr.,vitus,martyr,"martyr, saint",false,true,true,false,false,instances
+Muhammad is a balkan country.,muhammad,balkan country,prophet,false,false,true,false,false,instances
+Mann is not a clarinettist.,mann,clarinettist,"educator, pedagog, pedagogue",true,true,true,false,false,instances
+Gregory is a promoter.,gregory,promoter,"pontiff, catholic pope, vicar of christ, pope, saint, doctor, bishop of rome, holy father, roman catholic pope, doctor of the church",false,false,true,false,false,instances
+Johnson is an engineer.,johnson,engineer,"writer, lexicographer, lexicologist, author",false,false,true,false,false,instances
+Gagarin is a cosmonaut.,gagarin,cosmonaut,"astronaut, cosmonaut, spaceman",true,false,true,false,false,instances
+Jolson is not a conspirator.,jolson,conspirator,"actor, histrion, player, role player, singer, thespian, vocaliser, vocalist, vocalizer",true,true,true,false,false,instances
+Tati is not a geographical area.,tati,geographical area,"film maker, film producer, filmmaker, movie maker",true,true,true,false,false,instances
+Klein is not a designer.,klein,designer,"clothes designer, couturier, fashion designer, designer",false,true,true,false,false,instances
+Duncan is a dancer.,duncan,dancer,"dancer, professional dancer, terpsichorean",true,false,true,false,false,instances
+Gregory is not a balkan country.,gregory,balkan country,"pontiff, catholic pope, vicar of christ, pope, saint, doctor, bishop of rome, holy father, roman catholic pope, doctor of the church",true,true,true,false,false,instances
+Debs is a planet.,debs,planet,"labor organizer, organiser, organizer",false,false,true,false,false,instances
+Gregory is a spaceman.,gregory,spaceman,"pontiff, catholic pope, vicar of christ, pope, saint, doctor, bishop of rome, holy father, roman catholic pope, doctor of the church",false,false,true,false,false,instances
+Freud is an analyst.,freud,analyst,"analyst, brain doctor, neurologist, psychoanalyst",true,false,true,false,false,instances
+Crichton is not a scholarly person.,crichton,scholarly person,"bookman, scholar, scholarly person, student",false,true,true,false,false,instances
+Goodman is a bandleader.,goodman,bandleader,"bandleader, clarinetist, clarinettist",true,false,true,false,false,instances
+Crichton is not a king of great britain.,crichton,king of great britain,"bookman, scholar, scholarly person, student",true,true,true,false,false,instances
+Italy is a european country.,italy,european country,"european nation, european country",true,false,true,false,false,instances
+Klein is not a pedagogue.,klein,pedagogue,"clothes designer, couturier, fashion designer, designer",true,true,true,false,false,instances
+Tarkovsky is not a jazz musician.,tarkovsky,jazz musician,"film maker, film producer, filmmaker, movie maker",true,true,true,false,false,instances
+Dix is not a binary.,dix,binary,"crusader, meliorist, reformer, reformist, social reformer",true,true,true,false,false,instances
+Gregory is not a doctor.,gregory,doctor,"pontiff, catholic pope, vicar of christ, pope, saint, doctor, bishop of rome, holy father, roman catholic pope, doctor of the church",false,true,true,false,false,instances
+Dix is a reformer.,dix,reformer,"crusader, meliorist, reformer, reformist, social reformer",true,false,true,false,false,instances
+Libby is not an author.,libby,author,chemist,true,true,true,false,false,instances
+Vitus is not a geographic region.,vitus,geographic region,"martyr, saint",true,true,true,false,false,instances
+Libby is a hierarch.,libby,hierarch,chemist,false,false,true,false,false,instances
+Hildebrand is a diarist.,hildebrand,diarist,"bishop of rome, catholic pope, holy father, pontiff, pope, roman catholic pope, vicar of christ",false,false,true,false,false,instances
+Cash is a patron saint.,cash,patron saint,"vocalizer, vocalist, vocaliser, singer",false,false,true,false,false,instances
+Johor is a revolutionist.,johor,revolutionist,malaysian state,false,false,true,false,false,instances
+Dix is not a physiologist.,dix,physiologist,"crusader, meliorist, reformer, reformist, social reformer",true,true,true,false,false,instances
+Obama is a civil rights leader.,obama,civil rights leader,"chief executive, president, president of the united states, united states president",false,false,true,false,false,instances
+Schweitzer is not a weird sister.,schweitzer,weird sister,"doc, doctor, dr., md, medico, missionary, missioner, organist, philosopher, physician",true,true,true,false,false,instances
+Redford is not a role player.,redford,role player,"actor, film maker, film producer, filmmaker, histrion, movie maker, player, role player, thespian",false,true,true,false,false,instances
+Goodman is a double star.,goodman,double star,"bandleader, clarinetist, clarinettist",false,false,true,false,false,instances
+MO is not an american state.,MO,american state,american state,false,true,true,false,false,instances
+Algiers is not a port.,algiers,port,"national capital, port",false,true,true,false,false,instances
+Dix is not a reformer.,dix,reformer,"crusader, meliorist, reformer, reformist, social reformer",false,true,true,false,false,instances
+Meyerbeer is not a mythologist.,meyerbeer,mythologist,composer,true,true,true,false,false,instances
+Mishnah is a sacred text.,mishnah,sacred text,"religious text, religious writing, sacred text, sacred writing",true,false,true,false,false,instances
+Duncan is not a fictional character.,duncan,fictional character,"dancer, professional dancer, terpsichorean",true,true,true,false,false,instances
+Owens is a gladiator.,owens,gladiator,"athlete, jock",false,false,true,false,false,instances
+Turpin is not a missionary.,turpin,missionary,"highjacker, highwayman, hijacker, road agent",true,true,true,false,false,instances
+Schweitzer is not a singer.,schweitzer,singer,"doc, doctor, dr., md, medico, missionary, missioner, organist, philosopher, physician",true,true,true,false,false,instances
+Jolson is an old master.,jolson,old master,"actor, histrion, player, role player, singer, thespian, vocaliser, vocalist, vocalizer",false,false,true,false,false,instances
+Montpelier is a bishop of rome.,montpelier,bishop of rome,state capital,false,false,true,false,false,instances
+Menuhin is a fiddler.,menuhin,fiddler,"fiddler, violinist",true,false,true,false,false,instances
+Fawkes is not a machinator.,fawkes,machinator,"coconspirator, conspirator, machinator, plotter",false,true,true,false,false,instances
+Kharkov is a male monarch.,kharkov,male monarch,"city, metropolis, urban center",false,false,true,false,false,instances
+Decalogue is not a commandment.,decalogue,commandment,commandment,false,true,true,false,false,instances
+Rigel is an astronaut.,rigel,astronaut,"binary, binary star, double star",false,false,true,false,false,instances
+Acheson is a solon.,acheson,solon,"national leader, solon, statesman",true,false,true,false,false,instances
+Jonson is not a financier.,jonson,financier,"dramatist, playwright, poet",true,true,true,false,false,instances
+Alger is a writer.,alger,writer,"author, writer",true,false,true,false,false,instances
+Fairbanks is not a histrion.,fairbanks,histrion,"thespian, role player, histrion, actor, player",false,true,true,false,false,instances
+Archean is not an aeon.,archean,aeon,"aeon, eon",false,true,true,false,false,instances
+Shostakovich is a composer.,shostakovich,composer,composer,true,false,true,false,false,instances
+Thailand is a catholic pope.,thailand,catholic pope,"asian country, asian nation",false,false,true,false,false,instances
+Gregory is not a pope.,gregory,pope,"pontiff, catholic pope, vicar of christ, pope, saint, doctor, bishop of rome, holy father, roman catholic pope, doctor of the church",false,true,true,false,false,instances
+Richelieu is not religious text.,richelieu,religious text,"archpriest, hierarch, high priest, national leader, prelate, primate, solon, statesman",true,true,true,false,false,instances
+Oaxaca is not an urban center.,oaxaca,urban center,"city, metropolis, urban center",false,true,true,false,false,instances
+Thailand is not an illustrator.,thailand,illustrator,"asian country, asian nation",true,true,true,false,false,instances
+Dix is an interpreter.,dix,interpreter,"crusader, meliorist, reformer, reformist, social reformer",false,false,true,false,false,instances
+Oaxaca is metropolis.,oaxaca,metropolis,"city, metropolis, urban center",true,false,true,false,false,instances
+TT is a dancer.,TT,dancer,"country, state, land",false,false,true,false,false,instances
+Dix is not a social reformer.,dix,social reformer,"crusader, meliorist, reformer, reformist, social reformer",false,true,true,false,false,instances
+Tyndale is an interpreter.,tyndale,interpreter,"interpreter, martyr, sufferer, translator",true,false,true,false,false,instances
+Tati is not a filmmaker.,tati,filmmaker,"film maker, film producer, filmmaker, movie maker",false,true,true,false,false,instances
+Algiers is not a national capital.,algiers,national capital,"national capital, port",false,true,true,false,false,instances
+Cash is not a singer.,cash,singer,"vocalizer, vocalist, vocaliser, singer",false,true,true,false,false,instances
+Alger is not an asian nation.,alger,asian nation,"author, writer",true,true,true,false,false,instances
+Macedon is not an author.,macedon,author,"geographic region, geographic area, geographical area, geographical region",true,true,true,false,false,instances
+Harrison is not a socialist.,harrison,socialist,rock star,true,true,true,false,false,instances
+Barrie is not a diary keeper.,barrie,diary keeper,"dramatist, playwright",true,true,true,false,false,instances
+Italy is a european nation.,italy,european nation,"european nation, european country",true,false,true,false,false,instances
+Spock is not a baby doctor.,spock,baby doctor,"baby doctor, paediatrician, pediatrician, pediatrist",false,true,true,false,false,instances
+Seville is not a roman.,seville,roman,"metropolis, city, port, urban center",true,true,true,false,false,instances
+Trotsky is a revolutionist.,trotsky,revolutionist,"bolshevik, bolshevist, revolutionary, revolutionist, subversive, subverter",true,false,true,false,false,instances
+Jolson is not a vocaliser.,jolson,vocaliser,"actor, histrion, player, role player, singer, thespian, vocaliser, vocalist, vocalizer",false,true,true,false,false,instances
+Thales is a philosopher.,thales,philosopher,"astronomer, philosopher, stargazer, uranologist",true,false,true,false,false,instances
+Lewis is a writer.,lewis,writer,"author, writer",true,false,true,false,false,instances
+Dixieland is a primate.,dixieland,primate,"geographic region, geographical area, geographical region, geographic area",false,false,true,false,false,instances
+Cracow is a primate.,cracow,primate,"city, metropolis, urban center",false,false,true,false,false,instances
+Spock is not a paediatrician.,spock,paediatrician,"baby doctor, paediatrician, pediatrician, pediatrist",false,true,true,false,false,instances
+Turpin is not a highjacker.,turpin,highjacker,"highjacker, highwayman, hijacker, road agent",false,true,true,false,false,instances
+Gregory is not an asian nation.,gregory,asian nation,"pontiff, catholic pope, vicar of christ, pope, saint, doctor, bishop of rome, holy father, roman catholic pope, doctor of the church",true,true,true,false,false,instances
+Chomsky is a linguistic scientist.,chomsky,linguistic scientist,"linguist, linguistic scientist",true,false,true,false,false,instances
+Gregory is a holy father.,gregory,holy father,"pontiff, catholic pope, vicar of christ, pope, saint, doctor, bishop of rome, holy father, roman catholic pope, doctor of the church",true,false,true,false,false,instances
+Cash is not a vocalist.,cash,vocalist,"vocalizer, vocalist, vocaliser, singer",false,true,true,false,false,instances
+Crux is not a constellation.,crux,constellation,constellation,false,true,true,false,false,instances
+Carolina is not a geographic region.,carolina,geographic region,"geographical region, geographic region, geographic area, geographical area",false,true,true,false,false,instances
+Aquinas is not a national leader.,aquinas,national leader,"theologizer, saint, theologian, doctor, doctor of the church, theologiser, theologist",true,true,true,false,false,instances
+Montpelier is a state capital.,montpelier,state capital,state capital,true,false,true,false,false,instances
+Schweitzer is a province.,schweitzer,province,"doc, doctor, dr., md, medico, missionary, missioner, organist, philosopher, physician",false,false,true,false,false,instances
+Aquinas is a sufferer.,aquinas,sufferer,"theologizer, saint, theologian, doctor, doctor of the church, theologiser, theologist",false,false,true,false,false,instances
+Gagarin is a south american nation.,gagarin,south american nation,"astronaut, cosmonaut, spaceman",false,false,true,false,false,instances
+Plough is an asterism.,plough,asterism,asterism,true,false,true,false,false,instances
+Fawkes is a conspirator.,fawkes,conspirator,"coconspirator, conspirator, machinator, plotter",true,false,true,false,false,instances
+Aquinas is not a lexicologist.,aquinas,lexicologist,"theologizer, saint, theologian, doctor, doctor of the church, theologiser, theologist",true,true,true,false,false,instances
+Richelieu is an archpriest.,richelieu,archpriest,"archpriest, hierarch, high priest, national leader, prelate, primate, solon, statesman",true,false,true,false,false,instances
+Lithuania is not a baltic republic.,lithuania,baltic republic,"baltic state, baltic republic",false,true,true,false,false,instances
+Muhammad is not an actor.,muhammad,actor,prophet,true,true,true,false,false,instances
+Mishnah is not a sacred text.,mishnah,sacred text,"religious text, religious writing, sacred text, sacred writing",false,true,true,false,false,instances
+Obama is not a president of the united states.,obama,president of the united states,"chief executive, president, president of the united states, united states president",false,true,true,false,false,instances
+Monet is not a theologian.,monet,theologian,painter,true,true,true,false,false,instances
+Schweitzer is a missioner.,schweitzer,missioner,"doc, doctor, dr., md, medico, missionary, missioner, organist, philosopher, physician",true,false,true,false,false,instances
+Madrid is a bandleader.,madrid,bandleader,national capital,false,false,true,false,false,instances
+Tarkovsky is not a movie maker.,tarkovsky,movie maker,"film maker, film producer, filmmaker, movie maker",false,true,true,false,false,instances
+Toscanini is not a conductor.,toscanini,conductor,"conductor, director, music director",false,true,true,false,false,instances
+Mozambique is a patron saint.,mozambique,patron saint,"african country, african nation",false,false,true,false,false,instances
+Agrippina is not a roman.,agrippina,roman,roman,false,true,true,false,false,instances
+Oaxaca is not a city.,oaxaca,city,"city, metropolis, urban center",false,true,true,false,false,instances
+Redford is a pediatrician.,redford,pediatrician,"actor, film maker, film producer, filmmaker, histrion, movie maker, player, role player, thespian",false,false,true,false,false,instances
+Oaxaca is not a pirate.,oaxaca,pirate,"city, metropolis, urban center",true,true,true,false,false,instances
+Rigel is a binary.,rigel,binary,"binary, binary star, double star",true,false,true,false,false,instances
+Oldfield is not a painter.,oldfield,painter,"automobile driver, race driver, racer",true,true,true,false,false,instances
+Redford is not a diary keeper.,redford,diary keeper,"actor, film maker, film producer, filmmaker, histrion, movie maker, player, role player, thespian",true,true,true,false,false,instances
+Tyndale is not a sufferer.,tyndale,sufferer,"interpreter, martyr, sufferer, translator",false,true,true,false,false,instances
+Johnson is a writer.,johnson,writer,"writer, lexicographer, lexicologist, author",true,false,true,false,false,instances
+Robbins is not a reformer.,robbins,reformer,choreographer,true,true,true,false,false,instances
+Tyrol is an author.,tyrol,author,"province, state",false,false,true,false,false,instances
+Oaxaca is an urban center.,oaxaca,urban center,"city, metropolis, urban center",true,false,true,false,false,instances
+Joffrey is not a choreographer.,joffrey,choreographer,choreographer,false,true,true,false,false,instances
+Mishnah is a crusader.,mishnah,crusader,"religious text, religious writing, sacred text, sacred writing",false,false,true,false,false,instances
+Tati is not tennis player.,tati,tennis player,"film maker, film producer, filmmaker, movie maker",true,true,true,false,false,instances
+Graf is not an organizer.,graf,organizer,tennis player,true,true,true,false,false,instances
+Carolina is a meliorist.,carolina,meliorist,"geographical region, geographic region, geographic area, geographical area",false,false,true,false,false,instances
+Puglia is not a socialist.,puglia,socialist,italian region,true,true,true,false,false,instances
+Carolina is a patron saint.,carolina,patron saint,"geographical region, geographic region, geographic area, geographical area",false,false,true,false,false,instances
+Sydenham is not a doc.,sydenham,doc,"doc, doctor, dr., md, medico, physician",false,true,true,false,false,instances
+Seville is not an urban center.,seville,urban center,"metropolis, city, port, urban center",false,true,true,false,false,instances
+Jolson is not a meliorist.,jolson,meliorist,"actor, histrion, player, role player, singer, thespian, vocaliser, vocalist, vocalizer",true,true,true,false,false,instances
+Redford is a singer.,redford,singer,"actor, film maker, film producer, filmmaker, histrion, movie maker, player, role player, thespian",false,false,true,false,false,instances
+Graf is a geographic region.,graf,geographic region,tennis player,false,false,true,false,false,instances
+Gagarin is not a south american nation.,gagarin,south american nation,"astronaut, cosmonaut, spaceman",true,true,true,false,false,instances
+Acheson is not a national leader.,acheson,national leader,"national leader, solon, statesman",false,true,true,false,false,instances
+Debs is an organiser.,debs,organiser,"labor organizer, organiser, organizer",true,false,true,false,false,instances
+Tyrol is a state.,tyrol,state,"province, state",true,false,true,false,false,instances
+Gregory is a movie maker.,gregory,movie maker,"pontiff, catholic pope, vicar of christ, pope, saint, doctor, bishop of rome, holy father, roman catholic pope, doctor of the church",false,false,true,false,false,instances
+Ukraine is an interpreter.,ukraine,interpreter,"land, country, state",false,false,true,false,false,instances
+Reiter is an asterism.,reiter,asterism,bacteriologist,false,false,true,false,false,instances
+Nansen is not a solon.,nansen,solon,"adventurer, explorer, national leader, solon, statesman",false,true,true,false,false,instances
+Klein is a fashion designer.,klein,fashion designer,"clothes designer, couturier, fashion designer, designer",true,false,true,false,false,instances
+Hildebrand is a pontiff.,hildebrand,pontiff,"bishop of rome, catholic pope, holy father, pontiff, pope, roman catholic pope, vicar of christ",true,false,true,false,false,instances
+Willamette is not an eon.,willamette,eon,river,true,true,true,false,false,instances
+Redford is a peninsula.,redford,peninsula,"actor, film maker, film producer, filmmaker, histrion, movie maker, player, role player, thespian",false,false,true,false,false,instances
+Kharkov is not a balkan nation.,kharkov,balkan nation,"city, metropolis, urban center",true,true,true,false,false,instances
+Fawkes is a civil rights worker.,fawkes,civil rights worker,"coconspirator, conspirator, machinator, plotter",false,false,true,false,false,instances
+Jolson is a vocalizer.,jolson,vocalizer,"actor, histrion, player, role player, singer, thespian, vocaliser, vocalist, vocalizer",true,false,true,false,false,instances
+Gagarin is an astronaut.,gagarin,astronaut,"astronaut, cosmonaut, spaceman",true,false,true,false,false,instances
+Dixieland is not a geographical area.,dixieland,geographical area,"geographic region, geographical area, geographical region, geographic area",false,true,true,false,false,instances
+Goldberg is tennis player.,goldberg,tennis player,cartoonist,false,false,true,false,false,instances
+Marciano is not a prizefighter.,marciano,prizefighter,"gladiator, prizefighter",false,true,true,false,false,instances
+Dix is a social reformer.,dix,social reformer,"crusader, meliorist, reformer, reformist, social reformer",true,false,true,false,false,instances
+Algiers is a hierarch.,algiers,hierarch,"national capital, port",false,false,true,false,false,instances
+Schweitzer is a medico.,schweitzer,medico,"doc, doctor, dr., md, medico, missionary, missioner, organist, philosopher, physician",true,false,true,false,false,instances
+Ukraine is not a land.,ukraine,land,"land, country, state",false,true,true,false,false,instances
+Tyrol is a king of great britain.,tyrol,king of great britain,"province, state",false,false,true,false,false,instances
+Klein is not an astronaut.,klein,astronaut,"clothes designer, couturier, fashion designer, designer",true,true,true,false,false,instances
+Molokai is not a psychoanalyst.,molokai,psychoanalyst,island,true,true,true,false,false,instances
+Debs is a civil rights leader.,debs,civil rights leader,"labor organizer, organiser, organizer",false,false,true,false,false,instances
+Gregory is not a social reformer.,gregory,social reformer,"pontiff, catholic pope, vicar of christ, pope, saint, doctor, bishop of rome, holy father, roman catholic pope, doctor of the church",true,true,true,false,false,instances
+Aquinas is not a baltic state.,aquinas,baltic state,"theologizer, saint, theologian, doctor, doctor of the church, theologiser, theologist",true,true,true,false,false,instances
+Thales is a vocalist.,thales,vocalist,"astronomer, philosopher, stargazer, uranologist",false,false,true,false,false,instances
+Jolson is a player.,jolson,player,"actor, histrion, player, role player, singer, thespian, vocaliser, vocalist, vocalizer",true,false,true,false,false,instances
+Goodman is not a clarinetist.,goodman,clarinetist,"bandleader, clarinetist, clarinettist",false,true,true,false,false,instances
+Richelieu is not a hierarch.,richelieu,hierarch,"archpriest, hierarch, high priest, national leader, prelate, primate, solon, statesman",false,true,true,false,false,instances
+Turpin is a settler.,turpin,settler,"highjacker, highwayman, hijacker, road agent",false,false,true,false,false,instances
+Bushnell is not an artificer.,bushnell,artificer,"artificer, discoverer, inventor",false,true,true,false,false,instances
+Crichton is a scholarly person.,crichton,scholarly person,"bookman, scholar, scholarly person, student",true,false,true,false,false,instances
+Gregory is a geographical area.,gregory,geographical area,"pontiff, catholic pope, vicar of christ, pope, saint, doctor, bishop of rome, holy father, roman catholic pope, doctor of the church",false,false,true,false,false,instances
+Sydenham is not a md.,sydenham,md,"doc, doctor, dr., md, medico, physician",false,true,true,false,false,instances
+Spock is not a sculpturer.,spock,sculpturer,"baby doctor, paediatrician, pediatrician, pediatrist",true,true,true,false,false,instances
+Klein is not a couturier.,klein,couturier,"clothes designer, couturier, fashion designer, designer",false,true,true,false,false,instances
+Trotsky is a subversive.,trotsky,subversive,"bolshevik, bolshevist, revolutionary, revolutionist, subversive, subverter",true,false,true,false,false,instances
+Kazak is a noble.,kazak,noble,"asian country, asian nation",false,false,true,false,false,instances
+Loeb is a physiologist.,loeb,physiologist,physiologist,true,false,true,false,false,instances
+Bushnell is not an inventor.,bushnell,inventor,"artificer, discoverer, inventor",false,true,true,false,false,instances
+Jolson is a vocaliser.,jolson,vocaliser,"actor, histrion, player, role player, singer, thespian, vocaliser, vocalist, vocalizer",true,false,true,false,false,instances
+Lithuania is a philosopher.,lithuania,philosopher,"baltic state, baltic republic",false,false,true,false,false,instances
+Coppola is a peninsula.,coppola,peninsula,"film maker, film producer, filmmaker, movie maker",false,false,true,false,false,instances
+Marciano is a prizefighter.,marciano,prizefighter,"gladiator, prizefighter",true,false,true,false,false,instances
+Thales is a uranologist.,thales,uranologist,"astronomer, philosopher, stargazer, uranologist",true,false,true,false,false,instances
+Acheson is a neurologist.,acheson,neurologist,"national leader, solon, statesman",false,false,true,false,false,instances
+Gregory is a civil rights activist.,gregory,civil rights activist,"pontiff, catholic pope, vicar of christ, pope, saint, doctor, bishop of rome, holy father, roman catholic pope, doctor of the church",false,false,true,false,false,instances
+Mishnah is not religious writing.,mishnah,religious writing,"religious text, religious writing, sacred text, sacred writing",false,true,true,false,false,instances
+Nansen is not a civil rights activist.,nansen,civil rights activist,"adventurer, explorer, national leader, solon, statesman",true,true,true,false,false,instances
+Friedman is an economist.,friedman,economist,"economic expert, economist",true,false,true,false,false,instances
+Loyola is a choreographer.,loyola,choreographer,"theologian, theologiser, theologist, theologizer, saint",false,false,true,false,false,instances
+Matthew is not a saint.,matthew,saint,"apostle, evangelist, saint",false,true,true,false,false,instances
+Gregory is not a vicar of christ.,gregory,vicar of christ,"pontiff, catholic pope, vicar of christ, pope, saint, doctor, bishop of rome, holy father, roman catholic pope, doctor of the church",false,true,true,false,false,instances
+Crux is not a mother.,crux,mother,constellation,true,true,true,false,false,instances
+Walter is not an actor.,walter,actor,"conductor, director, music director",true,true,true,false,false,instances
+Macedon is a geographical region.,macedon,geographical region,"geographic region, geographic area, geographical area, geographical region",true,false,true,false,false,instances
+Robbins is not a choreographer.,robbins,choreographer,choreographer,false,true,true,false,false,instances
+Sydenham is not a prizefighter.,sydenham,prizefighter,"doc, doctor, dr., md, medico, physician",true,true,true,false,false,instances
+Nansen is not an explorer.,nansen,explorer,"adventurer, explorer, national leader, solon, statesman",false,true,true,false,false,instances
+Jolson is a publisher.,jolson,publisher,"actor, histrion, player, role player, singer, thespian, vocaliser, vocalist, vocalizer",false,false,true,false,false,instances
+Campbell is not a bacteriologist.,campbell,bacteriologist,mythologist,true,true,true,false,false,instances
+Johnson is not an educator.,johnson,educator,"writer, lexicographer, lexicologist, author",true,true,true,false,false,instances
+Redford is a player.,redford,player,"actor, film maker, film producer, filmmaker, histrion, movie maker, player, role player, thespian",true,false,true,false,false,instances
+Mann is an educator.,mann,educator,"educator, pedagog, pedagogue",true,false,true,false,false,instances
+Trotsky is not a bolshevist.,trotsky,bolshevist,"bolshevik, bolshevist, revolutionary, revolutionist, subversive, subverter",false,true,true,false,false,instances
+Jonson is not a dramatist.,jonson,dramatist,"dramatist, playwright, poet",false,true,true,false,false,instances
+Tati is not a businessman.,tati,businessman,"film maker, film producer, filmmaker, movie maker",true,true,true,false,false,instances
+Obama is a president of the united states.,obama,president of the united states,"chief executive, president, president of the united states, united states president",true,false,true,false,false,instances
+MO is an american state.,MO,american state,american state,true,false,true,false,false,instances
+Haifa is not an astronomer.,haifa,astronomer,"port, urban center, metropolis, city",true,true,true,false,false,instances
+Johnson is a lexicographer.,johnson,lexicographer,"writer, lexicographer, lexicologist, author",true,false,true,false,false,instances
+Italy is not a race driver.,italy,race driver,"european nation, european country",true,true,true,false,false,instances
+Jutland is not a naval battle.,jutland,naval battle,naval battle,false,true,true,false,false,instances
+Thales is not a philosopher.,thales,philosopher,"astronomer, philosopher, stargazer, uranologist",false,true,true,false,false,instances
+Tarkovsky is a carver.,tarkovsky,carver,"film maker, film producer, filmmaker, movie maker",false,false,true,false,false,instances
+Menuhin is not a violinist.,menuhin,violinist,"fiddler, violinist",false,true,true,false,false,instances
+Loeb is an economist.,loeb,economist,physiologist,false,false,true,false,false,instances
+Owens is not a translator.,owens,translator,"athlete, jock",true,true,true,false,false,instances
+Hemingway is not an author.,hemingway,author,"author, writer",false,true,true,false,false,instances
+Molokai is not an island.,molokai,island,island,false,true,true,false,false,instances
+Taylor is not a mystic.,taylor,mystic,"music critic, composer",true,true,true,false,false,instances
+Dixieland is a geographic region.,dixieland,geographic region,"geographic region, geographical area, geographical region, geographic area",true,false,true,false,false,instances
+Gambia is not an african nation.,gambia,african nation,"african country, african nation",false,true,true,false,false,instances
+Toscanini is not a director.,toscanini,director,"conductor, director, music director",false,true,true,false,false,instances
+Christopher is a patron saint.,christopher,patron saint,patron saint,true,false,true,false,false,instances
+Matthew is a subverter.,matthew,subverter,"apostle, evangelist, saint",false,false,true,false,false,instances
+Sydenham is a doc.,sydenham,doc,"doc, doctor, dr., md, medico, physician",true,false,true,false,false,instances
+Oaxaca is a linguist.,oaxaca,linguist,"city, metropolis, urban center",false,false,true,false,false,instances
+Swaziland is not an african nation.,swaziland,african nation,"african country, african nation",false,true,true,false,false,instances
+Bushnell is a showman.,bushnell,showman,"artificer, discoverer, inventor",false,false,true,false,false,instances
+Spock is not a pediatrist.,spock,pediatrist,"baby doctor, paediatrician, pediatrician, pediatrist",false,true,true,false,false,instances
+Hildebrand is a holy father.,hildebrand,holy father,"bishop of rome, catholic pope, holy father, pontiff, pope, roman catholic pope, vicar of christ",true,false,true,false,false,instances
+Aquinas is a saint.,aquinas,saint,"theologizer, saint, theologian, doctor, doctor of the church, theologiser, theologist",true,false,true,false,false,instances
+Mozambique is not a king of great britain.,mozambique,king of great britain,"african country, african nation",true,true,true,false,false,instances
+Oldfield is not a designer.,oldfield,designer,"automobile driver, race driver, racer",true,true,true,false,false,instances
+Aquinas is a meliorist.,aquinas,meliorist,"theologizer, saint, theologian, doctor, doctor of the church, theologiser, theologist",false,false,true,false,false,instances
+Turpin is a hijacker.,turpin,hijacker,"highjacker, highwayman, hijacker, road agent",true,false,true,false,false,instances
+Cash is not an old master.,cash,old master,"vocalizer, vocalist, vocaliser, singer",true,true,true,false,false,instances
+Djibouti is not an african country.,djibouti,african country,"african nation, african country",false,true,true,false,false,instances
+Velazquez is not a jazz musician.,velazquez,jazz musician,old master,true,true,true,false,false,instances
+Herder is a united states president.,herder,united states president,philosopher,false,false,true,false,false,instances
+Serra is not a missionary.,serra,missionary,"missionary, missioner",false,true,true,false,false,instances
+Fairbanks is a role player.,fairbanks,role player,"thespian, role player, histrion, actor, player",true,false,true,false,false,instances
+Schweitzer is not a dr..,schweitzer,dr.,"doc, doctor, dr., md, medico, missionary, missioner, organist, philosopher, physician",false,true,true,false,false,instances
+Toscanini is not a peninsula.,toscanini,peninsula,"conductor, director, music director",true,true,true,false,false,instances
+Richelieu is not a primate.,richelieu,primate,"archpriest, hierarch, high priest, national leader, prelate, primate, solon, statesman",false,true,true,false,false,instances
+Archean is an aeon.,archean,aeon,"aeon, eon",true,false,true,false,false,instances
+Schweitzer is not an organist.,schweitzer,organist,"doc, doctor, dr., md, medico, missionary, missioner, organist, philosopher, physician",false,true,true,false,false,instances
+Fairbanks is an actor.,fairbanks,actor,"thespian, role player, histrion, actor, player",true,false,true,false,false,instances
+Mishnah is not an economic expert.,mishnah,economic expert,"religious text, religious writing, sacred text, sacred writing",true,true,true,false,false,instances
+Goodman is not a bandleader.,goodman,bandleader,"bandleader, clarinetist, clarinettist",false,true,true,false,false,instances
+Johnson is not an author.,johnson,author,"writer, lexicographer, lexicologist, author",false,true,true,false,false,instances
+Ukraine is not a thespian.,ukraine,thespian,"land, country, state",true,true,true,false,false,instances
+Menuhin is a machinator.,menuhin,machinator,"fiddler, violinist",false,false,true,false,false,instances
+Plough is a cartoonist.,plough,cartoonist,asterism,false,false,true,false,false,instances
+Obama is not a commandment.,obama,commandment,"chief executive, president, president of the united states, united states president",true,true,true,false,false,instances
+Schweitzer is a philosopher.,schweitzer,philosopher,"doc, doctor, dr., md, medico, missionary, missioner, organist, philosopher, physician",true,false,true,false,false,instances
+Loyola is not a saint.,loyola,saint,"theologian, theologiser, theologist, theologizer, saint",false,true,true,false,false,instances
+Browne is an african country.,browne,african country,illustrator,false,false,true,false,false,instances
+Richelieu is a solon.,richelieu,solon,"archpriest, hierarch, high priest, national leader, prelate, primate, solon, statesman",true,false,true,false,false,instances
+Herder is not a philosopher.,herder,philosopher,philosopher,false,true,true,false,false,instances
+Redford is a film producer.,redford,film producer,"actor, film maker, film producer, filmmaker, histrion, movie maker, player, role player, thespian",true,false,true,false,false,instances
+Chennai is an urban center.,chennai,urban center,"city, metropolis, urban center",true,false,true,false,false,instances
+Rushmore is not a mountain peak.,rushmore,mountain peak,mountain peak,false,true,true,false,false,instances
+Tyndale is an illustrator.,tyndale,illustrator,"interpreter, martyr, sufferer, translator",false,false,true,false,false,instances
+Coppola is not a filmmaker.,coppola,filmmaker,"film maker, film producer, filmmaker, movie maker",false,true,true,false,false,instances
+Trotsky is a president.,trotsky,president,"bolshevik, bolshevist, revolutionary, revolutionist, subversive, subverter",false,false,true,false,false,instances
+Carolina is not a lowland.,carolina,lowland,"geographical region, geographic region, geographic area, geographical area",true,true,true,false,false,instances
+Seville is a commandment.,seville,commandment,"metropolis, city, port, urban center",false,false,true,false,false,instances
+Chennai is an epistle.,chennai,epistle,"city, metropolis, urban center",false,false,true,false,false,instances
+Tarkovsky is not a filmmaker.,tarkovsky,filmmaker,"film maker, film producer, filmmaker, movie maker",false,true,true,false,false,instances
+Fawkes is not a conspirator.,fawkes,conspirator,"coconspirator, conspirator, machinator, plotter",false,true,true,false,false,instances
+Walter is not a norn.,walter,norn,"conductor, director, music director",true,true,true,false,false,instances
+Crichton is a bookman.,crichton,bookman,"bookman, scholar, scholarly person, student",true,false,true,false,false,instances
+Dixieland is not a philosopher.,dixieland,philosopher,"geographic region, geographical area, geographical region, geographic area",true,true,true,false,false,instances
+Loyola is not a major planet.,loyola,major planet,"theologian, theologiser, theologist, theologizer, saint",true,true,true,false,false,instances
+Algiers is a port.,algiers,port,"national capital, port",true,false,true,false,false,instances
+Carolina is not a president.,carolina,president,"geographical region, geographic region, geographic area, geographical area",true,true,true,false,false,instances
+Archean is a financier.,archean,financier,"aeon, eon",false,false,true,false,false,instances
+Spock is an emperor of rome.,spock,emperor of rome,"baby doctor, paediatrician, pediatrician, pediatrist",false,false,true,false,false,instances
+Walter is an old master.,walter,old master,"conductor, director, music director",false,false,true,false,false,instances
+Carolina is not an explorer.,carolina,explorer,"geographical region, geographic region, geographic area, geographical area",true,true,true,false,false,instances
+Haifa is an eon.,haifa,eon,"port, urban center, metropolis, city",false,false,true,false,false,instances
+Kazak is not an asian nation.,kazak,asian nation,"asian country, asian nation",false,true,true,false,false,instances
+Chomsky is not a linguistic scientist.,chomsky,linguistic scientist,"linguist, linguistic scientist",false,true,true,false,false,instances
+Chomsky is a director.,chomsky,director,"linguist, linguistic scientist",false,false,true,false,false,instances
+Nansen is not a national leader.,nansen,national leader,"adventurer, explorer, national leader, solon, statesman",false,true,true,false,false,instances
+Kline is not a geographical area.,kline,geographical area,painter,true,true,true,false,false,instances
+Alger is a jazzman.,alger,jazzman,"author, writer",false,false,true,false,false,instances
+Morton is a jazz musician.,morton,jazz musician,"jazz musician, jazzman",true,false,true,false,false,instances
+Kazak is not an emperor of rome.,kazak,emperor of rome,"asian country, asian nation",true,true,true,false,false,instances
+Duncan is not an architect.,duncan,architect,"dancer, professional dancer, terpsichorean",true,true,true,false,false,instances
+Verdun is a pitched battle.,verdun,pitched battle,pitched battle,true,false,true,false,false,instances
+PRC is an executive.,PRC,executive,"asian nation, asian country",false,false,true,false,false,instances
+Owens is not a jock.,owens,jock,"athlete, jock",false,true,true,false,false,instances
+Fairbanks is a baltic republic.,fairbanks,baltic republic,"thespian, role player, histrion, actor, player",false,false,true,false,false,instances
+Gregory is a pope.,gregory,pope,"pontiff, catholic pope, vicar of christ, pope, saint, doctor, bishop of rome, holy father, roman catholic pope, doctor of the church",true,false,true,false,false,instances
+Jolson is a thespian.,jolson,thespian,"actor, histrion, player, role player, singer, thespian, vocaliser, vocalist, vocalizer",true,false,true,false,false,instances
+Coppola is not a poet.,coppola,poet,"film maker, film producer, filmmaker, movie maker",true,true,true,false,false,instances
+Mann is not a pedagog.,mann,pedagog,"educator, pedagog, pedagogue",false,true,true,false,false,instances
+Lena is not a sculptor.,lena,sculptor,river,true,true,true,false,false,instances
+TT is a land.,TT,land,"country, state, land",true,false,true,false,false,instances
+Redford is not a filmmaker.,redford,filmmaker,"actor, film maker, film producer, filmmaker, histrion, movie maker, player, role player, thespian",false,true,true,false,false,instances
+Spock is a baby doctor.,spock,baby doctor,"baby doctor, paediatrician, pediatrician, pediatrist",true,false,true,false,false,instances
+Toscanini is a film maker.,toscanini,film maker,"conductor, director, music director",false,false,true,false,false,instances
+Loeb is not fictitious character.,loeb,fictitious character,physiologist,true,true,true,false,false,instances
+Tyndale is not a translator.,tyndale,translator,"interpreter, martyr, sufferer, translator",false,true,true,false,false,instances
+Hildebrand is not a chief executive.,hildebrand,chief executive,"bishop of rome, catholic pope, holy father, pontiff, pope, roman catholic pope, vicar of christ",true,true,true,false,false,instances
+Mann is a roman.,mann,roman,"educator, pedagog, pedagogue",false,false,true,false,false,instances
+Trotsky is not a subverter.,trotsky,subverter,"bolshevik, bolshevist, revolutionary, revolutionist, subversive, subverter",false,true,true,false,false,instances
+Italy is an asterism.,italy,asterism,"european nation, european country",false,false,true,false,false,instances
+Tarkovsky is not a film maker.,tarkovsky,film maker,"film maker, film producer, filmmaker, movie maker",false,true,true,false,false,instances
+Nansen is an explorer.,nansen,explorer,"adventurer, explorer, national leader, solon, statesman",true,false,true,false,false,instances
+Jutland is a naval battle.,jutland,naval battle,naval battle,true,false,true,false,false,instances
+Lena is a river.,lena,river,river,true,false,true,false,false,instances
+Hildebrand is not a vicar of christ.,hildebrand,vicar of christ,"bishop of rome, catholic pope, holy father, pontiff, pope, roman catholic pope, vicar of christ",false,true,true,false,false,instances
+Diaz is a navigator.,diaz,navigator,navigator,true,false,true,false,false,instances
+Richelieu is not an archpriest.,richelieu,archpriest,"archpriest, hierarch, high priest, national leader, prelate, primate, solon, statesman",false,true,true,false,false,instances
+Mishnah is an inventor.,mishnah,inventor,"religious text, religious writing, sacred text, sacred writing",false,false,true,false,false,instances
+PRC is an asian nation.,PRC,asian nation,"asian nation, asian country",true,false,true,false,false,instances
+Loyola is an egyptian deity.,loyola,egyptian deity,"theologian, theologiser, theologist, theologizer, saint",false,false,true,false,false,instances
+Seville is a painter.,seville,painter,"metropolis, city, port, urban center",false,false,true,false,false,instances
+Schweitzer is not a missionary.,schweitzer,missionary,"doc, doctor, dr., md, medico, missionary, missioner, organist, philosopher, physician",false,true,true,false,false,instances
+Jolson is not a player.,jolson,player,"actor, histrion, player, role player, singer, thespian, vocaliser, vocalist, vocalizer",false,true,true,false,false,instances
+Nansen is a buccaneer.,nansen,buccaneer,"adventurer, explorer, national leader, solon, statesman",false,false,true,false,false,instances
+Vitus is a saint.,vitus,saint,"martyr, saint",true,false,true,false,false,instances
+Djibouti is an african nation.,djibouti,african nation,"african nation, african country",true,false,true,false,false,instances
+Obama is not a civil rights activist.,obama,civil rights activist,"chief executive, president, president of the united states, united states president",true,true,true,false,false,instances
+Menotti is not a city.,menotti,city,composer,true,true,true,false,false,instances
+Sydenham is a medico.,sydenham,medico,"doc, doctor, dr., md, medico, physician",true,false,true,false,false,instances
+Lewis is not a writer.,lewis,writer,"author, writer",false,true,true,false,false,instances
+Menuhin is not a king of great britain.,menuhin,king of great britain,"fiddler, violinist",true,true,true,false,false,instances
+Jolson is not a sea rover.,jolson,sea rover,"actor, histrion, player, role player, singer, thespian, vocaliser, vocalist, vocalizer",true,true,true,false,false,instances
+Gambia is an african country.,gambia,african country,"african country, african nation",true,false,true,false,false,instances
+Macedon is an anthropologist.,macedon,anthropologist,"geographic region, geographic area, geographical area, geographical region",false,false,true,false,false,instances
+Nansen is not a statesman.,nansen,statesman,"adventurer, explorer, national leader, solon, statesman",false,true,true,false,false,instances
+Trotsky is not an apostle.,trotsky,apostle,"bolshevik, bolshevist, revolutionary, revolutionist, subversive, subverter",true,true,true,false,false,instances
+Crichton is not a student.,crichton,student,"bookman, scholar, scholarly person, student",false,true,true,false,false,instances
+Lisbon is not a port.,lisbon,port,"national capital, port",false,true,true,false,false,instances
+Loyola is not a president.,loyola,president,"theologian, theologiser, theologist, theologizer, saint",true,true,true,false,false,instances
+Duncan is not a rock star.,duncan,rock star,"dancer, professional dancer, terpsichorean",true,true,true,false,false,instances
+Haifa is not a city.,haifa,city,"port, urban center, metropolis, city",false,true,true,false,false,instances
+Sydenham is a physician.,sydenham,physician,"doc, doctor, dr., md, medico, physician",true,false,true,false,false,instances
+Campbell is not a mythologist.,campbell,mythologist,mythologist,false,true,true,false,false,instances
+Jena is not a crusader.,jena,crusader,pitched battle,true,true,true,false,false,instances
+Seville is not a city.,seville,city,"metropolis, city, port, urban center",false,true,true,false,false,instances
+Turpin is an organiser.,turpin,organiser,"highjacker, highwayman, hijacker, road agent",false,false,true,false,false,instances
+Oldfield is an automobile driver.,oldfield,automobile driver,"automobile driver, race driver, racer",true,false,true,false,false,instances
+Freud is not a male monarch.,freud,male monarch,"analyst, brain doctor, neurologist, psychoanalyst",true,true,true,false,false,instances
+Sydenham is a stargazer.,sydenham,stargazer,"doc, doctor, dr., md, medico, physician",false,false,true,false,false,instances
+Djibouti is not an african nation.,djibouti,african nation,"african nation, african country",false,true,true,false,false,instances
+Johor is not a malaysian state.,johor,malaysian state,malaysian state,false,true,true,false,false,instances
+Gregory is not a chemist.,gregory,chemist,"pontiff, catholic pope, vicar of christ, pope, saint, doctor, bishop of rome, holy father, roman catholic pope, doctor of the church",true,true,true,false,false,instances
+TT is not a subversive.,TT,subversive,"country, state, land",true,true,true,false,false,instances
+Quechua is a diary keeper.,quechua,diary keeper,community,false,false,true,false,false,instances
+Redford is not an asian nation.,redford,asian nation,"actor, film maker, film producer, filmmaker, histrion, movie maker, player, role player, thespian",true,true,true,false,false,instances
+Turpin is a brain doctor.,turpin,brain doctor,"highjacker, highwayman, hijacker, road agent",false,false,true,false,false,instances
+Tarkovsky is not an ethnologist.,tarkovsky,ethnologist,"film maker, film producer, filmmaker, movie maker",true,true,true,false,false,instances
+Carolina is an engineer.,carolina,engineer,"geographical region, geographic region, geographic area, geographical area",false,false,true,false,false,instances
+Kharkov is a cartoonist.,kharkov,cartoonist,"city, metropolis, urban center",false,false,true,false,false,instances
+Goldberg is not a cartoonist.,goldberg,cartoonist,cartoonist,false,true,true,false,false,instances
+Gilmer is metropolis.,gilmer,metropolis,journalist,false,false,true,false,false,instances
+Barrie is a vocaliser.,barrie,vocaliser,"dramatist, playwright",false,false,true,false,false,instances
+Barrie is not a dramatist.,barrie,dramatist,"dramatist, playwright",false,true,true,false,false,instances
+Bushnell is a geographical region.,bushnell,geographical region,"artificer, discoverer, inventor",false,false,true,false,false,instances
+Robbins is a choreographer.,robbins,choreographer,choreographer,true,false,true,false,false,instances
+Tarkovsky is a filmmaker.,tarkovsky,filmmaker,"film maker, film producer, filmmaker, movie maker",true,false,true,false,false,instances
+Bushnell is not a discoverer.,bushnell,discoverer,"artificer, discoverer, inventor",false,true,true,false,false,instances
+Tarkovsky is a movie maker.,tarkovsky,movie maker,"film maker, film producer, filmmaker, movie maker",true,false,true,false,false,instances
+Plough is not an asterism.,plough,asterism,asterism,false,true,true,false,false,instances
+Swaziland is not a nuclear physicist.,swaziland,nuclear physicist,"african country, african nation",true,true,true,false,false,instances
+Walter is not a mountain peak.,walter,mountain peak,"conductor, director, music director",true,true,true,false,false,instances
+Nansen is a spaceman.,nansen,spaceman,"adventurer, explorer, national leader, solon, statesman",false,false,true,false,false,instances
+Thales is not an astronomer.,thales,astronomer,"astronomer, philosopher, stargazer, uranologist",false,true,true,false,false,instances
+Tati is a film maker.,tati,film maker,"film maker, film producer, filmmaker, movie maker",true,false,true,false,false,instances
+Dix is not a meliorist.,dix,meliorist,"crusader, meliorist, reformer, reformist, social reformer",false,true,true,false,false,instances
+Toscanini is not a female parent.,toscanini,female parent,"conductor, director, music director",true,true,true,false,false,instances
+Browne is an illustrator.,browne,illustrator,illustrator,true,false,true,false,false,instances
+Fairbanks is not a labor organizer.,fairbanks,labor organizer,"thespian, role player, histrion, actor, player",true,true,true,false,false,instances
+Mishnah is not a nuclear physicist.,mishnah,nuclear physicist,"religious text, religious writing, sacred text, sacred writing",true,true,true,false,false,instances
+Spock is not a pediatrician.,spock,pediatrician,"baby doctor, paediatrician, pediatrician, pediatrist",false,true,true,false,false,instances
+Richelieu is not a music director.,richelieu,music director,"archpriest, hierarch, high priest, national leader, prelate, primate, solon, statesman",true,true,true,false,false,instances
+Schweitzer is a dr..,schweitzer,dr.,"doc, doctor, dr., md, medico, missionary, missioner, organist, philosopher, physician",true,false,true,false,false,instances
+Trotsky is a writer.,trotsky,writer,"bolshevik, bolshevist, revolutionary, revolutionist, subversive, subverter",false,false,true,false,false,instances
+Tyndale is a uranologist.,tyndale,uranologist,"interpreter, martyr, sufferer, translator",false,false,true,false,false,instances
+Djibouti is not an illustrator.,djibouti,illustrator,"african nation, african country",true,true,true,false,false,instances
+Jolson is a reformer.,jolson,reformer,"actor, histrion, player, role player, singer, thespian, vocaliser, vocalist, vocalizer",false,false,true,false,false,instances
+Taylor is a music critic.,taylor,music critic,"music critic, composer",true,false,true,false,false,instances
+Redford is an actor.,redford,actor,"actor, film maker, film producer, filmmaker, histrion, movie maker, player, role player, thespian",true,false,true,false,false,instances
+Redford is a state.,redford,state,"actor, film maker, film producer, filmmaker, histrion, movie maker, player, role player, thespian",false,false,true,false,false,instances
+Thales is not a president of the united states.,thales,president of the united states,"astronomer, philosopher, stargazer, uranologist",true,true,true,false,false,instances
+Nansen is a statesman.,nansen,statesman,"adventurer, explorer, national leader, solon, statesman",true,false,true,false,false,instances
+Cash is a diarist.,cash,diarist,"vocalizer, vocalist, vocaliser, singer",false,false,true,false,false,instances
+Kazak is not a professional dancer.,kazak,professional dancer,"asian country, asian nation",true,true,true,false,false,instances
+Caracas is not a national capital.,caracas,national capital,national capital,false,true,true,false,false,instances
+Hildebrand is not a pope.,hildebrand,pope,"bishop of rome, catholic pope, holy father, pontiff, pope, roman catholic pope, vicar of christ",false,true,true,false,false,instances
+Obama is a united states president.,obama,united states president,"chief executive, president, president of the united states, united states president",true,false,true,false,false,instances
+Algiers is not a road agent.,algiers,road agent,"national capital, port",true,true,true,false,false,instances
+Schweitzer is not a bacteriologist.,schweitzer,bacteriologist,"doc, doctor, dr., md, medico, missionary, missioner, organist, philosopher, physician",true,true,true,false,false,instances
+Matthew is a saint.,matthew,saint,"apostle, evangelist, saint",true,false,true,false,false,instances
+Trotsky is not actress.,trotsky,actress,"bolshevik, bolshevist, revolutionary, revolutionist, subversive, subverter",true,true,true,false,false,instances
+Chomsky is a linguist.,chomsky,linguist,"linguist, linguistic scientist",true,false,true,false,false,instances
+Redford is not a movie maker.,redford,movie maker,"actor, film maker, film producer, filmmaker, histrion, movie maker, player, role player, thespian",false,true,true,false,false,instances
+Oldfield is a prophet.,oldfield,prophet,"automobile driver, race driver, racer",false,false,true,false,false,instances
+Aquinas is not a doctor.,aquinas,doctor,"theologizer, saint, theologian, doctor, doctor of the church, theologiser, theologist",false,true,true,false,false,instances
+Warsaw is an organiser.,warsaw,organiser,national capital,false,false,true,false,false,instances
+Freud is a neurologist.,freud,neurologist,"analyst, brain doctor, neurologist, psychoanalyst",true,false,true,false,false,instances

@@ -2,8 +2,8 @@ defaults:
   - base
   - _self_
 
-name: defs
-datasets: ["word_instances_subsample", "word_types_subsample", "word_synonyms_subsample",
+name: word_definitions
+datasets: ["word_instances", "word_types", "word_synonyms",
  "synth_word2type_subsample", "synth_word2inst_subsample", "synth_word2syn_subsample"]
 datasets_test: []
 agg: full
