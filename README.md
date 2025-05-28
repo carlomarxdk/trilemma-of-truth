@@ -44,7 +44,7 @@ python main.py
 
 ## Dataset
 
-You can find the full preprocessed datasets (with all splits) hosted on [Hugging Face 🤗 Datasets](https://huggingface.co/datasets/carlomarxx/trilemma-of-truth): `carlomarxx/trilemma-of-truth`.  
+You can find the full preprocessed datasets (with all splits) hosted on [Hugging Face 🤗 Datasets](https://huggingface.co/datasets/carlomarxx/trilemma-of-truth).  
 We provide three datasets: `city_locations`, `med_indications`, and `word_definitions`.
 > **Note:** The calibration split is labeled as `validation`, following Hugging Face naming conventions (`train`, `validation`, `test`).
 
@@ -54,7 +54,7 @@ First, install the 🤗 Datasets library:
 pip install datasets
 ```
 
-Then load the data with the `datasets` package:
+Then load the data with the `datasets` package. The dataset identifier is `carlomarxx/trilemma-of-truth`.
 
 ```python
 from datasets import load_dataset
@@ -72,6 +72,9 @@ print(ds["train"][0])
 ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split="train")
 ```
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for more information.
+## License
+
+This **code** is licensed under the MIT License. See [LICENSE](LICENSE) for more information.
+The **data** is licensed under the [Creative Commons Attribution 4.0 (CC BY 4.0)](https://huggingface.co/datasets/choosealicense/licenses/blob/main/markdown/cc-by-4.0.md).
 
 ---
