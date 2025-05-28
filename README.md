@@ -42,9 +42,34 @@ How you use this project
 python main.py
 ```
 
-## Examples
+## Dataset
 
-## License
+You can find the full preprocessed dataset (with all splits) hosted on [Hugging Face 🤗 Datasets](https://huggingface.co/datasets/carlomarxx/trilemma-of-truth).  
+We provide three configurations: `city_locations`, `med_indications`, and `word_definitions`.
+> **Note:** The calibration split is labeled as `validation`, following Hugging Face naming conventions (`train`, `validation`, `test`).
+
+First, install the 🤗 Datasets library:
+
+```bash
+pip install datasets
+```
+
+
+```python
+from datasets import load_dataset
+
+# 1. Load the full dataset with train/validation/test splits
+ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions")
+
+# Convert to pandas
+df = ds["train"].to_pandas()
+
+# Access the first example
+print(ds["train"][0])
+
+# 2. Load a specific split [train, validation, test]
+ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split="train")
+```
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for more information.
 
