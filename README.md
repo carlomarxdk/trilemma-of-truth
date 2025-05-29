@@ -1,5 +1,8 @@
 # Trilemma of Truth
+[![arXiv](https://img.shields.io/badge/arXiv-2405.12345-b31b1b.svg)](https://arxiv.org/empty)
+[![🤗 Datasets](https://img.shields.io/badge/🤗%20Datasets-trilemma--of--truth-yellow)](https://huggingface.co/datasets/carlomarxx/trilemma-of-truth)
 
+**Trilemma of Truth** is 
 
 ---
 
@@ -17,7 +20,6 @@
   - [📃 License](#-license)
   - [👋 Contacts](#-contacts)
 
----
 ## 🚀 Overview
 
 **Trilemma of Truth** is 
