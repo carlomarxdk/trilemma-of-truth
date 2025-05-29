@@ -59,7 +59,7 @@ dh = DataHandler(
     datasets=['city_locations', 'city_locations_synthetic'],
     activation_type='full',
     with_calibration=True,    # Include a calibration set
-    load_scores=False
+    load_scores=False # if you run a zero-shot prompting with default, shuffled or tf template -- it will append these scores to the data 
 )
 
 dh.assemble(
