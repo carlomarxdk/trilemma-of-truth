@@ -4,6 +4,7 @@ defaults:
 
 name: word_definitions
 datasets: ["word_instances", "word_types", "word_synonyms",
- "synth_word2type_subsample", "synth_word2inst_subsample", "synth_word2syn_subsample"]
+ "word_types_synthetic", "word_instances_synthetic", "word_synonyms_synthetic"]
+
 datasets_test: []
 agg: full
