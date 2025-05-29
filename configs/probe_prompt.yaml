@@ -7,11 +7,10 @@ defaults:
   - model: llama-3-8b # runs llama-3-8b by default
   - _self_
 
-datasets: ['city_country_subsample', 'city_country_synth_subsample', 'drug_disease_synth_subsample', 'drug_disease_subsample',
-            "word_instances_subsample", "word_types_subsample", "word_synonyms_subsample", 
-           "synth_word2type_subsample", "synth_word2inst_subsample", "synth_word2syn_subsample"]
+datasets: ["city_locations", "city_locations_synthetic",
+           "med_indications", "med_indications_synthetic", ...]
 layers: ${model.layers}
-device: null
+device: null # null means use the default device (if GPU or MPS is available)
 variation: "default"
 output_dir: "outputs/probes/prompt/${variation}/${model.name}"
 

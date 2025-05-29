@@ -29,30 +29,19 @@ counter_method:
   absolute: True
   start_token: -1
 
-mc_params:
-  question_type: multichoice
-  variation: default
-  enum_list: [1,2,3,4,5,6]
-
-
-prompt_f:
-  enumeration: [1,2,3,4,5,6]
 
 layers: ${model.layers}
 device: null
 max_length: 150 # max length of the input sequence (used only if agg is full)
 random_seed: 42
-limit_num_statements: 1200
-### metadata about the probe trained
-task: 4
-sparsify_data: -1 
+limit_num_statements: 1200 # limit number of statements to run the analysis on
+task: 1
 layer_range: [0.1, 1]
 search: True
 agg: full
 save_results: True
 
-ndif_apikey: null
-
+ndif_apikey: null # API keys to use NDIF models (very Large Language Models)
 start_from_checkpoint: True
 run_debugging: False
 trial_name: ${datapack.name}

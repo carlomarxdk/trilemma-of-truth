@@ -1,6 +1,7 @@
 captum>=0.7
 cmcrameri>=1.9
 datasets
+english-words
 geonamescache
 ipykernel
 matplotlib>=3.9

@@ -3,6 +3,7 @@ from typing import Dict, List
 import random
 import numpy as np
 import polars as pl
+import inflect
 
 
 class DatasetGenerator(ABC):
@@ -164,3 +165,114 @@ class DrugDisease(DatasetGenerator):
         elif any(word in c.lower().split() for word in choice.lower().split() for c in correct):
             return self.lookup_incorrect(key)
         return choice
+    
+    
+### Word Definition Dataset ###
+
+p = inflect.engine()
+
+def is_plural(word):
+    """
+    Check if a word is plural
+    """
+    word = word.split(' ')[0]
+    check = p.singular_noun(word)
+    if type(check) == str:
+        return True
+    return False
+
+class WordsInstances(DatasetGenerator):
+    '''
+    Class to handle the dataset from WordAPI
+    '''    
+    def apply_template(self, word: str, definition: str, negated: bool=False):
+        if word.upper() == word:
+            word = word
+        else:
+            word = word.capitalize()
+        if not is_plural(definition):
+            definition = p.a(definition)
+        if negated:
+            return f"{word} is not {definition}."
+        else:
+            return f"{word} is {definition}."
+    
+
+    def generate_sample(self, key, value, negated: bool):
+        correct_values = self.source[key]
+        correct = any([value.lower() in v.lower() for v in correct_values])
+        if negated:
+            correct = not correct
+        if not self.is_fake:
+            return {'statement': self.apply_template(key, value, negated),
+                    'object_1': key,
+                    'object_2': value,
+                    'correct_object_2':  correct_values,
+                    'correct': correct,
+                    'negated': negated,
+                    'real_object': True,
+                    'fake_object': False,
+                    'fictional_object': False,
+                    'category': self.category,
+                    }
+        else:
+            return {'statement': self.apply_template(key, value, negated),
+                    'object_1': key,
+                    'object_2': value,
+                    # correct_values do notmean anything in this case
+                    'correct_object_2':  correct_values,
+                    'correct': False,
+                    'negated': negated,
+                    'real_object': False,
+                    'fake_object': True,
+                    'fictional_object': False,
+                    'category': self.category
+                    }
+
+        
+    def generate_subsample(self, n: int, seed: int, objects: list = None):
+        np.random.seed(seed)
+        if objects is not None:
+            data = self.data.filter(pl.col("object_1").is_in(objects))
+        else:
+            data = self.data
+        if data.height > n:
+            print(f'Downsample from {data.height} to {n}')
+            data = data.sample(n, seed=seed, shuffle=True)
+        else:
+            print(f'Size of the dataset is {data.height}')
+        return data
+
+
+class WordsTypes(WordsInstances):
+    '''
+    Class to handle the dataset from WordAPI
+    '''    
+    def apply_template(self, word: str, definition: str, negated: bool=False):
+        if word.upper() == word:
+            word = word
+        else:
+            word = word.capitalize()
+        if not is_plural(definition):
+            definition = p.a(definition)
+        if negated:
+            return f"{word.capitalize()} is not a type of {definition}."
+        else:
+            return f"{word.capitalize()} is a type of {definition}."
+        
+        
+class WordsSynonyms(WordsInstances):
+    '''
+    Class to handle the dataset from WordAPI
+    '''    
+    def apply_template(self, word: str, definition: str, negated: bool=False):
+        if word.upper() == word:
+            word = word
+        else:
+            word = word.capitalize()
+        if not is_plural(definition):
+            definition = p.a(definition)
+        if negated:
+            return f"{word.capitalize()} is not a synonym of {definition}."
+        else:
+            return f"{word.capitalize()} is a synonym of {definition}."

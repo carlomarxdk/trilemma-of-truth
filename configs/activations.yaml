@@ -14,8 +14,8 @@ datasets: ['city_country_subsample', 'city_country_synth_subsample',
            "synth_word2type_subsample", "synth_word2inst_subsample", "synth_word2syn_subsample"]
 
 layers: ${model.layers}
-device: null
+device: null # null means use the default device (if GPU or MPS is available)
 agg: full # full (loads all activations, for each token)
 batch_size: 12 
-max_length: 100 # max length of the input sequence (used only if agg is full)
+max_length: 100 # max length of the input sequence (used only if agg is full) 
 output_dir: "outputs/activations/${model.name}"

@@ -4,6 +4,6 @@ defaults:
   - _self_
 
 name: med_indications
-datasets: ["drug_disease", "drug_disease_synthetic"]
+datasets: ["med_indications", "med_indications_synthetic"]
 datasets_test: []
 agg: full
