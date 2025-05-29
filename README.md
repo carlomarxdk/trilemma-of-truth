@@ -3,7 +3,7 @@
 [![🤗 Datasets](https://img.shields.io/badge/🤗%20Datasets-trilemma--of--truth-yellow)](https://huggingface.co/datasets/carlomarxx/trilemma-of-truth)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Email](https://img.shields.io/badge/Email-g.savcisens@northeastern.edu-orange)](mailto:g.savcisens@northeastern.edu)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/{github_id}.svg)](https://doi.org/10.5281/zenodo)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.{github_id}.svg)](https://doi.org/10.5281/zenodo)
 
 
 
@@ -21,9 +21,8 @@
     - [Structure](#structure)
     - [Load Data with `DataHandler`](#load-data-with-datahandler)
     - [Processed Data on Hugging Face 🤗](#processed-data-on-hugging-face-)
-  - [✍️ Citation](#️-citation)
-  - [📃 License](#-license)
-  - [👋 Contacts](#-contacts)
+  - [✍️ How to Cite?](#️-how-to-cite)
+  - [📃 Licenses](#-licenses)
 
 ## 🚀 Overview
 
@@ -129,13 +128,10 @@ print(ds["train"][0])
 ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split="train")
 ```
 
-## ✍️ Citation
+## ✍️ How to Cite? 
 
 
-## 📃 License
+## 📃 Licenses
 
 This **code** is licensed under the MIT License. See [LICENSE](LICENSE) for more information.
 The **data** is licensed under the [Creative Commons Attribution 4.0 (CC BY 4.0)](https://huggingface.co/datasets/choosealicense/licenses/blob/main/markdown/cc-by-4.0.md).
-
-
-## 👋 Contacts 
