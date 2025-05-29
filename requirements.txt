@@ -6,7 +6,7 @@ ipykernel
 matplotlib>=3.9
 mrmr-selection
 pytrends
-plotly
+# plotly
 omegaconf
 mpltern
 numba>=0.58.0
@@ -28,3 +28,4 @@ hydra-core
 omegaconf
 namemaker
 inflect
+wordfreq

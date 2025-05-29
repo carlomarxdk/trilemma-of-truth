@@ -132,3 +132,35 @@ class CityCountry(DatasetGenerator):
         else:
             print(f'Size of the dataset is {data.height}')
         return data
+
+
+
+##### Drug-Disease Dataset #####
+def abbreviate(entity):
+    return ''.join([i[0] for i in entity.split()]).upper()
+
+class DrugDisease(DatasetGenerator):
+    '''
+    Class to handle the dataset from DrugBank
+    '''
+    def apply_template(self, drug: str, condition: str, negated: bool=False):
+        if negated:
+            return f"{drug} is not indicated for the treatment of {condition}."
+        else:
+            return f"{drug} is indicated for the treatment of {condition}."
+        
+        
+
+    def lookup_incorrect(self, key) -> str:
+        '''
+        Return False condition for a given drug
+        '''
+        correct = self.source[key]
+        choice = random.choice(list(set(self.values) - set(correct)))
+        if choice.lower() in [c.lower() for c in correct]:
+            return self.lookup_incorrect(key)
+        elif abbreviate(choice) in [abbreviate(c) for c in correct] or abbreviate(choice) in [c for c in correct]:
+            return self.lookup_incorrect(key)
+        elif any(word in c.lower().split() for word in choice.lower().split() for c in correct):
+            return self.lookup_incorrect(key)
+        return choice
