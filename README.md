@@ -1,6 +1,11 @@
 # Trilemma of Truth
 [![arXiv](https://img.shields.io/badge/arXiv-2405.12345-b31b1b.svg)](https://arxiv.org/empty)
 [![🤗 Datasets](https://img.shields.io/badge/🤗%20Datasets-trilemma--of--truth-yellow)](https://huggingface.co/datasets/carlomarxx/trilemma-of-truth)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Email](https://img.shields.io/badge/Email-g.savcisens@northeastern.edu-orange)](mailto:g.savcisens@northeastern.edu)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/{github_id}.svg)](https://doi.org/10.5281/zenodo)
+
+
 
 **Trilemma of Truth** is 
 
