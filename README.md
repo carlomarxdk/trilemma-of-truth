@@ -1,10 +1,30 @@
 # Trilemma of Truth
 
-## Overview
+
+---
+
+## Table of Contents
+- [Trilemma of Truth](#trilemma-of-truth)
+  - [Table of Contents](#table-of-contents)
+  - [🚀 Overview](#-overview)
+  - [⚡ Installation](#-installation)
+  - [📝 Usage](#-usage)
+  - [🗂️ Dataset](#️-dataset)
+    - [Structure](#structure)
+    - [Load Data with `DataHandler`](#load-data-with-datahandler)
+    - [Processed Data on Hugging Face 🤗](#processed-data-on-hugging-face-)
+  - [✍️ Citation](#️-citation)
+  - [📃 License](#-license)
+  - [👋 Contacts](#-contacts)
+
+---
+## 🚀 Overview
 
 **Trilemma of Truth** is 
 
-## Installation
+
+
+## ⚡ Installation
 
 Clone the repository:
 
@@ -22,7 +42,7 @@ pip install -r requirements.txt
 
 Additionally, refer to [macOS using Homebrew, Pyenv, and Pipenv](https://medium.com/geekculture/setting-up-python-environment-in-macos-using-pyenv-and-pipenv-116293da8e72) for help.
 
-## Usage
+## 📝 Usage
 
 How you use this project 
 
@@ -31,7 +51,7 @@ How you use this project
 python main.py
 ```
 
-## Dataset
+## 🗂️ Dataset
 
 The dataset scripts and files are located in the `datasets/` folder. This includes everything from data generation to the final preprocessed splits used in our experiments.
 
@@ -102,12 +122,13 @@ print(ds["train"][0])
 ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split="train")
 ```
 
-## Citation
+## ✍️ Citation
 
 
-## License
+## 📃 License
 
 This **code** is licensed under the MIT License. See [LICENSE](LICENSE) for more information.
 The **data** is licensed under the [Creative Commons Attribution 4.0 (CC BY 4.0)](https://huggingface.co/datasets/choosealicense/licenses/blob/main/markdown/cc-by-4.0.md).
 
----
+
+## 👋 Contacts 
