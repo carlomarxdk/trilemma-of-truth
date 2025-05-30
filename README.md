@@ -16,7 +16,8 @@
   - [Table of Contents](#table-of-contents)
   - [🚀 Overview](#-overview)
   - [⚡ Installation](#-installation)
-  - [📝 Usage](#-usage)
+  - [📝 Usage \& Examples](#-usage--examples)
+    - [Running Experiments with `Hydra`](#running-experiments-with-hydra)
   - [🗂️ Dataset](#️-dataset)
     - [Structure](#structure)
     - [Load Data with `DataHandler`](#load-data-with-datahandler)
@@ -28,6 +29,7 @@
 
 **Trilemma of Truth** is 
 
+![Abstract Pipeline](./docs/figures/flow.svg)
 
 
 ## ⚡ Installation
@@ -48,7 +50,7 @@ pip install -r requirements.txt
 
 Additionally, refer to [macOS using Homebrew, Pyenv, and Pipenv](https://medium.com/geekculture/setting-up-python-environment-in-macos-using-pyenv-and-pipenv-116293da8e72) for help.
 
-## 📝 Usage
+## 📝 Usage & Examples
 
 How you use this project 
 
@@ -56,6 +58,9 @@ How you use this project
 # For running scripts or applications
 python main.py
 ```
+
+### Running Experiments with `Hydra`
+
 
 ## 🗂️ Dataset
 
@@ -135,3 +140,6 @@ ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split
 
 This **code** is licensed under the MIT License. See [LICENSE](LICENSE) for more information.
 The **data** is licensed under the [Creative Commons Attribution 4.0 (CC BY 4.0)](https://huggingface.co/datasets/choosealicense/licenses/blob/main/markdown/cc-by-4.0.md).
+
+
+*__Note__: We have refactored the code to improve readability, please, let us know if something does not work.*
