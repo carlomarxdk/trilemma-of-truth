@@ -1,6 +1,6 @@
 model: ???
 name: ???
-token: ??? # HuggingFace Token (can obtain from https://huggingface.co/settings/tokens)
+token: INSERT_ACCESS_TOKEN # HuggingFace Token (can obtain from https://huggingface.co/settings/tokens)
 module: model
 encoders: layers
 submodule_att: self_attn

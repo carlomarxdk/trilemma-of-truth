@@ -52,12 +52,15 @@ pip install -r requirements.txt
 
 Additionally, refer to [macOS using Homebrew, Pyenv, and Pipenv](https://medium.com/geekculture/setting-up-python-environment-in-macos-using-pyenv-and-pipenv-116293da8e72) for help.
 
+Get HuggingFace API tokens for gated models:
+> If you intend to use LLMs, you need to update the `configs/model` files for some of the LLMs. For example, in case of `base_gemma.yaml`, you need to update the `token` field with a valid Access Token, see [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens). Same applies for `base_llama`, `_llama-3-8b-med`, `_llama-3.1-8b-bio`.
+
 ## 📝 Usage & Examples
 We use `Hydra` to run and manage most of our experiments.
 
 ### 1. Collect Hidden Activations
 
-```sh
+```bash
 # To collect hidden activations for (every statement) specific model
 python collect_activations.py model=llama-3-8b # see configs/activations.yaml for all the paramaters
 ```
@@ -73,7 +76,7 @@ python run_zero_shot.py model=llama-3-8b variation=default batch_size=12 # see c
 
 Note that you need to collect activations before you can train this probe
 
-```sh
+```bash
 # Train one-vs-all probe
 ```
 
