@@ -5,16 +5,16 @@
 [![Email](https://img.shields.io/badge/Email-g.savcisens@northeastern.edu-orange)](mailto:g.savcisens@northeastern.edu)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.{github_id}.svg)](https://doi.org/10.5281/zenodo)
 
-
-
 **Trilemma of Truth** is 
+
+
+![Abstract Pipeline](./docs/figures/flow.svg)
 
 ---
 
 ## Table of Contents
 - [Trilemma of Truth](#trilemma-of-truth)
   - [Table of Contents](#table-of-contents)
-  - [🚀 Overview](#-overview)
   - [⚡ Installation](#-installation)
   - [📝 Usage \& Examples](#-usage--examples)
     - [1. Collect Hidden Activations](#1-collect-hidden-activations)
@@ -26,13 +26,6 @@
     - [Processed Data on Hugging Face 🤗](#processed-data-on-hugging-face-)
   - [✍️ How to Cite?](#️-how-to-cite)
   - [📃 Licenses](#-licenses)
-
-## 🚀 Overview
-
-**Trilemma of Truth** is 
-
-![Abstract Pipeline](./docs/figures/flow.svg)
-
 
 ## ⚡ Installation
 
@@ -52,8 +45,9 @@ pip install -r requirements.txt
 
 Additionally, refer to [macOS using Homebrew, Pyenv, and Pipenv](https://medium.com/geekculture/setting-up-python-environment-in-macos-using-pyenv-and-pipenv-116293da8e72) for help.
 
-Get HuggingFace API tokens for gated models:
-> If you intend to use LLMs, you need to update the `configs/model` files for some of the LLMs. For example, in case of `base_gemma.yaml`, you need to update the `token` field with a valid Access Token, see [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens). Same applies for `base_llama`, `_llama-3-8b-med`, `_llama-3.1-8b-bio`.
+Get HuggingFace **Access Tokens** for gated models:
+> If you intend to use LLMs, you need to update the `configs/model` files for some of the models. For example, in case of `base_gemma.yaml`, you need to update the `token` field with a valid Access Token, see [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens). 
+> Same applies to `base_llama`, `_llama-3-8b-med`, `_llama-3.1-8b-bio`.
 
 ## 📝 Usage & Examples
 We use `Hydra` to run and manage most of our experiments.
