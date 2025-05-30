@@ -4,7 +4,7 @@ hydra:
     dir: outputs/hydra_logs/activations/${model.name}/${now:%Y-%m-%d}/${now:%H-%M-%S}
 
 defaults:
-  - model: llama-3-8b
+  - model: ???
   - _self_
 
 

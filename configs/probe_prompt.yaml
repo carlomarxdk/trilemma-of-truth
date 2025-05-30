@@ -4,7 +4,7 @@ hydra:
     dir: outputs/hydra_logs/probes/prompt/${model.name}/${now:%Y-%m-%d}/${now:%H-%M-%S}
 
 defaults:
-  - model: llama-3-8b # runs llama-3-8b by default
+  - model: ??? 
   - _self_
 
 datasets: ["city_locations", "city_locations_synthetic",

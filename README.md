@@ -17,7 +17,9 @@
   - [🚀 Overview](#-overview)
   - [⚡ Installation](#-installation)
   - [📝 Usage \& Examples](#-usage--examples)
-    - [Running Experiments with `Hydra`](#running-experiments-with-hydra)
+    - [1. Collect Hidden Activations](#1-collect-hidden-activations)
+    - [2. Run zero-shot prompt (and collect scores)](#2-run-zero-shot-prompt-and-collect-scores)
+    - [3. Train *one-vs-all sAwMIL* probe](#3-train-one-vs-all-sawmil-probe)
   - [🗂️ Dataset](#️-dataset)
     - [Structure](#structure)
     - [Load Data with `DataHandler`](#load-data-with-datahandler)
@@ -51,16 +53,29 @@ pip install -r requirements.txt
 Additionally, refer to [macOS using Homebrew, Pyenv, and Pipenv](https://medium.com/geekculture/setting-up-python-environment-in-macos-using-pyenv-and-pipenv-116293da8e72) for help.
 
 ## 📝 Usage & Examples
+We use `Hydra` to run and manage most of our experiments.
 
-How you use this project 
+### 1. Collect Hidden Activations
 
 ```sh
-# For running scripts or applications
-python main.py
+# To collect hidden activations for (every statement) specific model
+python collect_activations.py model=llama-3-8b # see configs/activations.yaml for all the paramaters
 ```
 
-### Running Experiments with `Hydra`
+### 2. Run zero-shot prompt (and collect scores)
 
+```sh
+# Collect scores with the zero-shot prompting method (aka replies to multiple choice questions)
+python run_zero_shot.py model=llama-3-8b variation=default batch_size=12 # see configs/probe_prompt.yaml for all the available paramaters
+```
+
+### 3. Train *one-vs-all sAwMIL* probe
+
+Note that you need to collect activations before you can train this probe
+
+```sh
+# Train one-vs-all probe
+```
 
 ## 🗂️ Dataset
 
