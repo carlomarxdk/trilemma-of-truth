@@ -64,7 +64,7 @@ python collect_activations.py model=llama-3-8b # see configs/activations.yaml fo
 
 ### 2. Run zero-shot prompt (and collect scores)
 
-```sh
+```bash
 # Collect scores with the zero-shot prompting method (aka replies to multiple choice questions)
 python run_zero_shot.py model=llama-3-8b variation=default batch_size=12 # see configs/probe_prompt.yaml for all the available paramaters
 ```
