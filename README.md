@@ -17,6 +17,7 @@
   - [Table of Contents](#table-of-contents)
   - [⚡ Installation](#-installation)
   - [📝 Usage \& Examples](#-usage--examples)
+    - [0. Return full error log in `Hydra`](#0-return-full-error-log-in-hydra)
     - [1. Collect Hidden Activations](#1-collect-hidden-activations)
     - [2. Run zero-shot prompt (and collect scores)](#2-run-zero-shot-prompt-and-collect-scores)
     - [3. Train *one-vs-all sAwMIL* probe](#3-train-one-vs-all-sawmil-probe)
@@ -26,6 +27,7 @@
     - [Processed Data on Hugging Face 🤗](#processed-data-on-hugging-face-)
   - [✍️ How to Cite?](#️-how-to-cite)
   - [📃 Licenses](#-licenses)
+  - [To do:](#to-do)
 
 ## ⚡ Installation
 
@@ -40,7 +42,6 @@ Install dependencies:
 
 ```sh
 pip install -r requirements.txt
-
 ```
 
 Additionally, refer to [macOS using Homebrew, Pyenv, and Pipenv](https://medium.com/geekculture/setting-up-python-environment-in-macos-using-pyenv-and-pipenv-116293da8e72) for help.
@@ -52,6 +53,13 @@ Get HuggingFace **Access Tokens** for gated models:
 ## 📝 Usage & Examples
 
 We use `Hydra` to run and manage our experiments. Refer to [Hydra Documentation](https://hydra.cc/docs/intro/) for help.
+
+### 0. Return full error log in `Hydra`
+
+In `Hydra` you can specify `HYDRA_FULL_ERROR=1` before each command. For example: 
+```bash
+HYDRA_FULL_ERROR=1 python run_zero_shot.py model=llama-3-8b 
+```
 
 ### 1. Collect Hidden Activations
 
@@ -155,4 +163,8 @@ This **code** is licensed under the MIT License. See [LICENSE](LICENSE) for more
 The **data** is licensed under the [Creative Commons Attribution 4.0 (CC BY 4.0)](https://huggingface.co/datasets/choosealicense/licenses/blob/main/markdown/cc-by-4.0.md).
 
 
+## To do:
 *__Note__: We have refactored the code to improve readability, please, let us know if something does not work.*
+
+[x] Check `run_zero_shot.py`
+[x] Check `collect_activations.py`

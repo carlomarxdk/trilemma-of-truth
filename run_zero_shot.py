@@ -16,11 +16,11 @@ log = logging.getLogger(__name__)
 
 def validate_config(cfg: DictConfig):
     assert type(
-        cfg.datasets) == list or type(cfg.datasets).__name__ == "ListConfig", f"Datasets must be a list. Not {type(cfg.datasets)}"
+        cfg.datasets) == list or type(cfg.datasets).__name__ == "ListConfig", f"Datasets paramaeter must be a list. Not {type(cfg.datasets)}"
     assert len(cfg.datasets) > 0, "At least one dataset must be selected."
     if cfg.device == None:
         OmegaConf.set_struct(cfg, False)  # Allow overriding
-        cfg["device"] = str(get_device())
+        cfg["device"] = str(get_device()) # Change the device (if it is not set)
         OmegaConf.set_struct(cfg, True)
 
 

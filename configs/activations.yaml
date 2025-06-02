@@ -8,10 +8,9 @@ defaults:
   - _self_
 
 
-datasets: ['city_country_subsample', 'city_country_synth_subsample',
-            'drug_disease_synth_subsample', 'drug_disease',
-            "word_instances_subsample", "word_types_subsample", "word_synonyms_subsample", 
-           "synth_word2type_subsample", "synth_word2inst_subsample", "synth_word2syn_subsample"]
+datasets: ['city_locations', 'city_locations_synthetic', 'med_indications', 'med_indications_synthetic',
+          "word_instances", "word_instances_synthetic", "word_synonyms", "word_synonyms_synthetic",
+          "word_types", "word_types_synthetic"]
 
 layers: ${model.layers}
 device: null # null means use the default device (if GPU or MPS is available)
