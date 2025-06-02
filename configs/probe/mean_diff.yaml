@@ -3,7 +3,7 @@ defaults:
 
 name: mean_diff
 with_bags: False # If false then uses only the last token in the sentence
-
+train_sample_limit: 1000000 # Limit the number of training samples per bag
 init_params:
   with_covariance: True
   verbose: True

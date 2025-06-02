@@ -60,7 +60,6 @@ class SVMProbeRunner(BaseProbeRunner):
         limit = cfg.get('train_bag_limit', len(bags))
         self.separator = SVM(C=cfg.init_params['C'],
                              kernel=cfg.init_params['kernel'],
-                             penalty=-1,
                              scale_C=cfg.init_params.get('scale_C', True),
                              verbose=cfg.init_params.get('verbose', True))
         self.separator.fit(
@@ -228,20 +227,20 @@ class SVMProbeRunner(BaseProbeRunner):
         """
         # Transform the bags using the fitted scaler
         X = deepcopy(X)
-        Xt = [self.scaler.transform(bag)[-1] for bag in X]
-        Xt = np.vstack(Xt)
         # Compute the decision function using the separator
         yh = self.decision_function(X)
         # Compute the conformal prediction
         return self.calibrator.predict(yh)
+    
+    def process_input(self, X):
+        return np.vstack([self.scaler.transform(bag)[-1] for bag in X])
 
     def decision_function(self, X):
         """
         Compute the decision function for the given bags.
         """
         # Transform the bags using the fitted scaler
-        Xt = [self.scaler.transform(bag)[-1] for bag in X]
-        Xt = np.vstack(Xt)
+        Xt = self.process_input(X)
         # Compute the decision function using the separator
         return np.dot(Xt, self.direction) + self.bias
 

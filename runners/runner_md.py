@@ -59,7 +59,7 @@ class MDProbeRunner(BaseProbeRunner):
 
         # 2) Transform each bag (take only the last element)
         cfg = self.cfg.probe
-        limit = cfg.get(100, len(bags))
+        limit = cfg.get('train_sample_limit', len(bags))
         self.separator = MeanDifferenceClassifier(with_covariance=cfg.init_params['with_covariance'],
                                                   fit_intercept=cfg.init_params['fit_intercept'],
                                                    verbose=cfg.init_params.get('verbose', True))
