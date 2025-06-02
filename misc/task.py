@@ -61,7 +61,7 @@ class Task:
         elif self.task == 3:
             new_targets = np.zeros_like(correct)
             new_targets[(correct == 1) & (real == 1)] = 1
-            mask = np.zeros(real)
+            mask = np.zeros_like(real)
             mask[real == 1] = 1 # only keep the real samples (not the synthetic ones)
             assert self.is_binary(
                 new_targets), "The new targets must be binary"

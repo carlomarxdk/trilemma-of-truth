@@ -18,13 +18,14 @@
   - [📘 Repository Overview](#-repository-overview)
   - [⚡ Installation](#-installation)
   - [📝 Usage \& Examples](#-usage--examples)
-    - [0. Return full error log in `Hydra`](#0-return-full-error-log-in-hydra)
-    - [1. Collect Hidden Activations](#1-collect-hidden-activations)
-    - [2. Run zero-shot prompt (and collect scores)](#2-run-zero-shot-prompt-and-collect-scores)
-    - [3. Train *one-vs-all sAwMIL* probe](#3-train-one-vs-all-sawmil-probe)
-    - [4. Single Instance Probe](#4-single-instance-probe)
-      - [4.1 Train *one-vs-all SVM* probe](#41-train-one-vs-all-svm-probe)
-      - [4.2 Train the *mean-difference* probe](#42-train-the-mean-difference-probe)
+    - [Run the Scripts](#run-the-scripts)
+      - [0. Return full error log in `Hydra`](#0-return-full-error-log-in-hydra)
+      - [1. Collect Hidden Activations](#1-collect-hidden-activations)
+      - [2. Run zero-shot prompt (and collect scores)](#2-run-zero-shot-prompt-and-collect-scores)
+      - [3. Train *one-vs-all sAwMIL* probe](#3-train-one-vs-all-sawmil-probe)
+      - [4. Single Instance Probe](#4-single-instance-probe)
+        - [4.1 Train *one-vs-all SVM* probe](#41-train-one-vs-all-svm-probe)
+        - [4.2 Train the *mean-difference* probe](#42-train-the-mean-difference-probe)
     - [Task specification](#task-specification)
   - [🗂️ Dataset](#️-dataset)
     - [Structure](#structure)
@@ -61,28 +62,30 @@ Get HuggingFace **Access Tokens** for gated models:
 
 We use `Hydra` to run and manage our experiments. Refer to [Hydra Documentation](https://hydra.cc/docs/intro/) for help.
 
-### 0. Return full error log in `Hydra`
+### Run the Scripts
+
+#### 0. Return full error log in `Hydra`
 
 In `Hydra` you can specify `HYDRA_FULL_ERROR=1` before each command. For example: 
 ```bash
 HYDRA_FULL_ERROR=1 python run_zero_shot.py model=llama-3-8b 
 ```
 
-### 1. Collect Hidden Activations
+#### 1. Collect Hidden Activations
 
 ```bash
 # To collect hidden activations for (every statement) specific model
 python collect_activations.py model=llama-3-8b # see configs/activations.yaml for all the paramaters
 ```
 
-### 2. Run zero-shot prompt (and collect scores)
+#### 2. Run zero-shot prompt (and collect scores)
 
 ```bash
 # Collect scores with the zero-shot prompting method (aka replies to multiple choice questions)
 python run_zero_shot.py model=llama-3-8b variation=default batch_size=12 # see configs/probe_prompt.yaml for all the available paramaters
 ```
 
-### 3. Train *one-vs-all sAwMIL* probe
+#### 3. Train *one-vs-all sAwMIL* probe
 
 Note that you need to collect activations before you can train this probe
 
@@ -90,22 +93,26 @@ Note that you need to collect activations before you can train this probe
 # Train one-vs-all probe
 ```
 
-### 4. Single Instance Probe
+#### 4. Single Instance Probe
 
 These probes use only the last token representation (instead of bags)
 
-#### 4.1 Train *one-vs-all SVM* probe
+##### 4.1 Train *one-vs-all SVM* probe
+
+Generally, you need to train three SVM probes: one with `task=0`, one with `task=1` and `task=2`, see [Task Specification](#task-specification).
 
 ```bash
-python run_training.py model=llama-3-8b datapack=city_locations probe=svm
+python run_training.py --config-name=probe_sil.yaml \
+model=llama-3-8b datapack=city_locations probe=svm task=1
 ```
 
-#### 4.2 Train the *mean-difference* probe
+##### 4.2 Train the *mean-difference* probe
 
 The mean-difference probe is trained to separate *true-vs-false*, thus, use `task=3` .
 
 ```bash
-python run_training.py model=llama-3-8b datapack=city_locations probe=mean_diff task=3
+python run_training.py --config-name=probe_sil.yaml \
+model=llama-3-8b datapack=city_locations probe=mean_diff task=3
 ```
 
 ### Task specification
@@ -195,7 +202,7 @@ ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split
 
 - [x] Check `run_zero_shot.py`
 - [x] Check `collect_activations.py`
-- [ ] Check `run_mil.py`
+- [ ] Check `run_training.py` for SIL cases (SVM and Mean Difference)
 
 ## 📃 Licenses
 

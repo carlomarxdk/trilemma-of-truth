@@ -1,22 +1,21 @@
-from probes.runner_base import BaseProbeRunner
+from runners.runner_base import BaseProbeRunner
 from probes.silSVM_patch import SVM
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import KFold
 from probes.conformal import InductiveConformalPredictor, symmetric_nonconformity
 from sklearn.metrics import (
     average_precision_score as mAP,
-    matthews_corrcoef as mcc,
 )
 import numpy as np
 import logging
 from copy import deepcopy
 
-log = logging.getLogger("SILRunner")
+log = logging.getLogger("SILRunner-SVM")
 
 
-class SILProbeRunner(BaseProbeRunner):
+class SVMProbeRunner(BaseProbeRunner):
     """
-    SIL Probe Runner for probes trained on the last instance of the bag.
+    SIL Probe Runner for probes trained on the last instance of the bag (for SVM probe).
     """
 
     def __init__(self, cfg):

@@ -25,13 +25,14 @@ import pprint
 from utils import should_process_layer
 
 
-from probes.runner_sil import SILProbeRunner
+from runners.runner_svm import SVMProbeRunner
+from runners.runner_md import MDProbeRunner
 log = logging.getLogger(__name__)
 
 
 PROBES = {
-    'svm': SILProbeRunner,
-    'mean_diff': SILProbeRunner
+    'svm': SVMProbeRunner,
+    'mean_diff': MDProbeRunner
 }
 try:
     pass

@@ -68,7 +68,6 @@ class MeanDifferenceClassifier(BaseEstimator, ClassifierMixin):
             M: Mahalanobis matrix
         """
         assert type_of_target(y) == "binary", "Labels should be binary."
-
         pos_acts, neg_acts = X[y == 1], X[y == 0]
         pos_mean, neg_mean = pos_acts.mean(0), neg_acts.mean(0)
 
