@@ -83,9 +83,10 @@ def log_metric(preds, scores, y_true, mask, cfg):
     is_ok = (len(np.unique(preds)) > 0) & (len(np.unique(preds)) < 4)
     assert is_ok, "Only binary classification is supported (or binary with abstention class '-1')."
 
-    a_mask = preds != -1
+    a_mask = (preds != -1).flatten()
+    preds = preds.flatten()
+    scores = scores.flatten()
     a_rate = np.sum(a_mask[mask]) / len(a_mask[mask])
-
     def wmcc(y_true, y_pred): return mcc(y_true, y_pred) *\
         a_rate
 
@@ -95,7 +96,7 @@ def log_metric(preds, scores, y_true, mask, cfg):
     def wari(y_true, y_pred): return ari(y_true, y_pred) *\
         a_rate
 
-    full_mask = np.array(mask & a_mask)
+    full_mask = a_mask & mask    
 
     binary_kwargs = dict(
         y_true=y_true[full_mask],
@@ -330,10 +331,9 @@ def main(cfg: DictConfig):
         # CONFORMAL PREDICTION
         calibrator = runner.conformal_training(X_cal, y_cal, mask_cal)
 
-        yh_te = runner.decision_function(X_te)
+        yh_te = runner.predict_proba(X_te)
         yc_te = runner.conformal_prediction(X_te)
-        preds = np.array(yc_te > 0)
-
+        preds = runner.predict(X_te)
         # Assemble Metrics
         metric_dict = {}
         metric_dict['default'] = log_metric(preds=preds,
@@ -377,7 +377,7 @@ def main(cfg: DictConfig):
         log.warning(
             '|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||')
 
-        db_params = f"C:{cfg.probe['init_params']['C']} | Layers: {layer_id}/{layers[-1]}"
+        db_params = f"C:{cfg.probe['init_params']} | Layers: {layer_id}/{layers[-1]}"
         db_trial_id = f"{cfg.model.name}-{cfg.trial_name}"
         db.write(trial_id=db_trial_id,
                  model=cfg.model.name,

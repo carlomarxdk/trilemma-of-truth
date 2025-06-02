@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import numpy as np
 
 
 class BaseProbeRunner(ABC):
@@ -7,7 +8,15 @@ class BaseProbeRunner(ABC):
     def parameter_search(self, X, y, mask): ...
     def conformal_training(self, X_cal, y_cal): ...
     def decision_function(self, X): ...
+    def predict_proba(self, X):
+        '''Needs to be rewritten for probes that return probabilities'''
+        return self.decision_function(X)
+    def predict(self, X):
+        '''Needs to be rewriten for probes that return probabilities'''
+        scores = self.decision_function(X)
+        return np.array(scores > 0)
     @property
     def direction(self): ...
     @property
     def bias(self): ...
+    def process_input(self, X): ...

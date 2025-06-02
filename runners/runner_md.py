@@ -54,16 +54,16 @@ class MDProbeRunner(BaseProbeRunner):
             raise NotImplementedError(
                 "Only a pipeline with the normalization is implemented")
 
-        bags = np.array([self.scaler.transform(bag)[-1]
+        bags = np.vstack([self.scaler.transform(bag)[-1]
                 for bag, m in zip(X, mask) if m])
 
         # 2) Transform each bag (take only the last element)
         cfg = self.cfg.probe
-        limit = cfg.get('train_bag_limit', len(bags))
+        limit = cfg.get(100, len(bags))
         self.separator = MeanDifferenceClassifier(with_covariance=cfg.init_params['with_covariance'],
                                                   fit_intercept=cfg.init_params['fit_intercept'],
-                             verbose=cfg.init_params.get('verbose', True))
-                             
+                                                   verbose=cfg.init_params.get('verbose', True))
+                                     
         self.separator.fit(
             bags[:limit], y[:limit])
 
@@ -116,8 +116,6 @@ class MDProbeRunner(BaseProbeRunner):
         """
         # Transform the bags using the fitted scaler
         X = deepcopy(X)
-        Xt = [self.scaler.transform(bag)[-1] for bag in X]
-        Xt = np.vstack(Xt)
         # Compute the decision function using the separator
         yh = self.decision_function(X)
         # Compute the conformal prediction
@@ -128,10 +126,20 @@ class MDProbeRunner(BaseProbeRunner):
         Compute the decision function for the given bags.
         """
         # Transform the bags using the fitted scaler
-        Xt = [self.scaler.transform(bag)[-1] for bag in X]
-        Xt = np.vstack(Xt)
-        # Compute the decision function using the separator
-        return np.dot(Xt, self.direction) + self.bias
+        Xt = self.process_input(X)
+        yhat = self.separator.decision_function(Xt)
+        return yhat.flatten() 
+    
+    def predict_proba(self, X):
+        Xt = self.process_input(X)
+        return self.separator.predict_proba(Xt).flatten()
+    
+    def predict(self, X):
+        proba = self.predict_proba(X)
+        return np.array(proba > 0.5)    
+    
+    def process_input(self, X):
+        return np.vstack([self.scaler.transform(bag)[-1] for bag in X])
 
     def update_metric(self, metric_dict):
         """
@@ -144,7 +152,7 @@ class MDProbeRunner(BaseProbeRunner):
         """
         Return the direction of the separator.
         """
-        return self.separator.coef_.T
+        return self.separator.coef_[0]
 
     @property
     def bias(self):
