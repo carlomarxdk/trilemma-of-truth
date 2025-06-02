@@ -29,7 +29,7 @@ eval_params:
   n_bootstraps: 1000
   max_bag_size: 100
 
-task: 4
+task: 0
 layer_range: [0.1, 1.0]
 layer_id: None
 search: True
@@ -45,9 +45,8 @@ output_dir: "outputs/probes/${probe.name}/${model.name}/"
 random_seed: 42
 batch_size: 12
 limit_batches: -1 #number of batches to run the analysis on
-sparsify_data: -1
 cv_n_folds: 3
-cv_bag_limit: 600
+cv_bag_limit: 600 # limit the number of bags per fold (withing the cross-validation split)
 save_results: True
-start_from_checkpoint: True # "last_finished" will start from the layer that was last computed (aka checkpointed)
+start_from_checkpoint: True #will start from the layer that was last computed and saved (aka checkpointed)
 

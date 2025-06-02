@@ -29,7 +29,7 @@ def log_stats(cfg):
         f"Collecting prompt-based scores for: {cfg.model.name} (device: {cfg.device})")
 
 
-@hydra.main(version_base=None, config_path="configs", config_name="probe_prompt")
+@hydra.main(version_base=None, config_path="configs", config_name="probe_zeroshot")
 def main(cfg: DictConfig):
     validate_config(cfg)
     log_stats(cfg)

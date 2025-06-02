@@ -50,7 +50,8 @@ Get HuggingFace **Access Tokens** for gated models:
 > Same applies to `base_llama`, `_llama-3-8b-med`, `_llama-3.1-8b-bio`.
 
 ## 📝 Usage & Examples
-We use `Hydra` to run and manage most of our experiments.
+
+We use `Hydra` to run and manage our experiments. Refer to [Hydra Documentation](https://hydra.cc/docs/intro/) for help.
 
 ### 1. Collect Hidden Activations
 
