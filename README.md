@@ -16,6 +16,8 @@
 - [Trilemma of Truth](#trilemma-of-truth)
   - [Table of Contents](#table-of-contents)
   - [📘 Repository Overview](#-repository-overview)
+    - [What is included?](#what-is-included)
+    - [What is not included?](#what-is-not-included)
   - [⚡ Installation](#-installation)
   - [📝 Usage \& Examples](#-usage--examples)
     - [Run the Scripts](#run-the-scripts)
@@ -36,6 +38,18 @@
   - [📃 Licenses](#-licenses)
 
 ## 📘 Repository Overview
+
+This repository contains the code that we used to generate the results for the paper. 
+Along with the code, we provide the usage examples and examples of results.
+
+### What is included?
+
+1. [datasets](datasets/) folder contains the datasets (e.g., statement) that we use. The subfolders contain the notebooks that we used to generate datasets, as well as generate the syntehtic entities and statements
+2. [outputs/probes/prompt](outputs/probes/prompt) contains the scores for the *zero-shot prompting* (for every mode, dataset and instruction phrasing). These can be load using the `DataHandler` class. 
+3. [outputs/probes/mean_diff](outputs/probes/mean_diff) contains an example of results for the *mean-difference* probe (`Llama-3-8b` model, `city_locations` dataset, based on the activations of the 7th decoder).
+4. [configs](configs/) contains experiment configurations; `Hydra` uses these to run experiments.
+
+### What is not included? 
 
 ## ⚡ Installation
 
@@ -207,8 +221,11 @@ ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split
 - [x] Check `run_training.py` for SIL probes (SVM and Mean Difference)
 - [ ] Check `run_training.py` for `sAwMIL`
 - [ ] Upload `llama-3-8b` activations for the `city_locations` dataset
+- [ ] Check script for interventions
+- [ ] Check script for the cross-dataset generalization
 - [ ] Add scripts/notebooks for plot generation
 - [ ] Add examples: data loading 
+- [ ] Describe the contents of the repository
 
 ## 📃 Licenses
 

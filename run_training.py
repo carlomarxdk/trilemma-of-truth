@@ -1,4 +1,4 @@
-# Code for probes that work with BAGS (MIL-based classifiers)
+# Code for ONE-vs-OTHER probes, works both for SIL (MD+CP and SVM) and MIL (Sawmil) probes.
 
 from scipy.stats import energy_distance
 from sklearn.metrics import (
@@ -27,15 +27,18 @@ from utils import should_process_layer
 
 from runners.runner_svm import SVMProbeRunner
 from runners.runner_md import MDProbeRunner
+from runners.runner_sawmil import SawmilProbeRunner
 log = logging.getLogger(__name__)
 
 
 PROBES = {
     'svm': SVMProbeRunner,
-    'mean_diff': MDProbeRunner
+    'mean_diff': MDProbeRunner,
+    'sawmil': SawmilProbeRunner
 }
+
+
 try:
-    pass
     from sklearnex import patch_sklearn
     patch_sklearn()
     log.warning("Patched sklearn is running...")

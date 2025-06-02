@@ -3,7 +3,7 @@ defaults:
 
 name: svm
 train_bag_limit: 1800
-
+with_bags: False # this probes works only with the last token in the sentence
 init_params:
   kernel: linear
   penalty: -1
