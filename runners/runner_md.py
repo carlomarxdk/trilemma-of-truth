@@ -133,32 +133,29 @@ class MDProbeRunner(BaseProbeRunner):
         # Compute the decision function using the separator
         return np.dot(Xt, self.direction) + self.bias
 
-    # def update_metric(self, metric_dict):
-    #     """
-    #     Add the metric items to the metric dictionary.
-    #     """
-    #     metric_dict['C'] = self.separator.C
-    #     metric_dict['kernel'] = self.separator.kernel
-    #     metric_dict['scale_C'] = self.separator.scale_C
-    #     return metric_dict
+    def update_metric(self, metric_dict):
+        """
+        Add the metric items to the metric dictionary.
+        """
+        return metric_dict
 
     @property
     def direction(self):
         """
         Return the direction of the separator.
         """
-        return self.separator.linearize(normalize=True)[0]
+        return self.separator.coef_.T
 
     @property
     def bias(self):
         """
         Return the bias of the separator.
         """
-        return self.separator.linearize(normalize=True)[1]
+        return self.separator.intercept_ if self.separator.fit_intercept else 0.0
 
     @property
     def direction_bias(self):
         """
         Return, BOTH, the direction and bias of the separator.
         """
-        return self.separator.linearize(normalize=True)
+        return self.separator.direction, self.separator.bias

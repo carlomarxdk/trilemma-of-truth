@@ -85,7 +85,7 @@ python collect_activations.py model=llama-3-8b # see configs/activations.yaml fo
 python run_zero_shot.py model=llama-3-8b variation=default batch_size=12 # see configs/probe_prompt.yaml for all the available paramaters
 ```
 
-#### 3. Train *one-vs-all sAwMIL* probe
+#### 3. Train *one-vs-all sAwMIL* probe 
 
 Note that you need to collect activations before you can train this probe
 
@@ -96,6 +96,7 @@ Note that you need to collect activations before you can train this probe
 #### 4. Single Instance Probe
 
 These probes use only the last token representation (instead of bags)
+The **Single Instance Learning** probes use only representations of the last tokens (instead of the bags).
 
 ##### 4.1 Train *one-vs-all SVM* probe
 
@@ -162,7 +163,8 @@ dh.assemble(
     exclusive_split=True      # Ensures entities don’t appear in multiple splits
 )
 ```
-For more usage examples, see the `notebooks/` folder.
+
+For more usage examples, see the [notebooks/](notebooks/) folder.
 
 ### Processed Data on Hugging Face 🤗
 The  final preprocessed datasets - including standardized splits - are also available on [Hugging Face Datasets](https://huggingface.co/datasets/carlomarxx/trilemma-of-truth). These are ideal if you want to skip local preprocessing and directly load ready-to-use datasets into your workflow. They follow the same structure and splitting scheme we use internally. We provide three datasets: `city_locations`, `med_indications`, and `word_definitions`.
@@ -202,7 +204,11 @@ ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split
 
 - [x] Check `run_zero_shot.py`
 - [x] Check `collect_activations.py`
-- [ ] Check `run_training.py` for SIL cases (SVM and Mean Difference)
+- [x] Check `run_training.py` for SIL probes (SVM and Mean Difference)
+- [ ] Check `run_training.py` for `sAwMIL`
+- [ ] Upload `llama-3-8b` activations for the `city_locations` dataset
+- [ ] Add scripts/notebooks for plot generation
+- [ ] Add examples: data loading 
 
 ## 📃 Licenses
 
