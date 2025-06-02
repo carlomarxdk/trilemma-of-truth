@@ -360,19 +360,8 @@ def return_label(data):
     """
     Return labels from the dataframe
     """
-    correct, real, fake, fictional, negated = data["correct"].values, data["real_object"].values, data[
-        "fake_object"].values, data["fictional_object"].values, data["negation"].values
-    combined = np.select(
-        [
-            (correct == 0) & (real == 1) & (fake == 0) & (fictional == 0),
-            (correct == 1) & (real == 1) & (fake == 0) & (fictional == 0),
-            (fake == 1) & (fictional == 0) & (real == 0),
-            (correct == 0) & (fake == 1) | (correct == 0) & (fictional == 1),
-            (correct == 1) & (fake == 1) | (correct == 1) & (fictional == 1),
-        ],
-        [0, 1, 4, 2, 3], default=4
-    )
-    return correct, real, fake, combined, negated, fictional
+    correct, real, negated = data["correct"].values, data["real_object"].values, data["negation"].values
+    return correct, real, negated
 
 
 def normalize(X):

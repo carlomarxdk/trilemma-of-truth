@@ -15,19 +15,26 @@
 ## Table of Contents
 - [Trilemma of Truth](#trilemma-of-truth)
   - [Table of Contents](#table-of-contents)
+  - [📘 Repository Overview](#-repository-overview)
   - [⚡ Installation](#-installation)
   - [📝 Usage \& Examples](#-usage--examples)
     - [0. Return full error log in `Hydra`](#0-return-full-error-log-in-hydra)
     - [1. Collect Hidden Activations](#1-collect-hidden-activations)
     - [2. Run zero-shot prompt (and collect scores)](#2-run-zero-shot-prompt-and-collect-scores)
     - [3. Train *one-vs-all sAwMIL* probe](#3-train-one-vs-all-sawmil-probe)
+    - [4. Single Instance Probe](#4-single-instance-probe)
+      - [4.1 Train *one-vs-all SVM* probe](#41-train-one-vs-all-svm-probe)
+      - [4.2 Train the *mean-difference* probe](#42-train-the-mean-difference-probe)
+    - [Task specification](#task-specification)
   - [🗂️ Dataset](#️-dataset)
     - [Structure](#structure)
     - [Load Data with `DataHandler`](#load-data-with-datahandler)
     - [Processed Data on Hugging Face 🤗](#processed-data-on-hugging-face-)
   - [✍️ How to Cite?](#️-how-to-cite)
+  - [📝 To Do](#-to-do)
   - [📃 Licenses](#-licenses)
-  - [To do:](#to-do)
+
+## 📘 Repository Overview
 
 ## ⚡ Installation
 
@@ -82,6 +89,33 @@ Note that you need to collect activations before you can train this probe
 ```bash
 # Train one-vs-all probe
 ```
+
+### 4. Single Instance Probe
+
+These probes use only the last token representation (instead of bags)
+
+#### 4.1 Train *one-vs-all SVM* probe
+
+```bash
+python run_training.py model=llama-3-8b datapack=city_locations probe=svm
+```
+
+#### 4.2 Train the *mean-difference* probe
+
+The mean-difference probe is trained to separate *true-vs-false*, thus, use `task=3` .
+
+```bash
+python run_training.py model=llama-3-8b datapack=city_locations probe=mean_diff task=3
+```
+
+### Task specification
+
+You can train probe using different task configurations (see [misc/task.py](misc/task.py)). We have 5 tasks:
+ - **True-vs-All** (`task=0`): Separate true instances from all others (false and unverifiable cases);
+ - **False-vs-All** (`task=1`): Separate false instances from all others (true and unverifiable cases);
+ - **Unverifiable-vs-All** (`task=2`): Separate unverifiable instances from all others (true and false cases);
+ - **True-vs-False** (`task=3`): Separate true and false cases (the unverifiable statements are filtered out);
+ - **Multiclass** (`task=-1`): Multiclass setup, where labels correspond to `0=true`, `1=false` and `2=unverifiable`.
 
 ## 🗂️ Dataset
 
@@ -156,15 +190,14 @@ ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split
 
 ## ✍️ How to Cite? 
 
+## 📝 To Do
+*__Note__: We have refactored the code to improve readability, please, let us know if something does not work.*
+
+- [x] Check `run_zero_shot.py`
+- [x] Check `collect_activations.py`
+- [ ] Check `run_mil.py`
 
 ## 📃 Licenses
 
 This **code** is licensed under the MIT License. See [LICENSE](LICENSE) for more information.
 The **data** is licensed under the [Creative Commons Attribution 4.0 (CC BY 4.0)](https://huggingface.co/datasets/choosealicense/licenses/blob/main/markdown/cc-by-4.0.md).
-
-
-## To do:
-*__Note__: We have refactored the code to improve readability, please, let us know if something does not work.*
-
-[x] Check `run_zero_shot.py`
-[x] Check `collect_activations.py`

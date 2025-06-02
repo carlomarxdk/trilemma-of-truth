@@ -17,7 +17,9 @@ class Task:
         elif task == 1:
             log.warning("The TASK is set to: FALSE-vs-ALL")
         elif task == 2:
-            log.warning("The TASK is set to: UNKNOWN-vs-ALL")
+            log.warning("The TASK is set to: UNVERIFIABLE-vs-ALL")
+        elif task == 3:
+            log.warning("The TASK is set to: TRUE-vs-FALSE")
         elif task == -1:
             log.warning("The TASK is set to: MULTICLASS")
         self.task = task
@@ -56,6 +58,14 @@ class Task:
             assert self.is_binary(
                 new_targets), "The new targets must be binary"
             return {'targets': new_targets, 'mask': np.ones_like(real)}
+        elif self.task == 3:
+            new_targets = np.zeros_like(correct)
+            new_targets[(correct == 1) & (real == 1)] = 1
+            mask = np.zeros(real)
+            mask[real == 1] = 1 # only keep the real samples (not the synthetic ones)
+            assert self.is_binary(
+                new_targets), "The new targets must be binary"
+            return {'targets': new_targets, 'mask': mask}
         elif self.task == -1:
             new_targets = np.zeros_like(correct)
             new_targets[(correct == 1) & (real == 1)] = 1

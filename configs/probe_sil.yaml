@@ -17,8 +17,8 @@ hydra:
 defaults:
   - model: llama-3-8b
   - probe: mean_diff
-  - datapack: cities_loc
-  - datapack@datapack_test: cities_loc
+  - datapack: city_locations
+  - datapack@datapack_test: city_locations
   - _self_
 
 conformal_params:

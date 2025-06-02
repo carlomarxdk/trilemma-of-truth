@@ -176,3 +176,5 @@ cython_debug/
 /temp
 .DS_Store
 Pipfile.lock
+/outputs/activations
+/outputs/hydra_logs
