@@ -51,6 +51,7 @@ Along with the code, we provide the usage examples and examples of results.
 
 ### What is not included? 
 
+
 ## ⚡ Installation
 
 Clone the repository:
@@ -86,20 +87,27 @@ HYDRA_FULL_ERROR=1 python run_zero_shot.py model=llama-3-8b
 ```
 
 #### 1. Collect Hidden Activations
+To run experiments (e.g., train probes) on your machine, you need to collect hidden activations. The command below would collect hidden activations for every statement in the datasets, you only have to specify the name of the model, see [configs/activations.yamls](configs/activations.yaml) for more information on the attributes.
 
 ```bash
 # To collect hidden activations for (every statement) specific model
 python collect_activations.py model=llama-3-8b # see configs/activations.yaml for all the paramaters
 ```
 
+After you collected the activations, you can load them using the code in [notebooks/load_and_split_dataset](notebooks/load_and_split_dataset.ipynb) notebook.
+
 #### 2. Run zero-shot prompt (and collect scores)
+
+You can collect the zero-shot prompting scores without having activations.
 
 ```bash
 # Collect scores with the zero-shot prompting method (aka replies to multiple choice questions)
 python run_zero_shot.py model=llama-3-8b variation=default batch_size=12 # see configs/probe_prompt.yaml for all the available paramaters
 ```
 
-#### 3. Train *one-vs-all sAwMIL* probe 
+Note that we provide scores for every model in [outputs/probes/prompt](outputs/probes/prompt/) folder. We provide an example on how to load the scores from the zero-shot prompting in  [notebooks/load_and_split_dataset](notebooks/load_and_split_dataset.ipynb) notebook.
+
+#### 3. Train *one-vs-all sAwMIL* probe
 
 Note that you need to collect activations before you can train this probe
 
