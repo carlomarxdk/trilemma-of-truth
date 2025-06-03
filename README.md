@@ -250,6 +250,7 @@ ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split
 - @carlomarxdk (Germans Savcisens)
 - @eliassi (Tina Eliassi-Rad)
 
-This **code** is licensed under the MIT License. See [LICENSE](LICENSE) for more information.
-The **data** is licensed under the [Creative Commons Attribution 4.0 (CC BY 4.0)](https://huggingface.co/datasets/choosealicense/licenses/blob/main/markdown/cc-by-4.0.md).
+> [!IMPORTANT]
+> This **code** is licensed under the MIT License. See [LICENSE](LICENSE) for more information.
+> The **data** is licensed under the [Creative Commons Attribution 4.0 (CC BY 4.0)](https://huggingface.co/datasets/choosealicense/licenses/blob/main/markdown/cc-by-4.0.md).
 
