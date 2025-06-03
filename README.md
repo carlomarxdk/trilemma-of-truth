@@ -221,6 +221,12 @@ ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split
 
 ## ✍️ How to Cite? 
 
+```bibtex
+@article{
+
+}
+```
+
 ## 📝 To Do
 *__Note__: We have refactored the code to improve readability, please, let us know if something does not work.*
 
@@ -237,5 +243,10 @@ ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split
 
 ## 📃 Licenses
 
+**Contacts**:
+- Germans Savcisens
+- Tina Eliassi Rad
+
 This **code** is licensed under the MIT License. See [LICENSE](LICENSE) for more information.
 The **data** is licensed under the [Creative Commons Attribution 4.0 (CC BY 4.0)](https://huggingface.co/datasets/choosealicense/licenses/blob/main/markdown/cc-by-4.0.md).
+
