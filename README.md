@@ -70,6 +70,7 @@ pip install -r requirements.txt
 Additionally, refer to [macOS using Homebrew, Pyenv, and Pipenv](https://medium.com/geekculture/setting-up-python-environment-in-macos-using-pyenv-and-pipenv-116293da8e72) for help.
 
 Get HuggingFace **Access Tokens** for gated models:
+> [!NOTE]
 > If you intend to use LLMs, you need to update the `configs/model` files for some of the models. For example, in case of `base_gemma.yaml`, you need to update the `token` field with a valid Access Token, see [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens). 
 > Same applies to `base_llama`, `_llama-3-8b-med`, `_llama-3.1-8b-bio`.
 
@@ -228,7 +229,8 @@ ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split
 ```
 
 ## 📝 To Do
-*__Note__: We have refactored the code to improve readability, please, let us know if something does not work.*
+> [!WARNING]
+> We have refactored the code to improve readability, please, let us know if something does not work.*
 
 - [x] Check `run_zero_shot.py`
 - [x] Check `collect_activations.py`
@@ -244,8 +246,8 @@ ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split
 ## 📃 Licenses
 
 **Contacts**:
-- Germans Savcisens
-- Tina Eliassi Rad
+- @carlomarxdk (Germans Savcisens)
+- @eliassi (Tina Eliassi-Rad)
 
 This **code** is licensed under the MIT License. See [LICENSE](LICENSE) for more information.
 The **data** is licensed under the [Creative Commons Attribution 4.0 (CC BY 4.0)](https://huggingface.co/datasets/choosealicense/licenses/blob/main/markdown/cc-by-4.0.md).
