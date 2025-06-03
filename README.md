@@ -192,6 +192,7 @@ For more usage examples, see the [notebooks/](notebooks/) folder.
 ### Processed Data on Hugging Face 🤗
 The  final preprocessed datasets - including standardized splits - are also available on [Hugging Face Datasets](https://huggingface.co/datasets/carlomarxx/trilemma-of-truth). These are ideal if you want to skip local preprocessing and directly load ready-to-use datasets into your workflow. They follow the same structure and splitting scheme we use internally. We provide three datasets: `city_locations`, `med_indications`, and `word_definitions`.
 
+> [!IMPORTANT]
 > **Note I:** These Hugging Face -- hosted datasets are *not* used in our experiments.  
 > **Note II**: All experiments in this repository (e.g., `collect_activations.py`, probe evaluations) rely on the `DataHandler` class, which assembles the datasets locally from the `datasets/` folder.
 > **Note III:** The calibration split is labeled as `validation`, following Hugging Face naming conventions (`train`, `validation`, `test`).
