@@ -241,7 +241,7 @@ print(ds["train"][0])
 ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split="train")
 ```
 
-## ✍️ How to Cite? 
+## ✍️ How to Cite?
 
 ```bibtex
 @article{
@@ -250,14 +250,16 @@ ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split
 ```
 
 ## 📝 To Do
+
 > [!WARNING]
-> We have refactored the code to improve readability, please, let us know if something does not work.*
+> We have refactored the code to improve readability, please, let us know if something does not work.
 
 - [x] Check `run_zero_shot.py`
 - [x] Check `collect_activations.py`
 - [x] Check `run_training.py` for SIL probes (SVM and Mean Difference)
 - [x] Check `run_training.py` for `sAwMIL`
 - [ ] Check the multiclass SIL (SVM)
+- [ ] Check the multiclass MIL (`sAwMIL`)
 - [ ] Upload `llama-3-8b` activations for the `city_locations` dataset
 - [ ] Check script for interventions
 - [ ] Check script for the cross-dataset generalization
@@ -268,10 +270,10 @@ ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split
 ## 📃 Licenses
 
 **Contacts**:
-- @carlomarxdk (Germans Savcisens)
-- @eliassi (Tina Eliassi-Rad)
+
+- [Germans Savcisens](https://savcisens.com/) (@carlomarxdk)
+- [Tina Eliassi-Rad](https://eliassi.org/) (@eliassi)
 
 > [!IMPORTANT]
 > This **code** is licensed under the MIT License. See [LICENSE](LICENSE) for more information.
 > The **data** is licensed under the [Creative Commons Attribution 4.0 (CC BY 4.0)](https://huggingface.co/datasets/choosealicense/licenses/blob/main/markdown/cc-by-4.0.md).
-
