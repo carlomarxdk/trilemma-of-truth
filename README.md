@@ -118,10 +118,12 @@ Note that we provide scores for every model in [outputs/probes/prompt](outputs/p
 
 #### 3. Train *one-vs-all sAwMIL* probe
 
-Note that you need to collect activations before you can train this probe
+Note that you need to collect activations before you can train this probe. Generally, you need to train three SVM probes: one with `task=0`, one with `task=1` and `task=2`, see [Task Specification](#task-specification).
 
 ```bash
-# Train one-vs-all probe
+# Train one-vs-all probe (an example without the hyperparameter search)
+python run_training.py --config-name=probe_mil.yaml \
+model=llama-3-8b datapack=city_locations probe=sawmil task=0 search=False 
 ```
 
 #### 4. Single Instance Probe

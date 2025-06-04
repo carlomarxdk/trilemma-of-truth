@@ -34,7 +34,7 @@ log = logging.getLogger(__name__)
 PROBES = {
     'svm': SVMProbeRunner,
     'mean_diff': MDProbeRunner,
-    'sawmil': SawmilProbeRunner
+    'sawmil': SawmilProbeRunner,
 }
 
 
@@ -316,14 +316,14 @@ def main(cfg: DictConfig):
             result = runner.parameter_search(
                 X=X_tr, y=y_train, mask=mask)
         else:
-            try:
-                result = runner.single_training(
+            # try:
+            result = runner.single_training(
                     X=X_tr, y=y_train, mask=mask)
-            except Exception as e:
-                log.error(f"Error: {e}")
-                log.warning(
-                    "\tSkipping the [%s] layer and moving to the next one..." % layer_id)
-                continue
+            # except Exception as e:
+            #     log.error(f"Error: {e}")
+            #     log.warning(
+            #         "\tSkipping the [%s] layer and moving to the next one..." % layer_id)
+            #     continue
 
         # CONFORMAL PREDICTION
         X_te = dh_test.test_bags(

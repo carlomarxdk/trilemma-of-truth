@@ -14,39 +14,46 @@ hydra:
     dir: outputs/hydra_logs/probes/${probe.name}/${model.name}/${now:%Y-%m-%d}/${now:%H-%M-%S}
 
 defaults:
-  - model: llama-3-8b
+  - model: ???
   - probe: sbMIL2
-  - datapack: cities_loc
-  - datapack@datapack_test: cities_loc
+  - datapack: city_locations
+  - datapack@datapack_test: city_locations
   - _self_
 
 conformal_params:
   alpha: 0.1
-  tie_breaking: False # Break ties based on p-val (True) or abstains (False)
-  nc: 'binary'
+  # If True, resolve p-value ties by predicting; if False, abstain
+  tie_breaking: False
+  # Type of conformal prediction: 'multiclass' or 'binary'
+  nc: 'binary' 
 
 eval_params:
   n_bootstraps: 1000
   max_bag_size: 100
 
-task: 0
+task: 0 # [0,1,2,3, -1] 
 layer_range: [0.1, 1.0]
-layer_id: None
+
+
+# Enable hyperparameter search (with cross-validation)
 search: True
+# Number of folds the cross validation
+cv_n_folds: 3 
+cv_bag_limit: 600 # limit the number of bags per fold (withing the cross-validation split)
+
+
 agg: full
+layers: ${model.layers}
+# Set to True to enable debugging (starts from the specified layer, see the code)
 run_debugging: False
 
-layers: ${model.layers}
-variation: ""
-trial_name: ${datapack.name}
+trial_name: ${datapack.name} 
 output_dir: "outputs/probes/${probe.name}/${model.name}/"
 
-
 random_seed: 42
-batch_size: 12
-limit_batches: -1 #number of batches to run the analysis on
-cv_n_folds: 3
-cv_bag_limit: 600 # limit the number of bags per fold (withing the cross-validation split)
-save_results: True
-start_from_checkpoint: True #will start from the layer that was last computed and saved (aka checkpointed)
+save_results: True  # Save the outputs
+start_from_checkpoint: True #  will start from the layer that was last computed (aka checkpointed)
+
+
+
 

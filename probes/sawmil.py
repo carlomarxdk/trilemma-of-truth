@@ -16,7 +16,7 @@ import numpy as np
 
 import logging
 
-log = logging.getLogger("milSVM_patch")
+log = logging.getLogger("sAwMIL")
 
 
 BagSplitter = BagSplitter_pathced
@@ -136,20 +136,6 @@ def fit(self, bags, y, in_bag_labels=None):
     labels = np.vstack([-np.ones((bs.L_n, 1)), pos_labels])
     self._labels = labels
 
-    # #sanity check
-    # pos_keep_mask = ((pos_labels.flatten() == 1) & (intrabag_labels.flatten() == 1)) | (
-    #     (pos_labels.flatten() == -1) & (intrabag_labels.flatten() == 0))
-    # pos_keep_mask = pos_keep_mask.reshape(-1, 1)
-    # # Construct the final mask
-    # mask = np.array(np.vstack([
-    #     np.ones((bs.L_n, 1)),  # Include all negative instances
-    #     pos_keep_mask  # Include filtered positive instances
-    # ])).astype(bool).flatten()
-    # print("mask: ", mask.shape)
-    # log.warning(
-    #     f"Number of positive instances: {np.sum(pos_labels == 1)} out of {labels[mask].shape[0]}")
-    # super(SIL, self).fit(
-    #     bs.instances[mask], labels[mask])
     if self.verbose:
         log.warning(
             f"Number of positive instances: {np.sum(pos_labels == 1)} out of {labels.shape[0]}")
@@ -202,8 +188,10 @@ def linearize(self, normalize: bool = True):
 
 SVM.__init__ = __init__
 SVM._setup_svm = _setup_svm
-sbMIL.fit = fit
-sbMIL.linearize = linearize
-sMIL.linearize = linearize
 SVM.linearize = linearize
-sbMIL.sort_and_label = sort_and_label
+sMIL.linearize = linearize
+sAwMIL = sbMIL
+sAwMIL.fit = fit
+sAwMIL.linearize = linearize
+sAwMIL.sort_and_label = sort_and_label
+sAwMIL.sort_and_label = sort_and_label
