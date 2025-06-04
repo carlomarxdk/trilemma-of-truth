@@ -185,16 +185,19 @@ from data_handler import DataHandler
 dh = DataHandler(
     model='llama-3-8b',
     datasets=['city_locations', 'city_locations_synthetic'],
-    activation_type='full',
+    activation_type='full', # load the representation of all the tokens in each statement (alternatively, you can use `last`)
     with_calibration=True,    # Include a calibration set
-    load_scores=False # if you run a zero-shot prompting with default, shuffled or tf template -- it will append these scores to the data 
+    load_scores=False # if you run a zero-shot prompting with `default`, 
+    #`shuffled` or `tf` template -- it will append these scores to the data (if they are calculated) 
 )
 
 dh.assemble(
     test_size=0.25,
     calibration_size=0.25,
     seed=42,
-    exclusive_split=True      # Ensures entities don’t appear in multiple splits
+    exclusive_split=True      # Ensures entities don’t appear in multiple splits 
+    # `True` would make the train, test and calibartion splits approximately split according to your specifications
+    # in this case, test size is going to be approximatelly 25% of all the samples. 
 )
 ```
 
