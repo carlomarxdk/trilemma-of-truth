@@ -97,7 +97,7 @@ class SawmilProbeRunner(BaseProbeRunner):
             kernel=self.cfg.probe["init_params"]["kernel"],
             scale_C=self.cfg.probe["init_params"]["scale_C"],
             verbose=self.cfg.probe["init_params"]["verbose"],
-            eta=eta,
+            eta=self.eta,
         )
         limit = self.cfg.probe.get("train_bag_limit", len(processed_bags))
         log.warning(
@@ -198,7 +198,6 @@ class SawmilProbeRunner(BaseProbeRunner):
                     len(bag) for bag in processed_bags
                 ]
                 eta = sum([sum(lbl) for lbl in intra_labels]) / sum(pos_lengths)
-                self.eta = eta          
                 # try:
                 if True:
                     separator = sAwMIL(
@@ -206,7 +205,7 @@ class SawmilProbeRunner(BaseProbeRunner):
                         kernel=self.cfg.probe.get('kernel', 'linear'),
                         scale_C=self.cfg.probe.get('scale_C', True),
                         verbose=False,
-                        eta=self.eta,
+                        eta=eta,
                     )
                     separator.fit(
                         bags = processed_bags[:limit],
