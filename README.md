@@ -152,11 +152,12 @@ model=llama-3-8b datapack=city_locations probe=mean_diff task=3
 ### Task specification
 
 You can train probe using different task configurations (see [misc/task.py](misc/task.py)). We have 5 tasks:
- - **True-vs-All** (`task=0`): Separate true instances from all others (false and unverifiable cases);
- - **False-vs-All** (`task=1`): Separate false instances from all others (true and unverifiable cases);
- - **Unverifiable-vs-All** (`task=2`): Separate unverifiable instances from all others (true and false cases);
- - **True-vs-False** (`task=3`): Separate true and false cases (the unverifiable statements are filtered out);
- - **Multiclass** (`task=-1`): Multiclass setup, where labels correspond to `0=true`, `1=false` and `2=unverifiable`.
+
+- **True-vs-All** (`task=0`): Separate *true* instances from all others (*false* and *neither*-valued cases);
+- **False-vs-All** (`task=1`): Separate *false* instances from all others (*true* and *neither* cases);
+- **Neither-vs-All** (`task=2`): Separate *neither* instances from all others (*true* and *false* cases);
+- **True-vs-False** (`task=3`): Separate *true* and *false* cases (the *neither* statements are filtered out);
+- **Multiclass** (`task=-1`): Multiclass setup, where labels correspond to `0=true`, `1=false` and `2=neither`.
 
 ## 🗂️ Dataset
 
