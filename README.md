@@ -1,4 +1,5 @@
 # Trilemma of Truth
+
 [![arXiv](https://img.shields.io/badge/arXiv-2405.12345-b31b1b.svg)](https://arxiv.org/empty)
 [![🤗 Datasets](https://img.shields.io/badge/🤗%20Datasets-trilemma--of--truth-yellow)](https://huggingface.co/datasets/carlomarxx/trilemma-of-truth)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -7,12 +8,12 @@
 
 **Trilemma of Truth** is 
 
-
 ![Abstract Pipeline](./docs/figures/flow.svg)
 
 ---
 
 ## Table of Contents
+
 - [Trilemma of Truth](#trilemma-of-truth)
   - [Table of Contents](#table-of-contents)
   - [📘 Repository Overview](#-repository-overview)
@@ -54,7 +55,9 @@ Along with the code, we provide the usage examples and examples of results.
 
 
 ### `sAwMIL` (Sparse Aware Multiple Instance Learning) Implementation
-The code for the `sAwMIL` is partially based on the [MISVM](https://github.com/garydoranjr/misvm) representation (contains the `sbMIL` implementation for older version of Python and [cvxopt](https://cvxopt.org/)). We adapt [MISVM](https://github.com/garydoranjr/misvm) code for `python=3.11.11` and `cvxopt=1.3.2`. 
+
+The code for the `sAwMIL` is partially based on the [MISVM](https://github.com/garydoranjr/misvm) representation (contains the `sbMIL` implementation for older version of Python and [cvxopt](https://cvxopt.org/)). We adapt [MISVM](https://github.com/garydoranjr/misvm) code for `python=3.11.11` and `cvxopt=1.3.2`. The patched code for the `sAwMIL` is located in [probes/sawmil](probes/sawmil.py) script.
+
 > [!NOTE]
 > We plan to release a **standalone** package that implements `sAwMIL` using the [gurobipy](https://www.gurobi.com/) (closer to the end of July 2025).
 
@@ -204,6 +207,7 @@ dh.assemble(
 For more usage examples, see the [notebooks/](notebooks/) folder.
 
 ### Processed Data on Hugging Face 🤗
+
 The  final preprocessed datasets - including standardized splits - are also available on [Hugging Face Datasets](https://huggingface.co/datasets/carlomarxx/trilemma-of-truth). These are ideal if you want to skip local preprocessing and directly load ready-to-use datasets into your workflow. They follow the same structure and splitting scheme we use internally. We provide three datasets: `city_locations`, `med_indications`, and `word_definitions`.
 
 > [!IMPORTANT]
@@ -252,7 +256,8 @@ ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split
 - [x] Check `run_zero_shot.py`
 - [x] Check `collect_activations.py`
 - [x] Check `run_training.py` for SIL probes (SVM and Mean Difference)
-- [ ] Check `run_training.py` for `sAwMIL`
+- [x] Check `run_training.py` for `sAwMIL`
+- [ ] Check the multiclass SIL (SVM)
 - [ ] Upload `llama-3-8b` activations for the `city_locations` dataset
 - [ ] Check script for interventions
 - [ ] Check script for the cross-dataset generalization

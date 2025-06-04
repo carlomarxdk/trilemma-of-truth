@@ -9,7 +9,7 @@ from copy import deepcopy
 from probes.sawmil import sAwMIL
 from probes.conformal import InductiveConformalPredictor, symmetric_nonconformity
 from sklearn.preprocessing import StandardScaler
-
+from sklearn.model_selection import KFold
 from utils_hydra import drop_rows_with_tail_keep
 
 log = logging.getLogger("SawmilProbeRunner")
@@ -32,13 +32,15 @@ class SawmilProbeRunner(BaseProbeRunner):
         self.eta = None
         self.calibrator = None
 
-    def _preprocess_labels(self, y, mask):
+    def return_targets(self, y, mask=None):
         """
         Turn {0,1} labels into {−1,+1} and apply mask.
         """
-        arr = y.copy()
-        arr[arr == 0] = -1
-        return arr[mask]
+        arr = np.ones_like(y)
+        arr[y == 0] = -1
+        if mask is not None:
+            return arr[mask]
+        return arr
 
     def single_training(self, X, y, mask):
         """
@@ -46,7 +48,6 @@ class SawmilProbeRunner(BaseProbeRunner):
         Args:
             - X: list of bags (each is array-like of shape [ #instances × hidden_size ])
             - y: full array of bag-labels (0/1)
-            - layer_id: which layer we’re processing (used for randomness in drop_rows_with_tail_keep)
             - mask: boolean mask array of length len(X) indicating which bags to train on
         Returns a dict with keys:
             'separator', 'scaler', 'transformer', 'eta'
@@ -56,7 +57,7 @@ class SawmilProbeRunner(BaseProbeRunner):
         y = deepcopy(y)
 
         # =========== Step 1: label preprocessing ===========
-        y_train = self._preprocess_labels(y, mask)
+        y_train = self.return_targets(y, mask)
 
         # =========== Step 2: normalization ===========
         if self.cfg.probe.get("normalize_data", True):
@@ -122,165 +123,147 @@ class SawmilProbeRunner(BaseProbeRunner):
         Args:
             - X: list of bags
             - y: array of labels (0/1)
-            - layer_id: integer
             - mask: boolean mask array
         Returns:
             same dict as single_training plus 'best_C'
         """
-        # Copy inputs so we don’t modify them in‐place
-        X_copy = deepcopy(X)
-        y_copy = deepcopy(y)
-        mask_copy = deepcopy(mask)
+        log.warning("Running the hyperparameter search...")
+        param_grid = self.cfg.probe.param_grid['C'] # You can redefine this based on your needs
+        f_X = deepcopy(X)
+        f_y = deepcopy(y)
+        f_mask = deepcopy(mask)
+        # 0) Get the bags and labels
 
+        assert len(X) == len(y), "X and y must have the same length"
+        assert np.unique(y).size == 2, "y must be binary"
         # Convert all‐zero mask to boolean
-        mask_bool = np.array(mask_copy, dtype=bool)
+        mask = np.array(f_mask, dtype=bool)
+        y = self.return_targets(f_y, None)
+        random_seed = self.cfg.get("random_seed", 42)
+        # 1) Fit transformer on concatenated instances
 
-        # Pre‐process labels
-        y_all = y_copy.copy()
-        y_all[y_all == 0] = -1
-
-        # Pull out param grid
-        C_candidates = self.cfg.probe["param_grid"]["C"]
-        n_splits = self.cfg.get("cv_n_folds", 3)
-        seed = self.cfg.get("random_seed", 42)
-
+        kf = KFold(n_splits=self.cfg.get("cv_n_folds", 3), shuffle=True,
+                   random_state=random_seed)
+        kf.get_n_splits(X)
         scores = []
         stds = []
-        n_samples = len(X_copy)
-
-        for idx, Cval in enumerate(C_candidates):
-            log.warning(f"\tParam‐search: testing C = {Cval} ...")
-            fold_scores = []
-
-            kf = KFold(
-                n_splits=n_splits,
-                shuffle=True,
-                random_state=seed,
-            )
-
-            for fold_idx, (tr_idx, te_idx) in enumerate(kf.split(X_copy)):
-                # build fold-specific mask
+        n_samples = len(X)
+        
+        for i, C in enumerate(param_grid):
+            log.warning(f"\tRunning the iteration with C={C}...")
+            _inner_scores = []
+            for j, (train_index, test_index) in enumerate(kf.split(X)):
+                # Initialize boolean masks
                 tr_mask = np.zeros(n_samples, dtype=bool)
                 te_mask = np.zeros(n_samples, dtype=bool)
-                tr_mask[tr_idx] = True
-                te_mask[te_idx] = True
-                tr_mask = tr_mask & mask_bool
-                te_mask = te_mask & mask_bool
-
-                # get fold data
-                X_tr = [bag for bag, m in zip(X_copy, tr_mask) if m]
-                X_te = [bag for bag, m in zip(X_copy, te_mask) if m]
-                y_tr = y_all[tr_mask]
-                y_te = y_all[te_mask]
-
-                # step 1: normalize fold data
-                if self.cfg.probe["normalize_data"]:
-                    flat_tr = np.vstack(X_tr)
-                    fold_scaler = StandardScaler()
-                    fold_scaler.fit(flat_tr)
-                    bags_tr = [fold_scaler.transform(bag) for bag in X_tr]
-                    bags_te = [fold_scaler.transform(bag)[-1] for bag in X_te]
+                # Set True for the respective indices
+                tr_mask[train_index] = True
+                te_mask[test_index] = True
+                tr_mask = tr_mask & mask
+                te_mask = te_mask & mask
+                X_train = [x for x, m in zip(X, tr_mask) if m]
+                X_test = [x for x, m in zip(X, te_mask) if m]
+                y_train = y[tr_mask]
+                y_test = y[te_mask]
+                np.random.seed(random_seed + j)
+                
+                # =========== Step 2: normalization ===========
+                if self.cfg.probe.get("normalize_data", True):
+                    log.warning("\t\tNormalizing the data...")
+                    Xt = np.vstack([bag for bag, m in zip(X, mask) if m])
+                    scaler = StandardScaler()
+                    scaler.fit(Xt)
+                    # transform each bag
+                    bags = [scaler.transform(bag) for bag in X_train]
                 else:
-                    raise NotImplementedError("Only normalization is supported in param search")
+                    raise NotImplementedError("Only normalization pipeline is implemented")
 
-                # step 2: cap bag size and assign intra labels
-                pruned_bags = []
+                limit = self.cfg.get('cv_bag_limit', len(bags))
+                # =========== Step 3: sparsification (optional) ===========
+                self.transformer = None
+
+                # =========== Step 4: cap bag size and assign intra‐bag labels ===========
+                processed_bags = []
                 intra_labels = []
-                pos_count = self.cfg.probe["num_known_positives"]
-                assume_known = self.cfg.probe.get("assume_known_positives", True)
-                max_size = max(self.cfg.probe["max_bag_size"] - 5, 10)
-
-                for i_bag, bag in enumerate(bags_tr):
-                    n_inst = bag.shape[0]
-                    if n_inst > max_size:
-                        rng = seed + layer_id + fold_idx + i_bag
-                        bag_cap = drop_rows_with_tail_keep(
-                            bag, max_size, pos_count, rng
-                        )
-                    else:
-                        bag_cap = bag
-                    pruned_bags.append(bag_cap)
-
-                    if assume_known:
-                        lbls = [0] * (bag_cap.shape[0] - pos_count) + [1] * pos_count
-                    else:
-                        lbls = [1] * bag_cap.shape[0]
-                    intra_labels.append(lbls)
-
-                # compute eta for this fold
-                lengths_pos = [len(b) for b, lbl in zip(pruned_bags, y_tr) if lbl == 1]
-                eta_fold = (y_tr[y_tr == 1] * pos_count).sum() / sum(lengths_pos)
-                y_tr[y_tr == 0] = -1
-                y_te[y_te == 0] = -1
-
-                # train MIL‐SVM
-                try:
-                    sep = sAwMIL(
-                        C=float(Cval),
-                        kernel=self.cfg.probe["init_params"]["kernel"],
-                        penalty=self.cfg.probe["init_params"]["penalty"],
-                        scale_C=self.cfg.probe["init_params"]["scale_C"],
+                max_bag_size = self.cfg.probe["max_bag_size"]
+                for i, bag in enumerate(bags):
+                    bag_processed, intra_labels_for_this_bag = self.process_single_bag(
+                        bag, max_bag_size=max_bag_size, rnd_seed_offset=i
+                    )
+                    processed_bags.append(bag_processed)
+                    intra_labels.append(intra_labels_for_this_bag)
+                    
+                # =========== Step 5: compute η (eta) ===========
+                pos_lengths = [
+                    len(bag) for bag in processed_bags
+                ]
+                eta = sum([sum(lbl) for lbl in intra_labels]) / sum(pos_lengths)
+                self.eta = eta          
+                # try:
+                if True:
+                    separator = sAwMIL(
+                        C=float(C),
+                        kernel=self.cfg.probe.get('kernel', 'linear'),
+                        scale_C=self.cfg.probe.get('scale_C', True),
                         verbose=False,
-                        eta=eta_fold,
+                        eta=self.eta,
                     )
-                    sep.fit(pruned_bags, y_tr, intra_labels)
-
-                    direction, bias = sep.linearize(normalize=True)
-                    bp = BagProcessor(
-                        max_bag_size=self.cfg.probe["max_bag_size"],
-                        pos_labels_in_bag=pos_count,
-                        scaler=fold_scaler,
+                    separator.fit(
+                        bags = processed_bags[:limit],
+                        y = y_train[:limit],
+                        in_bag_labels = intra_labels[:limit],
                     )
-                    scores_te = bp.predict_scores(
-                        bags=X_te, direction=direction, bias=bias
-                    )
-                    fold_scores.append(mAP(y_te, scores_te))
-                    log.warning(f"\t\tFold {fold_idx} mAP: {fold_scores[-1]:.4f}")
-                except Exception as e:
-                    log.error(f"Fold error (C={Cval}): {e}")
-                    fold_scores.append(0.0)
-
-            scores.append(np.mean(fold_scores))
-            stds.append(np.std(fold_scores))
-            log.warning(f"\tAvg-mAP for C={Cval}: {scores[-1]:.4f}")
-
-        scores_arr = np.array(scores)
-        std_arr = np.array(stds) / np.sqrt(n_splits)
-        best_idx = int(np.argmax(scores_arr))
-        best_C = C_candidates[best_idx]
-        best_se = std_arr[best_idx]
-        best_score = scores_arr[best_idx]
-
-        # 1-SE rule
-        sel_index = None
-        for i, sc in enumerate(scores_arr):
-            if sc >= (best_score - best_se):
-                sel_index = i
+                    direction, bias = separator.linearize(normalize=True)             
+                    y_hat = self._decision_function_(X_test, direction = direction, bias = bias, scaler=scaler)
+                    _inner_scores.append(mAP(y_test, y_hat))
+                    log.warning(
+                        f"\t\tmAP for {j}th fold: {_inner_scores[-1]}")
+                # except Exception as e:
+                #     log.error(f"Error: {e}")
+                #     log.warning(
+                #         "\t\tMoving to the next one...")
+                #     _inner_scores.append(0.1)
+            scores.append(np.mean(_inner_scores))
+            stds.append(np.std(_inner_scores))
+            log.warning(f"\tMean mAP for {C}: {scores[-1]}")
+        se = np.array(stds) / np.sqrt(self.cfg.get("cv_n_folds", 3))
+        scores = np.array(scores)
+        best_index = np.argmax(scores)
+        best_score = scores[best_index]
+        best_C = list(param_grid)[best_index]
+        best_se = se[best_index]
+        # 1STD rule
+        selected_index = None
+        for idx, score in enumerate(scores):
+            if score > (best_score - best_se):
+                selected_index = idx
                 break
-
-        if sel_index is not None:
-            selected_C = C_candidates[sel_index]
-            selected_score = scores_arr[sel_index]
-        else:
+        try:
+            selected_C = list(param_grid)[selected_index]
+            selected_score = scores[selected_index]
+        except Exception as e:
             selected_C = best_C
             selected_score = best_score
-            log.warning("\tNo C within 1SE; using best C.")
+            log.warning(
+                f"\t\tCould not find a C within 1SE. Using the best C.")
+            log.warning(f"\t\tScores: {scores}")
+            log.warning(f"\t\tSE: {se}")
 
-        log.warning(f"\tBest C: {best_C} (mAP={best_score:.4f})")
-        log.warning(f"\tSelected C (1SE): {selected_C} (mAP≈{selected_score:.4f})")
+        log.warning(
+            f"\t\tBest C: {best_C} with mAP: {best_score} (se {best_se})")
+        log.warning(f"\t\tSelected C: {selected_C} with mAP: {selected_score}")
 
-        # update cfg and retrain on full set
         self.cfg.probe["init_params"]["C"] = selected_C
-        log.warning(f"\tRetraining on full set with C={selected_C} ...")
-        final = self.single_training(X_copy, y_copy, layer_id, mask_copy)
+        log.warning(
+            f"MODEL: Retraining with the best C: {self.cfg.probe['init_params']['C']}...")
+        result = self.single_training(f_X, f_y, f_mask)
 
         return {
-            "separator": final["separator"],
-            "scaler": final["scaler"],
-            "transformer": final["transformer"],
-            "eta": final["eta"],
-            "best_C": selected_C,
-        }
+            "separator": result["separator"],
+            "scaler": result["scaler"],
+            "transformer": result["transformer"],
+            "best_C": self.cfg.probe["init_params"]["C"],
+        }              
 
     def conformal_training(self, X_cal, y_cal, mask_cal):
         """
@@ -338,6 +321,22 @@ class SawmilProbeRunner(BaseProbeRunner):
             scores = np.dot(bag, self.direction) + self.bias
             output.append(np.max(scores))
         return np.array(output)
+    
+    def _decision_function_(self, X: list, direction, bias, scaler):
+        """
+        Compute raw bag‐scores for a new set of bags, using the trained separator.
+        This is a helper function to avoid code duplication.
+        """
+        output = []
+        if type(X) is np.ndarray:
+            X = [X]
+            
+        for bag in X:
+            bag = scaler.transform(bag)
+            bag, _ = self.process_single_bag(bag)
+            scores = np.dot(bag, direction) + bias
+            output.append(np.max(scores))
+        return np.array(output)
 
 
     def process_input(self, X):
@@ -356,10 +355,12 @@ class SawmilProbeRunner(BaseProbeRunner):
     def process_single_bag(self, bag: np.ndarray, max_bag_size: int =100, rnd_seed_offset: int =0):
         ''' 
         Process a single bag
-        bag: np.array, bag
+        bag: np.array, shape [ #instances × hidden_size ]
+        max_bag_size: int, maximum size of the bag after processing
+        rnd_seed_offset: int, offset for the random seed (to ensure different random behavior for different bags)
         Returns:
         output_bag: np.array, processed bag
-        intra_bag_mask: np.array, mask for the positive labels in the bag
+        intra_bag_mask: np.array, intra bag labes used by the `sAwMIL` probe (for training)
         '''
         num_last_tokens_to_keep = self.cfg.probe["num_known_positives"]
         assume_known = self.cfg.probe.get("assume_known_positives", True)

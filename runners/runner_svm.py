@@ -70,11 +70,14 @@ class SVMProbeRunner(BaseProbeRunner):
                 'transformer': np.nan}
 
     def return_target(self, y, mask=None):
-        yy = np.ones_like(y)
-        yy[y == 0] = -1
+        """
+        Turn {0,1} labels into {−1,+1} and apply mask.
+        """
+        arr = np.ones_like(y)
+        arr[y == 0] = -1
         if mask is not None:
-            return yy[mask]
-        return yy
+            return arr[mask]
+        return arr
 
     def parameter_search(self, X, y, mask):
         """
@@ -92,7 +95,7 @@ class SVMProbeRunner(BaseProbeRunner):
         # 0) Get the bags and labels
         assert len(X) == len(y), "X and y must have the same length"
         assert np.unique(y).size == 2, "y must be binary"
-        mask = np.array(mask, dtype=bool)
+        mask = np.array(f_mask, dtype=bool)
         y = self.return_target(y, None)
         random_seed = self.cfg.get("random_seed", 42)
         # 1) Fit transformer on concatenated instances
