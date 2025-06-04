@@ -18,6 +18,7 @@
   - [📘 Repository Overview](#-repository-overview)
     - [What is included?](#what-is-included)
     - [What is not included?](#what-is-not-included)
+    - [`sAwMIL` (Sparse Aware Multiple Instance Learning) Implementation](#sawmil-sparse-aware-multiple-instance-learning-implementation)
   - [⚡ Installation](#-installation)
   - [📝 Usage \& Examples](#-usage--examples)
     - [Run the Scripts](#run-the-scripts)
@@ -52,6 +53,11 @@ Along with the code, we provide the usage examples and examples of results.
 ### What is not included? 
 
 
+### `sAwMIL` (Sparse Aware Multiple Instance Learning) Implementation
+The code for the `sAwMIL` is partially based on the [MISVM](https://github.com/garydoranjr/misvm) representation (contains the `sbMIL` implementation for older version of Python and [cvxopt](https://cvxopt.org/)). We adapt [MISVM](https://github.com/garydoranjr/misvm) code for `python=3.11.11` and `cvxopt=1.3.2`. 
+> [!NOTE]
+> We plan to release a **standalone** package that implements `sAwMIL` using the [gurobipy](https://www.gurobi.com/) (closer to the end of July 2025).
+
 ## ⚡ Installation
 
 Clone the repository:
@@ -83,11 +89,13 @@ We use `Hydra` to run and manage our experiments. Refer to [Hydra Documentation]
 #### 0. Return full error log in `Hydra`
 
 In `Hydra` you can specify `HYDRA_FULL_ERROR=1` before each command. For example: 
+
 ```bash
 HYDRA_FULL_ERROR=1 python run_zero_shot.py model=llama-3-8b 
 ```
 
 #### 1. Collect Hidden Activations
+
 To run experiments (e.g., train probes) on your machine, you need to collect hidden activations. The command below would collect hidden activations for every statement in the datasets, you only have to specify the name of the model, see [configs/activations.yamls](configs/activations.yaml) for more information on the attributes.
 
 ```bash
@@ -194,7 +202,9 @@ The  final preprocessed datasets - including standardized splits - are also avai
 
 > [!IMPORTANT]
 > **Note I:** These Hugging Face -- hosted datasets are *not* used in our experiments.  
+> 
 > **Note II**: All experiments in this repository (e.g., `collect_activations.py`, probe evaluations) rely on the `DataHandler` class, which assembles the datasets locally from the `datasets/` folder.
+> 
 > **Note III:** The calibration split is labeled as `validation`, following Hugging Face naming conventions (`train`, `validation`, `test`).
 
 **How to use HF?** First, install the 🤗 Datasets and `pandas` libraries:
