@@ -56,10 +56,10 @@ Along with the code, we provide the usage examples and examples of results.
 
 ### `sAwMIL` (Sparse Aware Multiple Instance Learning) Implementation
 
-The code for the `sAwMIL` is partially based on the [MISVM](https://github.com/garydoranjr/misvm) representation (contains the `sbMIL` implementation for older version of Python and [cvxopt](https://cvxopt.org/)). We adapt [MISVM](https://github.com/garydoranjr/misvm) code for `python=3.11.11` and `cvxopt=1.3.2`. The patched code for the `sAwMIL` is located in [probes/sawmil](probes/sawmil.py) script.
+The code for the `sAwMIL` is partially based on the [garydoranjr/misvm](https://github.com/garydoranjr/misvm) repository (contains the `sbMIL` implementation for older versions of Python and [cvxopt](https://cvxopt.org/)). We adapt [MISVM](https://github.com/garydoranjr/misvm) code for `python=3.11.11` and `cvxopt=1.3.2`. The patched code for the `sAwMIL` is located in [probes/sawmil](probes/sawmil.py) script.
 
 > [!NOTE]
-> We plan to release a **standalone** package that implements `sAwMIL` using the [gurobipy](https://www.gurobi.com/) (closer to the end of July 2025).
+> We plan to release a **standalone** package that implements `sAwMIL` and `sbMIL` using the [gurobipy](https://www.gurobi.com/) (closer to the end of June 2025).
 
 ## ⚡ Installation
 
