@@ -6,7 +6,17 @@
 [![Email](https://img.shields.io/badge/Email-g.savcisens@northeastern.edu-orange)](mailto:g.savcisens@northeastern.edu)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.{github_id}.svg)](https://doi.org/10.5281/zenodo)
 
-**Trilemma of Truth** is 
+**Abstract:** We often attribute human characteristics to large language models (LLMs) and claim that they "know" certain things. LLMs have an internal probabilistic knowledge that represents information retained during training. How can we assess the veracity of this knowledge? 
+We examine two common methods for probing the veracity of LLMs and discover several assumptions that are flawed. To address these flawed assumptions, we introduce `sAwMIL` (short for Sparse Aware Multiple-Instance Learning), a probing method that utilizes the internal activations of LLMs to separate statements into *true*, *false*, and *neither*. `sAwMIL` is based on multiple-instance learning and conformal prediction. We evaluate `sAwMIL` on 5 validity criteria across 16 open-source LLMs, including both default and chat-based variants, as well as on 3 new datasets. Among the insights we provide are: (1) the veracity signal is often concentrated in the third quarter of an LLM's depth; (2) truth and falsehood signals are not always symmetric; (3) linear probes perform better on chat models than on default models; (4) nonlinear probes may be required to capture veracity signals for some LLMs with reinforcement learning from human feedback or knowledge distillation; and (5) LLMs capture a third type of signal that is distinct from true and false and is neither true nor false. These findings provide a reliable method for verifying what LLMs "know" and how certain they are of their probabilistic internal knowledge.
+
+---
+
+**This repository** is the codebase for our paper on evaluating factual reasoning in large language models.  
+Here you’ll find everything needed to  
+1. Generate and inspect our three Trilemma benchmarks (cities, drugs, definitions),  
+2. Run zero-shot prompts,  
+3. Train and evaluate a suite of probe models (from mean-difference to our sAwMIL),  
+4. Reproduce all figures and tables from the paper.  
 
 ![Abstract Pipeline](./docs/figures/flow.svg)
 
@@ -41,8 +51,8 @@
 
 ## 📘 Repository Overview
 
-This repository contains the code that we used to generate the results for the paper. 
-Along with the code, we provide the usage examples and examples of results.
+This repository contains the code used to generate the results presented in the paper. 
+Along with the code, we provide the usage examples and results.
 
 ### What is included?
 
@@ -122,7 +132,7 @@ Note that we provide scores for every model in [outputs/probes/prompt](outputs/p
 
 #### 3. Train *one-vs-all sAwMIL* probe
 
-Note that you need to collect activations before you can train this probe. Generally, you need to train three SVM probes: one with `task=0`, one with `task=1` and `task=2`, see [Task Specification](#task-specification).
+Note that you must collect activations before training this probe. Generally, you need to train three SVM probes: one with `task=0`, one with `task=1` and `task=2`, see [Task Specification](#task-specification).
 
 ```bash
 # Train one-vs-all probe (an example without the hyperparameter search)
@@ -253,7 +263,7 @@ ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split
 ## 📝 To Do
 
 > [!WARNING]
-> We have refactored the code to improve readability, please, let us know if something does not work.
+> We have refactored the code to improve readability. Please let us know if something does not work.
 
 - [x] Check `run_zero_shot.py`
 - [x] Check `collect_activations.py`
@@ -262,8 +272,8 @@ ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split
 - [ ] Check the multiclass SIL (SVM)
 - [ ] Check the multiclass MIL (`sAwMIL`)
 - [ ] Upload `llama-3-8b` activations for the `city_locations` dataset
-- [ ] Check script for interventions
-- [ ] Check script for the cross-dataset generalization
+- [ ] Check the script for interventions
+- [ ] Check the script for the cross-dataset generalization
 - [ ] Add scripts/notebooks for plot generation
 - [ ] Add examples: data loading 
 - [ ] Describe the contents of the repository
