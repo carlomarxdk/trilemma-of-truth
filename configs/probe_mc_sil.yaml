@@ -1,0 +1,58 @@
+# @package _global_
+
+hydra:
+  job_logging:
+    version: 1
+    disable_existing_loggers: false
+    root:
+      level: WARNING  # Global log level: suppress logs below WARNING
+    loggers:
+      sklearn.utils.validation:
+        level: WARNING  # Reduce verbosity for sklearn validation utils
+      sklearnex:
+        level: WARNING  # Reduce verbosity for sklearnex
+  run:
+    dir: outputs/hydra_logs/probes/${probe.name}/${model.name}/${now:%Y-%m-%d}/${now:%H-%M-%S}
+
+defaults:
+  - model: llama-3-8b
+  - probe: mean_diff
+  - datapack: city_locations
+  - datapack@datapack_test: city_locations
+  - _self_
+
+conformal_params:
+  alpha: 0.1
+  # If True, resolve p-value ties by predicting; if False, abstain
+  tie_breaking: False
+  # Type of conformal prediction: 'multiclass' or 'binary'
+  nc: 'multiclass'
+
+eval_params:
+  n_bootstraps: 1000  # Number of bootstrap samples for evaluation
+
+task: -1
+task_dict: 
+  'False': 0
+  'True': 1
+  'Neither': 2
+
+layer_range: [0.1, 1.0]
+
+# Enable hyperparameter search (with cross-validation)
+search: True
+# Number of folds the cross validation
+cv_n_folds: 3 
+
+agg: full
+layers: ${model.layers}
+
+trial_name: ${datapack.name} 
+output_dir: "outputs/probes/${probe.name}/${model.name}/"
+
+# Set to True to enable debugging (starts from the specified layer, see the code)
+run_debugging: False
+
+random_seed: 42
+save_results: True  # Save the outputs
+start_from_checkpoint: True #  will start from the layer that was last computed (aka checkpointed)

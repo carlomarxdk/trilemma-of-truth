@@ -1,10 +1,17 @@
-# Trilemma of Truth
+# The Trilemma of Truth in Large Language Models
 
 [![arXiv](https://img.shields.io/badge/arXiv-2405.12345-b31b1b.svg)](https://arxiv.org/empty)
 [![🤗 Datasets](https://img.shields.io/badge/🤗%20Datasets-trilemma--of--truth-yellow)](https://huggingface.co/datasets/carlomarxx/trilemma-of-truth)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Email](https://img.shields.io/badge/Email-g.savcisens@northeastern.edu-orange)](mailto:g.savcisens@northeastern.edu)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.{github_id}.svg)](https://doi.org/10.5281/zenodo)
+
+**This repository** is the codebase for [our paper](https://arxiv.org/empty) on evaluating factual reasoning in large language models.  
+Here you’ll find everything needed to  
+1. Generate and inspect our three Trilemma benchmarks (cities, drugs, definitions),  
+2. Run zero-shot prompts,  
+3. Train and evaluate a suite of probe models (from mean-difference to our sAwMIL),  
+4. Reproduce all figures and tables from the paper.  
 
 **Abstract:** We often attribute human characteristics to large language models (LLMs) and claim that they "know" certain things. LLMs have an internal probabilistic knowledge that represents information retained during training. How can we assess the veracity of this knowledge? 
 We examine two common methods for probing the veracity of LLMs and discover several assumptions that are flawed. To address these flawed assumptions, we introduce `sAwMIL` (short for Sparse Aware Multiple-Instance Learning), a probing method that utilizes the internal activations of LLMs to separate statements into *true*, *false*, and *neither*. `sAwMIL` is based on multiple-instance learning and conformal prediction. We evaluate `sAwMIL` on 5 validity criteria across 16 open-source LLMs, including both default and chat-based variants, as well as on 3 new datasets. Among the insights we provide are: (1) the veracity signal is often concentrated in the third quarter of an LLM's depth; (2) truth and falsehood signals are not always symmetric; (3) linear probes perform better on chat models than on default models; (4) nonlinear probes may be required to capture veracity signals for some LLMs with reinforcement learning from human feedback or knowledge distillation; and (5) LLMs capture a third type of signal that is distinct from true and false and is neither true nor false. These findings provide a reliable method for verifying what LLMs "know" and how certain they are of their probabilistic internal knowledge.
@@ -13,18 +20,9 @@ We examine two common methods for probing the veracity of LLMs and discover seve
 
 ---
 
-**This repository** is the codebase for our paper on evaluating factual reasoning in large language models.  
-Here you’ll find everything needed to  
-1. Generate and inspect our three Trilemma benchmarks (cities, drugs, definitions),  
-2. Run zero-shot prompts,  
-3. Train and evaluate a suite of probe models (from mean-difference to our sAwMIL),  
-4. Reproduce all figures and tables from the paper.  
-
----
-
 ## Table of Contents
 
-- [Trilemma of Truth](#trilemma-of-truth)
+- [The Trilemma of Truth in Large Language Models](#the-trilemma-of-truth-in-large-language-models)
   - [Table of Contents](#table-of-contents)
   - [📘 Repository Overview](#-repository-overview)
     - [What is included?](#what-is-included)
@@ -36,7 +34,9 @@ Here you’ll find everything needed to
       - [0. Return full error log in `Hydra`](#0-return-full-error-log-in-hydra)
       - [1. Collect Hidden Activations](#1-collect-hidden-activations)
       - [2. Run zero-shot prompt (and collect scores)](#2-run-zero-shot-prompt-and-collect-scores)
-      - [3. Train *one-vs-all sAwMIL* probe](#3-train-one-vs-all-sawmil-probe)
+      - [3. Train *sAwMIL* probe](#3-train-sawmil-probe)
+        - [3.1. One-vs-all](#31-one-vs-all)
+        - [3. Multiclass](#3-multiclass)
       - [4. Single Instance Probe](#4-single-instance-probe)
         - [4.1 Train *one-vs-all SVM* probe](#41-train-one-vs-all-svm-probe)
         - [4.2 Train the *mean-difference* probe](#42-train-the-mean-difference-probe)
@@ -130,7 +130,8 @@ python run_zero_shot.py model=llama-3-8b variation=default batch_size=12 # see c
 
 Note that we provide scores for every model in [outputs/probes/prompt](outputs/probes/prompt/) folder. We provide an example on how to load the scores from the zero-shot prompting in  [notebooks/load_and_split_dataset](notebooks/load_and_split_dataset.ipynb) notebook.
 
-#### 3. Train *one-vs-all sAwMIL* probe
+#### 3. Train *sAwMIL* probe
+##### 3.1. One-vs-all
 
 Note that you must collect activations before training this probe. Generally, you need to train three SVM probes: one with `task=0`, one with `task=1` and `task=2`, see [Task Specification](#task-specification).
 
@@ -138,6 +139,14 @@ Note that you must collect activations before training this probe. Generally, yo
 # Train one-vs-all probe (an example without the hyperparameter search)
 python run_training.py --config-name=probe_mil.yaml \
 model=llama-3-8b datapack=city_locations probe=sawmil task=0 search=False 
+```
+
+##### 3. Multiclass
+After you collect all the activations and train three one-vs-all `sAwMIL` probes, you can proceed with training the multiclass one.
+
+```bash
+python run_training.py --config-name=probe_mil.yaml \
+model=llama-3-8b datapack=city_locations probe=sawmil task=-1 search=False 
 ```
 
 #### 4. Single Instance Probe

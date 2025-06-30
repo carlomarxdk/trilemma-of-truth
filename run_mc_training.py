@@ -1,4 +1,4 @@
-# Code for ONE-vs-OTHER probes, works both for SIL (MD+CP and SVM) and MIL (Sawmil) probes.
+# Code for MULTICLASS probes, works for SIL (only SVM) and MIL (Sawmil) probes.
 
 from scipy.stats import energy_distance
 from sklearn.metrics import (
@@ -25,16 +25,14 @@ import pprint
 from utils import should_process_layer
 
 
-from runners.runner_svm import SVMProbeRunner
-from runners.runner_md import MDProbeRunner
+from runners.runner_sil2multiclass import SILMC_Runner
 from runners.runner_sawmil import SawmilProbeRunner
 
 log = logging.getLogger(__name__)
 
 
 PROBES = {
-    'svm': SVMProbeRunner,
-    'mean_diff': MDProbeRunner,
+    'svm': SILMC_Runner,
     'sawmil': SawmilProbeRunner,
 }
 
@@ -63,6 +61,7 @@ def validate_config(cfg: DictConfig):
     cfg["output_dir"] = os.path.join(cfg.output_dir, trial_name)
     OmegaConf.set_struct(cfg, True)
 
+    assert cfg.task == -1, "Task must be -1 for multiclass probes."
     assert len(cfg.layer_range) == 2, "Layer range must be a list of two integers."
 
 
@@ -81,12 +80,6 @@ def log_metric(preds, scores, y_true, mask, cfg):
     """
     Log the metrics to the Weights and Biases dashboard with prefix and return as a dictionary without prefix.
     """
-    # yhat = probs.round()
-    is_binary = len(np.unique(y_true)) == 2
-    assert is_binary, "Only binary classification is supported."
-    is_ok = (len(np.unique(preds)) > 0) & (len(np.unique(preds)) < 4)
-    assert is_ok, "Only binary classification is supported (or binary with abstention class '-1')."
-
     a_mask = (preds != -1).flatten()
     preds = preds.flatten()
     scores = scores.flatten()
@@ -102,41 +95,29 @@ def log_metric(preds, scores, y_true, mask, cfg):
 
     full_mask = a_mask & mask    
 
-    binary_kwargs = dict(
+    preds_kwargs = dict(
         y_true=y_true[full_mask],
         y_pred=preds[full_mask],
         n_bootstraps=cfg.eval_params["n_bootstraps"]
     )
 
     # Get the values for each metric using the helper.
-    mcc_val = safe_bootstrap(mcc,  **binary_kwargs)
-    ami_val = safe_bootstrap(ami,  **binary_kwargs)
-    ari_val = safe_bootstrap(ari,  **binary_kwargs)
-    recall_val = safe_bootstrap(recall, **binary_kwargs)
+    mcc_val = safe_bootstrap(mcc,  **preds_kwargs)
+    ami_val = safe_bootstrap(ami,  **preds_kwargs)
+    ari_val = safe_bootstrap(ari,  **preds_kwargs)
+    recall_val = safe_bootstrap(recall, **preds_kwargs)
     if np.equal(a_mask.mean(), 1):
         wmcc_val = mcc_val
         wami_val = ami_val
         wari_val = ari_val
         wrecall_val = recall_val
     else:
-        wmcc_val = safe_bootstrap(wmcc, **binary_kwargs)
-        wami_val = safe_bootstrap(wami, **binary_kwargs)
-        wari_val = safe_bootstrap(wari,  **binary_kwargs)
-        wrecall_val = safe_bootstrap(recall, **binary_kwargs)
-    try:
-        probs = scores[full_mask]
-        x_min = probs.min()
-        x_max = probs.max()
-
-        # Apply min-max scaling
-        probs_scaled = (probs - x_min) / (x_max - x_min)
-        targets = y_true[full_mask]
-        energy_val = energy_distance(
-            probs_scaled[targets == 0], probs_scaled[targets == 1])
-    except Exception as e:
-        log.warning(
-            f"Error calculating energy distance: {e}. Setting to 1000.")
-        energy_val = 1000
+        wmcc_val = safe_bootstrap(wmcc, **preds_kwargs)
+        wami_val = safe_bootstrap(wami, **preds_kwargs)
+        wari_val = safe_bootstrap(wari,  **preds_kwargs)
+        wrecall_val = safe_bootstrap(recall, **preds_kwargs)
+    
+    energy_val = -1 # We do not compute the energy val for multiclass probes.
 
     try:
         mAP_val = mAP(y_true[full_mask],
@@ -266,10 +247,10 @@ def main(cfg: DictConfig):
             layers = missing_layers
     else:
         layers = cfg["layers"]
-
+    ### only works with taks == -1
     task = Task(cfg.task)
     db = LogDataBase(
-        tab_name=f"{cfg.probe['name']}_fit", db_name="experiments")
+        tab_name=f"{cfg.probe['name']}_mc_fit", db_name="experiments")
     db.write(trial_id=f"{cfg.model.name}-{cfg.trial_name}",
              model=cfg.model.name,
              datapack=cfg.datapack.name,

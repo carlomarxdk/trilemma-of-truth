@@ -11,7 +11,7 @@ from sklearn.metrics import (
 import numpy as np
 import logging
 from copy import deepcopy
-from loaders.reader import MILProbeData
+from misc.reader import MILProbeData
 
 log = logging.getLogger("SILMC_Runner")
 
@@ -29,12 +29,12 @@ class SILMC_Runner(BaseProbeRunner):
         self.transformer = None
         self.bag_processor = None
 
-        self.task_list = cfg.task_list
-        reader_T = MILProbeData(output_dir=cfg.output_dir, task=self.task_list[0], model_name=cfg.model["name"],
+        self.task_dict = cfg.task_dict
+        reader_T = MILProbeData(output_dir=cfg.output_dir, task=self.task_dict[0], model_name=cfg.model["name"],
                                 datapack=cfg.datapack['name'], trial_name=cfg.trial_name, probe_name=cfg.probe["name"])
-        reader_F = MILProbeData(output_dir=cfg.output_dir, task=self.task_list[1], model_name=cfg.model["name"],
+        reader_F = MILProbeData(output_dir=cfg.output_dir, task=self.task_dict[1], model_name=cfg.model["name"],
                                 datapack=cfg.datapack['name'], trial_name=cfg.trial_name, probe_name=cfg.probe["name"])
-        reader_N = MILProbeData(output_dir=cfg.output_dir, task=self.task_list[2], model_name=cfg.model["name"],
+        reader_N = MILProbeData(output_dir=cfg.output_dir, task=self.task_dict[2], model_name=cfg.model["name"],
                                 datapack=cfg.datapack['name'], trial_name=cfg.trial_name, probe_name=cfg.probe["name"])
         self.readers = {
             0: reader_F,
@@ -122,13 +122,13 @@ class SILMC_Runner(BaseProbeRunner):
         # Transform the bags using the fitted scaler
         return self.separator.predict_proba(X, per_instance=per_instance)
 
-    def single_prediction(self, X):
+    def single_prediction(self, X, per_instance=False):
         '''
         Decision function based on the last token only.
         Args:
             - X: a list of bags
         '''
-        return self._decision_function(X, per_instance=False)
+        return self._decision_function(X, per_instance=per_instance)
 
     def bag_prediction(self, X):
         '''
