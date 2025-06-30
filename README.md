@@ -39,7 +39,8 @@ We examine two common methods for probing the veracity of LLMs and discover seve
         - [3. Multiclass](#3-multiclass)
       - [4. Single Instance Probe](#4-single-instance-probe)
         - [4.1 Train *one-vs-all SVM* probe](#41-train-one-vs-all-svm-probe)
-        - [4.2 Train the *mean-difference* probe](#42-train-the-mean-difference-probe)
+      - [4.2 Train *multiclass SVM* probe](#42-train-multiclass-svm-probe)
+        - [4.3 Train the *mean-difference* probe](#43-train-the-mean-difference-probe)
     - [Task specification](#task-specification)
   - [🗂️ Dataset](#️-dataset)
     - [Structure](#structure)
@@ -143,9 +144,10 @@ model=llama-3-8b datapack=city_locations probe=sawmil task=0 search=False
 
 ##### 3. Multiclass
 After you collect all the activations and train three one-vs-all `sAwMIL` probes, you can proceed with training the multiclass one.
+The `run_mc_training.py` runs only with the `task=-1`.
 
 ```bash
-python run_training.py --config-name=probe_mil.yaml \
+python run_mc_training.py --config-name=probe_mil.yaml \
 model=llama-3-8b datapack=city_locations probe=sawmil task=-1 search=False 
 ```
 
@@ -163,7 +165,16 @@ python run_training.py --config-name=probe_sil.yaml \
 model=llama-3-8b datapack=city_locations probe=svm task=1
 ```
 
-##### 4.2 Train the *mean-difference* probe
+#### 4.2 Train *multiclass SVM* probe
+After you collect all the activations and train three one-vs-all `SVM` probes, you can proceed with training the multiclass one.
+The `run_mc_training.py` runs only with the `task=-1`.
+
+```bash
+python run_mc_training.py --config-name=probe_mil.yaml \
+model=llama-3-8b datapack=city_locations probe=svm task=-1
+```
+
+##### 4.3 Train the *mean-difference* probe
 
 The mean-difference probe is trained to separate *true-vs-false*, thus, use `task=3` .
 
@@ -278,13 +289,14 @@ ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split
 - [x] Check `collect_activations.py`
 - [x] Check `run_training.py` for SIL probes (SVM and Mean Difference)
 - [x] Check `run_training.py` for `sAwMIL`
+- [x] Add the multiclass SIL and MIL script
 - [ ] Check the multiclass SIL (SVM)
 - [ ] Check the multiclass MIL (`sAwMIL`)
 - [ ] Upload `llama-3-8b` activations for the `city_locations` dataset
 - [ ] Check the script for interventions
 - [ ] Check the script for the cross-dataset generalization
 - [ ] Add scripts/notebooks for plot generation
-- [ ] Add examples: data loading 
+- [x] Add examples: data loading 
 - [ ] Describe the contents of the repository
 
 ## 📃 Licenses

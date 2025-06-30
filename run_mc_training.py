@@ -26,14 +26,14 @@ from utils import should_process_layer
 
 
 from runners.runner_sil2multiclass import SILMC_Runner
-from runners.runner_sawmil import SawmilProbeRunner
+from runners.runner_sawmil2multiclass import MILMC_Runner
 
 log = logging.getLogger(__name__)
 
 
 PROBES = {
     'svm': SILMC_Runner,
-    'sawmil': SawmilProbeRunner,
+    'sawmil': MILMC_Runner,
 }
 
 

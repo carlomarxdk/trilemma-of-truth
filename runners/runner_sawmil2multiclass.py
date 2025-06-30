@@ -1,6 +1,6 @@
 from probes.runner_base import BaseProbeRunner
 from probes.silSVM_patch import SVM
-from probes.multiclass import MulticlassSIL
+from probes.multiclass import MulticlassMIL
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import KFold
 from probes.conformal import MulticlassICP, probability_margin_nc
@@ -16,7 +16,7 @@ from misc.reader import MILProbeData
 log = logging.getLogger("SILMC_Runner")
 
 
-class SILMC_Runner(BaseProbeRunner):
+class MILMC_Runner(BaseProbeRunner):
     def __init__(self, cfg):
         super().__init__(cfg)
         assert cfg.probe["name"] == "SVM", "Probe name must be SIL"
@@ -53,8 +53,8 @@ class SILMC_Runner(BaseProbeRunner):
         """
         # 0) Get the bags and labels
         assert len(X) == len(y), "X and y must have the same length"
-        self.separator = MulticlassSIL(readers=self.readers,
-                                       max_bag_size=1,
+        self.separator = MulticlassMIL(readers=self.readers,
+                                       max_bag_size=self.probe.max_bag_size,
                                        layer_id=kwargs.get('layer_id', np.nan))
 
         self.separator.fit(X, y)
@@ -81,7 +81,7 @@ class SILMC_Runner(BaseProbeRunner):
 
     def parameter_search(self, X, y, mask):
         log.warning(
-            "Parameter search is not implemented for SILMC_Runner. Use single_training instead.")
+            "Parameter search is not implemented for MILMC_Runner. Use single_training instead.")
         return self.single_training(X, y, mask=mask)
     
     def conformal_training(self, X_cal, y_cal, mask_cal=None):
