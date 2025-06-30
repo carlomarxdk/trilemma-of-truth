@@ -1,4 +1,4 @@
-statement,object_1,object_2,correct_object_2,correct,negation,real_object,category,is_true,is_false,is_unvefiriable,multiclass_label
+statement,object_1,object_2,correct_object_2,correct,negation,real_object,category,is_true,is_false,is_neither,multiclass_label
 The city of Leguaqui is not located in the Slovorgypru Islands.,Leguaqui,the Slovorgypru Islands,"the Slovorgypru Islands, Molovenezue",FALSE,TRUE,FALSE,cities,FALSE,FALSE,TRUE,2
 The city of Leguaqui is located in the Slovorgypru Islands.,Leguaqui,the Slovorgypru Islands,"the Slovorgypru Islands, Molovenezue",FALSE,FALSE,FALSE,cities,FALSE,FALSE,TRUE,2
 The city of Leguaqui is not located in Mozamina.,Leguaqui,Mozamina,"the Slovorgypru Islands, Molovenezue",FALSE,TRUE,FALSE,cities,FALSE,FALSE,TRUE,2

@@ -1,4 +1,4 @@
-statement,object_1,object_2,correct_object_2,correct,negation,real_object,category,is_true,is_false,is_unvefiriable,multiclass_label
+statement,object_1,object_2,correct_object_2,correct,negation,real_object,category,is_true,is_false,is_neither,multiclass_label
 The city of Palembang is located in the Dominican Republic.,Palembang,the Dominican Republic,Indonesia,FALSE,FALSE,TRUE,cities,FALSE,TRUE,FALSE,0
 The city of Laoag is not located in Libya.,Laoag,Libya,the Philippines,TRUE,TRUE,TRUE,cities,TRUE,FALSE,FALSE,1
 The city of Airoli is not located in India.,Airoli,India,India,FALSE,TRUE,TRUE,cities,FALSE,TRUE,FALSE,0

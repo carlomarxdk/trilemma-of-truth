@@ -29,16 +29,17 @@ class SILMC_Runner(BaseProbeRunner):
         self.transformer = None
         self.bag_processor = None
 
-        reader_T = MILProbeData(output_dir=cfg.output_dir, task=4, model_name=cfg.model["name"],
+        self.task_list = cfg.task_list
+        reader_T = MILProbeData(output_dir=cfg.output_dir, task=self.task_list[0], model_name=cfg.model["name"],
                                 datapack=cfg.datapack['name'], trial_name=cfg.trial_name, probe_name=cfg.probe["name"])
-        reader_F = MILProbeData(output_dir=cfg.output_dir, task=5, model_name=cfg.model["name"],
+        reader_F = MILProbeData(output_dir=cfg.output_dir, task=self.task_list[1], model_name=cfg.model["name"],
                                 datapack=cfg.datapack['name'], trial_name=cfg.trial_name, probe_name=cfg.probe["name"])
-        reader_U = MILProbeData(output_dir=cfg.output_dir, task=3, model_name=cfg.model["name"],
+        reader_N = MILProbeData(output_dir=cfg.output_dir, task=self.task_list[2], model_name=cfg.model["name"],
                                 datapack=cfg.datapack['name'], trial_name=cfg.trial_name, probe_name=cfg.probe["name"])
         self.readers = {
             0: reader_F,
             1: reader_T,
-            2: reader_U
+            2: reader_N
         }
 
     def single_training(self, X, y, mask=None, **kwargs):

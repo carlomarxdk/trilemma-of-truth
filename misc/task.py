@@ -17,7 +17,7 @@ class Task:
         elif task == 1:
             log.warning("The TASK is set to: FALSE-vs-ALL")
         elif task == 2:
-            log.warning("The TASK is set to: UNVERIFIABLE-vs-ALL")
+            log.warning("The TASK is set to: NEITHER-vs-ALL")
         elif task == 3:
             log.warning("The TASK is set to: TRUE-vs-FALSE")
         elif task == -1:
