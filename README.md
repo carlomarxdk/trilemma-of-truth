@@ -1,17 +1,16 @@
 # The Trilemma of Truth in Large Language Models
 
-[![arXiv](https://img.shields.io/badge/arXiv-2405.12345-b31b1b.svg)](https://arxiv.org/empty)
+[![arXiv](https://img.shields.io/badge/arXiv-2506.23921-b31b1b.svg)](https://arxiv.org/abs/2506.23921)
 [![🤗 Datasets](https://img.shields.io/badge/🤗%20Datasets-trilemma--of--truth-yellow)](https://huggingface.co/datasets/carlomarxx/trilemma-of-truth)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Email](https://img.shields.io/badge/Email-g.savcisens@northeastern.edu-orange)](mailto:g.savcisens@northeastern.edu)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.{github_id}.svg)](https://doi.org/10.5281/zenodo)
 
-**This repository** is the codebase for [our paper](https://arxiv.org/empty) on evaluating factual reasoning in large language models.  
+**This repository** is the codebase for [our paper](https://arxiv.org/abs/2506.23921) on evaluating factual reasoning in large language models.  
 Here you’ll find everything needed to  
-1. Generate and inspect our three Trilemma benchmarks (cities, drugs, definitions),  
+1. Generate and inspect our three Trilemma data sets (city locations, drug indications, word definitions),  
 2. Run zero-shot prompts,  
 3. Train and evaluate a suite of probe models (from mean-difference to our sAwMIL),  
-4. Reproduce all figures and tables from the paper.  
 
 **Abstract:** We often attribute human characteristics to large language models (LLMs) and claim that they "know" certain things. LLMs have an internal probabilistic knowledge that represents information retained during training. How can we assess the veracity of this knowledge? 
 We examine two common methods for probing the veracity of LLMs and discover several assumptions that are flawed. To address these flawed assumptions, we introduce `sAwMIL` (short for Sparse Aware Multiple-Instance Learning), a probing method that utilizes the internal activations of LLMs to separate statements into *true*, *false*, and *neither*. `sAwMIL` is based on multiple-instance learning and conformal prediction. We evaluate `sAwMIL` on 5 validity criteria across 16 open-source LLMs, including both default and chat-based variants, as well as on 3 new datasets. Among the insights we provide are: (1) the veracity signal is often concentrated in the third quarter of an LLM's depth; (2) truth and falsehood signals are not always symmetric; (3) linear probes perform better on chat models than on default models; (4) nonlinear probes may be required to capture veracity signals for some LLMs with reinforcement learning from human feedback or knowledge distillation; and (5) LLMs capture a third type of signal that is distinct from true and false and is neither true nor false. These findings provide a reliable method for verifying what LLMs "know" and how certain they are of their probabilistic internal knowledge.
@@ -275,9 +274,12 @@ ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split
 ## ✍️ How to Cite?
 
 ```bibtex
-@article{
-
-}
+@inproceedings{savcisens2024trilemma,
+      title={The Trilemma of Truth in Large Language Models},
+      author={Savcisens, Germans and Eliassi‐Rad, Tina},
+      booktitle={arXiv preprint arXiv:2506.23921},
+      year={2025}
+    }
 ```
 
 ## 📝 To Do
@@ -297,7 +299,7 @@ ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split
 - [ ] Check the script for the cross-dataset generalization
 - [ ] Add scripts/notebooks for plot generation
 - [x] Add examples: data loading 
-- [ ] Describe the contents of the repository
+- [x] Describe the contents of the repository
 
 ## 📃 Licenses
 
