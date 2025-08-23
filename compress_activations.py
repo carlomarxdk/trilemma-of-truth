@@ -1,5 +1,4 @@
-# Description: Experiment script to GENERATE and SAVE activations from a model
-# Parts of the code are adapted from https://github.com/saprmarks/geometry-of-truth/blob/main/generate_acts.py
+# Description: Script to compress activations from a model
 
 import logging
 import hydra
