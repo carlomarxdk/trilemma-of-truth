@@ -185,3 +185,5 @@ Pipfile.lock
 /outputs/activations/llama-3-8b/word_instances
 /outputs/activations/llama-3-8b/med_indications_synthetic
 /outputs/activations/llama-3-8b/med_indications
+outputs/activations/llama-3-8b/city_locations_synthetic/full/layer_7_e_temp.npy
+outputs/activations/llama-3-8b/city_locations/full/layer_7_e_temp.npy

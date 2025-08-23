@@ -25,15 +25,15 @@ import pprint
 from utils import should_process_layer
 
 
-from runners.runner_sil2mc import SILMC_Runner
-from runners.runner_sawmil2multiclass import MILMC_Runner
+# from runners.runner_sil2mc import SILMC_Runner
+from runners.runner_sawmil2multiclass import MulticlassMILRunner
 
 log = logging.getLogger(__name__)
 
 
 PROBES = {
-    'svm': SILMC_Runner,
-    'sawmil': MILMC_Runner,
+    # 'svm': SILMC_Runner,
+    'sawmil': MulticlassMILRunner,
 }
 
 
@@ -151,10 +151,7 @@ def log_metric(preds, scores, y_true, mask, cfg):
     return metric_with_ci
 
 
-def save(concept_direction,
-         concept_bias,
-         scaler,
-         transformer,
+def save(cls, 
          conf_calibrator,
          metric_dict,
          cfg, layer_id, y_hat=None, y_true=None):
@@ -170,18 +167,11 @@ def save(concept_direction,
     # SAVE the METRIC
     with open(f"{save_dir}/metrics_{layer_id}.json", "w") as f:
         json.dump(metric_dict, f)
-    # SAVE the DIRECTION
-    np.save(f"{save_dir}/coef_{layer_id}.npy", concept_direction)
-    np.save(f"{save_dir}/bias_{layer_id}.npy", concept_bias)
 
-    # SAVE the SCALER
-    if (scaler is not None):
-        with open(f"{save_dir}/scaler_{layer_id}.pkl", "wb") as f:
-            pickle.dump(scaler, f)
-    # SAVE the TRANSFORMER
-    if (transformer is not None):
-        with open(f"{save_dir}/transformer_{layer_id}.pkl", "wb") as f:
-            pickle.dump(transformer, f)
+    # SAVE the Classifier
+    if (cls is not None):
+        with open(f"{save_dir}/cls_{layer_id}.pkl", "wb") as f:
+            pickle.dump(cls, f)
     # SAVE the CONFORMAL CALIBRATOR
     if (conf_calibrator is not None):
         with open(f"{save_dir}/calibrator_{layer_id}.pkl", "wb") as f:
@@ -312,7 +302,6 @@ def main(cfg: DictConfig):
 
         yh_te = runner.predict_proba(X_te)
         yc_te = runner.conformal_prediction(X_te)
-        print(yh_te, yc_te)
         preds = runner.predict(X_te)
         # Assemble Metrics
         metric_dict = {}
@@ -331,12 +320,9 @@ def main(cfg: DictConfig):
             yh_te)
 
         if cfg.save_results:
-            save(concept_direction=runner.direction,
-                 concept_bias=runner.bias,
-                 metric_dict=metric_dict,
-                 scaler=runner.scaler,
-                 transformer=runner.transformer,
+            save(cls = runner.separator,
                  conf_calibrator=runner.calibrator,
+                 metric_dict=metric_dict,
                  cfg=cfg,
                  layer_id=layer_id,
                  y_hat=yh_te,

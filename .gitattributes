@@ -1,1 +1,2 @@
 outputs/activations/** filter=lfs diff=lfs merge=lfs -text
+*e_temp.npy filter=lfs diff=lfs merge=lfs -text
