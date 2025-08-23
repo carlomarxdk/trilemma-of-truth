@@ -1,6 +1,12 @@
 # The Trilemma of Truth in Large Language Models
 
-**This repository** is the codebase for our paper on evaluating factual reasoning in large language models.  
+[![arXiv](https://img.shields.io/badge/arXiv-2506.23921-b31b1b.svg)](https://arxiv.org/abs/2506.23921)
+[![🤗 Datasets](https://img.shields.io/badge/🤗%20Datasets-trilemma--of--truth-yellow)](https://huggingface.co/datasets/carlomarxx/trilemma-of-truth)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Email](https://img.shields.io/badge/Email-g.savcisens@northeastern.edu-orange)](mailto:g.savcisens@northeastern.edu)
+[![DOI](https://zenodo.org/badge/986600505.svg)](https://doi.org/10.5281/zenodo.15779092)
+
+**This repository** is the codebase for [our paper](https://arxiv.org/abs/2506.23921) on evaluating factual reasoning in large language models.  
 Here you’ll find everything needed to  
 1. Generate and inspect our three Trilemma data sets (city locations, drug indications, word definitions),  
 2. Run zero-shot prompts,  
@@ -268,6 +274,78 @@ dh.assemble(
 
 For more usage examples, see the [notebooks/](notebooks/) folder.
 
+### Processed Data on Hugging Face 🤗
+
+The  final preprocessed datasets - including standardized splits - are also available on [Hugging Face Datasets](https://huggingface.co/datasets/carlomarxx/trilemma-of-truth). These are ideal if you want to skip local preprocessing and directly load ready-to-use datasets into your workflow. They follow the same structure and splitting scheme we use internally. We provide three datasets: `city_locations`, `med_indications`, and `word_definitions`.
+
+> [!IMPORTANT]
+> **Note I:** These Hugging Face -- hosted datasets are *not* used in our experiments.  
+> 
+> **Note II**: All experiments in this repository (e.g., `collect_activations.py`, probe evaluations) rely on the `DataHandler` class, which assembles the datasets locally from the `datasets/` folder.
+> 
+> **Note III:** The calibration split is labeled as `validation`, following Hugging Face naming conventions (`train`, `validation`, `test`).
+
+**How to use HF?** First, install the 🤗 Datasets and `pandas` libraries:
+
+```bash
+pip install datasets pandas
+```
+
+Then load the data with the `datasets` package. The dataset identifier is `carlomarxx/trilemma-of-truth`.
+
+```python
+from datasets import load_dataset
+
+# 1. Load the full dataset with train/validation/test splits
+ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions")
+
+# Convert to pandas
+df = ds["train"].to_pandas()
+
+# Access the first example
+print(ds["train"][0])
+
+# 2. Load a specific split [train, validation, test]
+ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split="train")
+```
+
+## ✍️ How to Cite?
+
+```bibtex
+@inproceedings{savcisens2024trilemma,
+      title={The Trilemma of Truth in Large Language Models},
+      author={Savcisens, Germans and Eliassi‐Rad, Tina},
+      booktitle={arXiv preprint arXiv:2506.23921},
+      year={2025}
+    }
+```
+
+## 📝 To Do
+
+> [!WARNING]
+> We have refactored the code to improve readability. Please let us know if something does not work.
+
+- [x] Check `run_zero_shot.py`
+- [x] Check `collect_activations.py`
+- [x] Check `run_training.py` for SIL probes (SVM and Mean Difference)
+- [x] Check `run_training.py` for `sAwMIL`
+- [x] Add the multiclass SIL and MIL script
+- [ ] Check the multiclass SIL (SVM)
+- [x] Check the multiclass MIL (`sAwMIL`)
+- [x] Upload `llama-3-8b` activations for the `city_locations` dataset
+- [ ] Check the script for interventions
+- [ ] Check the script for the cross-dataset generalization
+- [ ] Add scripts/notebooks for plot generation
+- [x] Add examples: data loading
+- [x] Describe the contents of the repository
+
 ## 📃 Licenses
+
+**Contacts**:
+
+- [Germans Savcisens](https://savcisens.com/) (@carlomarxdk)
+- [Tina Eliassi-Rad](https://eliassi.org/) (@eliassi)
+
 > [!IMPORTANT]
 > This **code** is licensed under the MIT License. See [LICENSE](LICENSE) for more information.
+> The **data** is licensed under the [Creative Commons Attribution 4.0 (CC BY 4.0)](https://huggingface.co/datasets/choosealicense/licenses/blob/main/markdown/cc-by-4.0.md).
