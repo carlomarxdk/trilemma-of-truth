@@ -330,11 +330,11 @@ ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split
 - [x] Check `run_training.py` for SIL probes (SVM and Mean Difference)
 - [x] Check `run_training.py` for `sAwMIL`
 - [x] Add the multiclass SIL and MIL script
-- [ ] Check the multiclass SIL (SVM)
+- [x] Check the multiclass SIL (SVM)
 - [x] Check the multiclass MIL (`sAwMIL`)
 - [x] Upload `llama-3-8b` activations for the `city_locations` dataset
-- [ ] Check the script for interventions
-- [ ] Check the script for the cross-dataset generalization
+- [x] Add code for interventions and cross-dataset generalization
+- [ ] Check the script for interventions and the cross-dataset generalization
 - [ ] Add scripts/notebooks for plot generation
 - [x] Add examples: data loading
 - [x] Describe the contents of the repository
