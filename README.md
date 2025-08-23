@@ -32,6 +32,7 @@ We examine two common methods for probing the veracity of LLMs and discover seve
     - [Run the Scripts](#run-the-scripts)
       - [0. Return full error log in `Hydra`](#0-return-full-error-log-in-hydra)
       - [1. Collect Hidden Activations](#1-collect-hidden-activations)
+        - [(Optional) Compress the activations](#optional-compress-the-activations)
       - [2. Run zero-shot prompt (and collect scores)](#2-run-zero-shot-prompt-and-collect-scores)
       - [3. Train *sAwMIL* probe](#3-train-sawmil-probe)
         - [3.1. One-vs-all](#31-one-vs-all)
@@ -119,6 +120,16 @@ python collect_activations.py model=llama-3-8b # see configs/activations.yaml fo
 
 After you collected the activations, you can load them using the code in [notebooks/load_and_split_dataset](notebooks/load_and_split_dataset.ipynb) notebook.
 
+##### (Optional) Compress the activations
+
+Files that store activations are pretty heavy. You can run `compress_activations.py` to further reduce the size (the `DataHandler` object can handle both uncompressed and compressed activations):
+
+```bash
+python compress_activations.py model=llama-3-8b # see configs/activations.yaml for all the paramaters
+```
+
+This method reduces the size of the file by 15-20%.
+
 #### 2. Run zero-shot prompt (and collect scores)
 
 You can collect the zero-shot prompting scores without having activations.
@@ -131,6 +142,7 @@ python run_zero_shot.py model=llama-3-8b variation=default batch_size=12 # see c
 Note that we provide scores for every model in [outputs/probes/prompt](outputs/probes/prompt/) folder. We provide an example on how to load the scores from the zero-shot prompting in  [notebooks/load_and_split_dataset](notebooks/load_and_split_dataset.ipynb) notebook.
 
 #### 3. Train *sAwMIL* probe
+
 ##### 3.1. One-vs-all
 
 Note that you must collect activations before training this probe. Generally, you need to train three SVM probes: one with `task=0`, one with `task=1` and `task=2`, see [Task Specification](#task-specification).
@@ -142,6 +154,7 @@ model=llama-3-8b datapack=city_locations probe=sawmil task=0 search=False
 ```
 
 ##### 3. Multiclass
+
 After you collect all the activations and train three one-vs-all `sAwMIL` probes, you can proceed with training the multiclass one.
 The `run_mc_training.py` runs only with the `task=-1`.
 
@@ -165,6 +178,7 @@ model=llama-3-8b datapack=city_locations probe=svm task=1
 ```
 
 #### 4.2 Train *multiclass SVM* probe
+
 After you collect all the activations and train three one-vs-all `SVM` probes, you can proceed with training the multiclass one.
 The `run_mc_training.py` runs only with the `task=-1`.
 
