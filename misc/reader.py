@@ -17,7 +17,7 @@ class ProbeData(ABC):
 
 
 class MILProbeData(ProbeData):
-    def __init__(self, output_dir, task, model_name, datapack, trial_name, probe_name: str = 'sbMIL', intervention_type: str = 'default'):
+    def __init__(self, output_dir, task, model_name, datapack, trial_name, probe_name: str = 'sawmil'):
         super().__init__()
         self.output_dir = output_dir
         self.task = task
@@ -36,7 +36,7 @@ class MILProbeData(ProbeData):
             self.mc_intervention_dir = to_absolute_path(
                 f'outputs/interv/{probe_name}/{model_name}/_mc_/{self.trial_name}{task}/')
         else:
-            self.trial_name = trial_name[:-2]
+            self.trial_name = trial_name.split('-')[0]
             self.probe_dir = to_absolute_path(
                 f'outputs/probes/{probe_name}/{model_name}/{self.trial_name}-{task}/')
             self.intervention_dir = to_absolute_path(

@@ -176,5 +176,12 @@ cython_debug/
 /temp
 .DS_Store
 Pipfile.lock
-/outputs/activations
 /outputs/hydra_logs
+/outputs/activations/llama-3-8b/word_types_synthetic
+/outputs/activations/llama-3-8b/word_types
+/outputs/activations/llama-3-8b/word_synonyms_synthetic
+/outputs/activations/llama-3-8b/word_synonyms
+/outputs/activations/llama-3-8b/word_instances_synthetic
+/outputs/activations/llama-3-8b/word_instances
+/outputs/activations/llama-3-8b/med_indications_synthetic
+/outputs/activations/llama-3-8b/med_indications

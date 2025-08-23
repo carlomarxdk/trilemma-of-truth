@@ -15,7 +15,7 @@ hydra:
 
 defaults:
   - model: ???
-  - probe: sbMIL2
+  - probe: sawmil
   - datapack: city_locations
   - datapack@datapack_test: city_locations
   - _self_
@@ -45,7 +45,7 @@ cv_bag_limit: 600 # limit the number of bags per fold (withing the cross-validat
 agg: full
 layers: ${model.layers}
 # Set to True to enable debugging (starts from the specified layer, see the code)
-run_debugging: False
+run_debugging: False # would run only on the 13th layer of every model (good for the debugging along with the llama-3-8b model)
 
 trial_name: ${datapack.name} 
 output_dir: "outputs/probes/${probe.name}/${model.name}/"
@@ -54,6 +54,7 @@ random_seed: 42
 save_results: True  # Save the outputs
 start_from_checkpoint: True #  will start from the layer that was last computed (aka checkpointed)
 
-
-
-
+multiclass_params:
+  tasks: {'T': 1, 
+          'F': 0,
+          'N': 2}

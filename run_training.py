@@ -1,4 +1,4 @@
-# Code for ONE-vs-OTHER probes, works both for SIL (MD+CP and SVM) and MIL (Sawmil) probes.
+# Code for ONE-vs-ALL probes, works both for SIL (MD+CP and SVM) and MIL (Sawmil) probes.
 
 from scipy.stats import energy_distance
 from sklearn.metrics import (
@@ -279,6 +279,8 @@ def main(cfg: DictConfig):
              status=0)
 
     # PER LAYER
+    if cfg.run_debugging:
+        layers = [13]
     for layer_id in layers:
         if cfg.run_debugging == True and layer_id > 6 and should_process_layer(layer_id, cfg):
             log.warning(f"Processing layer {layer_id} || Debugging mode")

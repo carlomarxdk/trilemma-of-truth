@@ -1,4 +1,4 @@
-from probes.runner_base import BaseProbeRunner
+from runners.runner_base import BaseProbeRunner
 from probes.silSVM_patch import SVM
 from probes.multiclass import MulticlassSIL
 from sklearn.preprocessing import StandardScaler
@@ -17,6 +17,10 @@ log = logging.getLogger("SILMC_Runner")
 
 
 class SILMC_Runner(BaseProbeRunner):
+    """
+    This runner collect the one-vs-all (single-instance based models) and convert them to multiclass models.
+    For example, one can convert the SVM-based single-instance models to a multiclass model.
+    """
     def __init__(self, cfg):
         super().__init__(cfg)
         assert cfg.probe["name"] == "SVM", "Probe name must be SIL"

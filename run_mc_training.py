@@ -25,7 +25,7 @@ import pprint
 from utils import should_process_layer
 
 
-from runners.runner_sil2multiclass import SILMC_Runner
+from runners.runner_sil2mc import SILMC_Runner
 from runners.runner_sawmil2multiclass import MILMC_Runner
 
 log = logging.getLogger(__name__)
@@ -56,8 +56,6 @@ def validate_config(cfg: DictConfig):
         trial_name += "_search"
     trial_name += f'_task-{cfg.task}'
     cfg["trial_name"] = trial_name
-    # if cfg["task"] == 2:
-    #     cfg["probe"]["assume_known_positives"] = False
     cfg["output_dir"] = os.path.join(cfg.output_dir, trial_name)
     OmegaConf.set_struct(cfg, True)
 
@@ -260,6 +258,8 @@ def main(cfg: DictConfig):
              status=0)
 
     # PER LAYER
+    if cfg.run_debugging:
+        layers = [13]
     for layer_id in layers:
         if cfg.run_debugging == True and layer_id > 6 and should_process_layer(layer_id, cfg):
             log.warning(f"Processing layer {layer_id} || Debugging mode")
@@ -296,16 +296,10 @@ def main(cfg: DictConfig):
         runner = PROBES[cfg.probe['name']](cfg)
         if cfg.search:
             result = runner.parameter_search(
-                X=X_tr, y=y_train, mask=mask)
+                X=X_tr, y=y_train, mask=mask, layer_id=layer_id)
         else:
-            # try:
             result = runner.single_training(
-                    X=X_tr, y=y_train, mask=mask)
-            # except Exception as e:
-            #     log.error(f"Error: {e}")
-            #     log.warning(
-            #         "\tSkipping the [%s] layer and moving to the next one..." % layer_id)
-            #     continue
+                    X=X_tr, y=y_train, mask=mask, layer_id=layer_id)
 
         # CONFORMAL PREDICTION
         X_te = dh_test.test_bags(
@@ -318,6 +312,7 @@ def main(cfg: DictConfig):
 
         yh_te = runner.predict_proba(X_te)
         yc_te = runner.conformal_prediction(X_te)
+        print(yh_te, yc_te)
         preds = runner.predict(X_te)
         # Assemble Metrics
         metric_dict = {}

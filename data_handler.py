@@ -528,6 +528,43 @@ class DataHandler:
             except:
                 columns.update(lf.columns)
         return list(columns)
+    
+    def get_train_labels(self):
+        '''
+        Returns the (multiclass) labels for the training data.
+        '''
+
+        correct = self.get_train_df()["correct"].to_numpy()
+        real = self.get_train_df()["real_object"].to_numpy()
+        labels = np.zeros_like(correct)
+        labels[correct == 1] = 1
+        labels[real == 0] = 2
+        return labels
+    
+    def get_cal_labels(self):
+        '''
+        Returns the (multiclass) labels for the calibration data.
+        '''
+
+        correct = self.get_cal_df()["correct"].to_numpy()
+        real = self.get_cal_df()["real_object"].to_numpy()
+        labels = np.zeros_like(correct)
+        labels[correct == 1] = 1
+        labels[real == 0] = 2
+        return labels
+    
+    def get_test_labels(self):
+        '''
+        Returns the (multiclass) labels for the test data.
+        '''
+
+        correct = self.get_test_df()["correct"].to_numpy()
+        real = self.get_test_df()["real_object"].to_numpy()
+        labels = np.zeros_like(correct)
+        labels[correct == 1] = 1
+        labels[real == 0] = 2
+        return labels
+
 
 
 def drop_zero_rows(X):
