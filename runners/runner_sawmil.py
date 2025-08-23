@@ -1,4 +1,4 @@
-from runners.runner_base import BaseProbeRunner
+from runners.base import BaseProbeRunner
 from sklearn.metrics import (
     average_precision_score as mAP,
 )

@@ -1,4 +1,4 @@
-from runners.runner_base import BaseProbeRunner
+from runners.base import BaseProbeRunner
 from probes.silSVM_patch import SVM
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import KFold

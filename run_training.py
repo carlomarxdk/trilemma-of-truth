@@ -64,7 +64,7 @@ def validate_config(cfg: DictConfig):
     OmegaConf.set_struct(cfg, True)
 
     assert len(cfg.layer_range) == 2, "Layer range must be a list of two integers."
-
+    assert cfg.task != -1, 'Cannot be multiclass task, choose a binary task.'
 
 def log_stats(cfg):
     datasets_test = cfg.datapack["datasets_test"] if len(

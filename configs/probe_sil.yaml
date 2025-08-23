@@ -52,3 +52,9 @@ run_debugging: False
 random_seed: 42
 save_results: True  # Save the outputs
 start_from_checkpoint: True #  will start from the layer that was last computed (aka checkpointed)
+
+
+multiclass_params:
+  tasks: {'T': 1, 
+          'F': 0,
+          'N': 2}

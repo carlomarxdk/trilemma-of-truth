@@ -36,10 +36,10 @@ We examine two common methods for probing the veracity of LLMs and discover seve
       - [2. Run zero-shot prompt (and collect scores)](#2-run-zero-shot-prompt-and-collect-scores)
       - [3. Train *sAwMIL* probe](#3-train-sawmil-probe)
         - [3.1. One-vs-all](#31-one-vs-all)
-        - [3. Multiclass](#3-multiclass)
+        - [3.2 Multiclass](#32-multiclass)
       - [4. Single Instance Probe](#4-single-instance-probe)
         - [4.1 Train *one-vs-all SVM* probe](#41-train-one-vs-all-svm-probe)
-      - [4.2 Train *multiclass SVM* probe](#42-train-multiclass-svm-probe)
+        - [4.2 Train *multiclass SVM* probe](#42-train-multiclass-svm-probe)
         - [4.3 Train the *mean-difference* probe](#43-train-the-mean-difference-probe)
     - [Task specification](#task-specification)
   - [🗂️ Dataset](#️-dataset)
@@ -128,7 +128,7 @@ Files that store activations are pretty heavy. You can run `compress_activations
 python compress_activations.py model=llama-3-8b # see configs/activations.yaml for all the paramaters
 ```
 
-This method reduces the size of the file by 15-20%.
+This method reduces the size of the file by 15-60% (earlier layers have lower compression rate).
 
 #### 2. Run zero-shot prompt (and collect scores)
 
@@ -153,7 +153,7 @@ python run_training.py --config-name=probe_mil.yaml \
 model=llama-3-8b datapack=city_locations probe=sawmil task=0 search=False 
 ```
 
-##### 3. Multiclass
+##### 3.2 Multiclass
 
 After you collect all the activations and train three one-vs-all `sAwMIL` probes, you can proceed with training the multiclass one.
 The `run_mc_training.py` runs only with the `task=-1`.
@@ -162,6 +162,8 @@ The `run_mc_training.py` runs only with the `task=-1`.
 python run_mc_training.py --config-name=probe_mil.yaml \
 model=llama-3-8b datapack=city_locations probe=sawmil task=-1 search=False 
 ```
+
+A small example is provided in the `make_predictions.ipynb` notebook.
 
 #### 4. Single Instance Probe
 
@@ -177,13 +179,13 @@ python run_training.py --config-name=probe_sil.yaml \
 model=llama-3-8b datapack=city_locations probe=svm task=1
 ```
 
-#### 4.2 Train *multiclass SVM* probe
+##### 4.2 Train *multiclass SVM* probe
 
 After you collect all the activations and train three one-vs-all `SVM` probes, you can proceed with training the multiclass one.
 The `run_mc_training.py` runs only with the `task=-1`.
 
 ```bash
-python run_mc_training.py --config-name=probe_mil.yaml \
+python run_mc_training.py --config-name=probe_sil.yaml \
 model=llama-3-8b datapack=city_locations probe=svm task=-1
 ```
 
@@ -307,12 +309,12 @@ ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split
 - [x] Check `run_training.py` for `sAwMIL`
 - [x] Add the multiclass SIL and MIL script
 - [ ] Check the multiclass SIL (SVM)
-- [ ] Check the multiclass MIL (`sAwMIL`)
-- [ ] Upload `llama-3-8b` activations for the `city_locations` dataset
+- [x] Check the multiclass MIL (`sAwMIL`)
+- [x] Upload `llama-3-8b` activations for the `city_locations` dataset
 - [ ] Check the script for interventions
 - [ ] Check the script for the cross-dataset generalization
 - [ ] Add scripts/notebooks for plot generation
-- [x] Add examples: data loading 
+- [x] Add examples: data loading
 - [x] Describe the contents of the repository
 
 ## 📃 Licenses

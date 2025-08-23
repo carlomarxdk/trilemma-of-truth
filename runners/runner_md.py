@@ -1,4 +1,4 @@
-from runners.runner_base import BaseProbeRunner
+from runners.base import BaseProbeRunner
 from probes.mean_difference import MeanDifferenceClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import KFold
@@ -11,7 +11,7 @@ import numpy as np
 import logging
 from copy import deepcopy
 
-log = logging.getLogger("SILRunner-MD")
+log = logging.getLogger("SILRunner-Mean-difference-cls")
 
 
 class MDProbeRunner(BaseProbeRunner):

@@ -26,14 +26,15 @@ from utils import should_process_layer
 
 
 # from runners.runner_sil2mc import SILMC_Runner
-from runners.runner_sawmil2multiclass import MulticlassMILRunner
+from runners.mc_runner_sawmil import MulticlassMILRunner
+from runners.mc_runner_sil import MulticlassSILRunner
 
 log = logging.getLogger(__name__)
 
 
 PROBES = {
-    # 'svm': SILMC_Runner,
     'sawmil': MulticlassMILRunner,
+    'svm': MulticlassSILRunner,
 }
 
 
@@ -300,9 +301,9 @@ def main(cfg: DictConfig):
         # CONFORMAL PREDICTION
         calibrator = runner.conformal_training(X_cal, y_cal, mask_cal)
 
-        yh_te = runner.predict_proba(X_te)
-        yc_te = runner.conformal_prediction(X_te)
-        preds = runner.predict(X_te)
+        yh_te = runner.predict_proba(X_te, is_test=True)
+        yc_te = runner.conformal_prediction(X_te, is_test=True)
+        preds = runner.predict(X_te, is_test=True)
         # Assemble Metrics
         metric_dict = {}
         metric_dict['default'] = log_metric(preds=preds,

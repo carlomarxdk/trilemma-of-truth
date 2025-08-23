@@ -7,12 +7,15 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 
+LEGAL_POOL = ['max', 'last', 'max_sil'] #sil-svm fails if we do max along the whole sequence 
+
 class MulticlassProbe(Pipeline):
     '''Multiclass probe for scoring bags against multiple classes.'''
     def __init__(self, projector, pool="max", max_iter=2000):
         self.projector = projector
         self.pool = pool
         self.max_iter = max_iter
+        assert pool in LEGAL_POOL, f"pool must be one of {LEGAL_POOL}"
         super().__init__(steps=[
             ("bag2scores", OvAScoresSkWrapper(projector, pool=pool)),
             ("scaler", StandardScaler()),
@@ -24,6 +27,13 @@ class MulticlassProbe(Pipeline):
                 max_iter=max_iter
             )),
         ])
+        # ------ convenience: update default pooling (for future calls) ------
+    def set_pool(self, pool: str):
+        assert pool in LEGAL_POOL, f"pool must be one of {LEGAL_POOL}"
+        self.pool = pool
+        # keep the transformer attribute in sync (for normal pipeline calls)
+        self.named_steps["bag2scores"].pool = pool
+        return self
 
 class OvAProjector:
     '''One-vs-All Projector for scoring bags against multiple classes.'''
@@ -66,6 +76,8 @@ class OvAProjector:
                 v = s[-1]
             elif pool == "max":
                 v = float(np.max(s))
+            elif pool == "max_sil":
+                v = float(np.max(s[1:]))
             elif pool == "mean":
                 v = float(np.mean(s))
             else:
