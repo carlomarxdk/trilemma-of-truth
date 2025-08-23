@@ -192,7 +192,7 @@ class MulticlassProbeData:
     """
     Reads multiclass probe data saved as:
       outputs/probes/{probe_name}/{model_name}/{datapack}{_search}_full/
-        model_{L}.pkl
+        cls_{L}.pkl
         cp_{L}.pkl                 (optional)
         metrics_{L}.json           (optional; {'default':..., 'conformal':...})
         y_hat_{L}.npy              (optional)
@@ -207,10 +207,10 @@ class MulticlassProbeData:
     # ------------------------ public API ------------------------
 
     def available_layers(self) -> List[int]:
-        """Discover layers via model_{L}.pkl (preferred), else metrics_{L}.json."""
+        """Discover layers via cls_{L}.pkl (preferred), else metrics_{L}.json."""
         layers = []
-        for f in self.probe_dir.glob("model_*.pkl"):
-            m = re.search(r"model_(\d+)", f.name)
+        for f in self.probe_dir.glob("cls_*.pkl"):
+            m = re.search(r"cls_(\d+)", f.name)
             if m: layers.append(int(m.group(1)))
         if not layers:
             for f in self.probe_dir.glob("metrics_*.json"):
@@ -222,7 +222,7 @@ class MulticlassProbeData:
         """Backward-compatible accessor (matches your old class)."""
         art = self.load_layer(layer_id)
         return {
-            "model": art.model,
+            "cls": art.cls,
             "calibrator": art.calibrator,
             "y_hat": art.y_hat,
             "y_true": art.y_true,
@@ -252,23 +252,23 @@ class MulticlassProbeData:
 
     # ----- convenience: inference using saved model/calibrator -----
 
-    def model(self, layer_id: int):
-        return self.load_layer(layer_id).model
+    def cls(self, layer_id: int):
+        return self.load_layer(layer_id).cls
 
     def calibrator(self, layer_id: int):
         return self.load_layer(layer_id).calibrator
 
     def predict_proba(self, layer_id: int, bags: List[np.ndarray]) -> np.ndarray:
         art = self.load_layer(layer_id)
-        if art.model is None:
-            raise RuntimeError(f"model_{layer_id}.pkl not found in {self.probe_dir}")
-        return art.model.predict_proba(bags)
+        if art.cls is None:
+            raise RuntimeError(f"cls_{layer_id}.pkl not found in {self.probe_dir}")
+        return art.cls.predict_proba(bags)
 
     def predict(self, layer_id: int, bags: List[np.ndarray]) -> np.ndarray:
         art = self.load_layer(layer_id)
-        if art.model is None:
-            raise RuntimeError(f"model_{layer_id}.pkl not found in {self.probe_dir}")
-        return art.model.predict(bags)
+        if art.cls is None:
+            raise RuntimeError(f"cls_{layer_id}.pkl not found in {self.probe_dir}")
+        return art.cls.predict(bags)
 
     def predict_sets(self, layer_id: int, bags: List[np.ndarray]) -> np.ndarray:
         """

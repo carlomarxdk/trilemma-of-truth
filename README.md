@@ -41,6 +41,9 @@ We examine two common methods for probing the veracity of LLMs and discover seve
         - [4.1 Train *one-vs-all SVM* probe](#41-train-one-vs-all-svm-probe)
         - [4.2 Train *multiclass SVM* probe](#42-train-multiclass-svm-probe)
         - [4.3 Train the *mean-difference* probe](#43-train-the-mean-difference-probe)
+      - [5. Extra](#5-extra)
+        - [5.1 Gerneralization Performance](#51-gerneralization-performance)
+        - [5.2 Interventions](#52-interventions)
     - [Task specification](#task-specification)
   - [🗂️ Dataset](#️-dataset)
     - [Structure](#structure)
@@ -196,6 +199,25 @@ The mean-difference probe is trained to separate *true-vs-false*, thus, use `tas
 ```bash
 python run_training.py --config-name=probe_sil.yaml \
 model=llama-3-8b datapack=city_locations probe=mean_diff task=3
+```
+
+#### 5. Extra
+
+##### 5.1 Gerneralization Performance
+
+To check the performance of the probe on another dataset you can run `run_generalization.py`. It will load the probe trained on `datapack` and use the test split of the `datapack@datapack_test`.
+
+```bash
+python run_generalization.py --config-name=probe_mil.yaml model=llama-3-8b datapack=city_locations datapack@datapack_test=med_indications
+probe=sawmil search=True  task=-1
+```
+
+##### 5.2 Interventions
+
+The code for interventions is located in `run_intervention.py`.
+
+```bash
+python run_intervention.py --config-name=interventions.yaml model=llama-3-8b datapack=city_locations  task=0
 ```
 
 ### Task specification

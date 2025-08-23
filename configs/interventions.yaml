@@ -17,7 +17,7 @@ hydra:
 
 defaults:
   - model: ???
-  - probe: sbMIL2
+  - probe: sawmil
   - datapack: ???
   - _self_
 
