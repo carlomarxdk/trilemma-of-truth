@@ -67,8 +67,9 @@ Along with the code, we provide the usage examples and results.
 2. [outputs/probes/prompt](outputs/probes/prompt) contains the scores for the *zero-shot prompting* (for every mode, dataset and instruction phrasing). These can be load using the `DataHandler` class. 
 3. [outputs/probes/mean_diff](outputs/probes/mean_diff) contains an example of results for the *mean-difference* probe (`Llama-3-8b` model, `city_locations` dataset, based on the activations of the 7th decoder).
 4. [configs](configs/) contains experiment configurations; `Hydra` uses these to run experiments.
-5. [outputs/activations/llama-3-8b] contains activations for the `city_locations` dataset (13th decoder).
-6. [outputs/probes] contains example of coefficients and statistics for the probes trained on the `llama-3-8b` activations (`city_locations` dataset).
+5. [outputs/activations/llama-3-8b](outputs/activations/llama-3-8b) contains activations for the `city_locations` dataset (13th decoder).
+6. [outputs/probes](outputs/probes) contains example of coefficients and statistics for the probes trained on the `llama-3-8b` activations (`city_locations` dataset).
+
 
 ### What is not included?
 
@@ -89,6 +90,16 @@ Clone the repository:
 ```sh
 git clone https://github.com/carlomarxdk/trilemma-of-truth.git
 cd trilemma-of-truth
+```
+
+> [!WARNING]
+> Activation files stored in [outputs/activations/llama-3-8b](outputs/activations/llama-3-8b) might take up to 4GB (you may decide to exclude them when cloning the repository). These files are stored using the [GitHub LFS](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-git-large-file-storage), you can *ignore* these files while clonning with
+
+```bash
+GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/carlomarxdk/trilemma-of-truth.git
+cd trilemma-of-truth
+### if later you want to load these files, you can run the following:
+# git lfs pull
 ```
 
 Install dependencies:
