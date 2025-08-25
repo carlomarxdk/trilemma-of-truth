@@ -50,6 +50,9 @@ We examine two common methods for probing the veracity of LLMs and discover seve
     - [Load Data with `DataHandler`](#load-data-with-datahandler)
     - [Processed Data on Hugging Face 🤗](#processed-data-on-hugging-face-)
   - [✍️ How to Cite?](#️-how-to-cite)
+    - [Preprint](#preprint)
+    - [Code](#code)
+    - [Data](#data)
   - [📝 To Do](#-to-do)
   - [📃 Licenses](#-licenses)
 
@@ -64,17 +67,20 @@ Along with the code, we provide the usage examples and results.
 2. [outputs/probes/prompt](outputs/probes/prompt) contains the scores for the *zero-shot prompting* (for every mode, dataset and instruction phrasing). These can be load using the `DataHandler` class. 
 3. [outputs/probes/mean_diff](outputs/probes/mean_diff) contains an example of results for the *mean-difference* probe (`Llama-3-8b` model, `city_locations` dataset, based on the activations of the 7th decoder).
 4. [configs](configs/) contains experiment configurations; `Hydra` uses these to run experiments.
+5. [outputs/activations/llama-3-8b] contains activations for the `city_locations` dataset (13th decoder).
+6. [outputs/probes] contains example of coefficients and statistics for the probes trained on the `llama-3-8b` activations (`city_locations` dataset).
 
-### What is not included? 
+### What is not included?
 
-TODO
+1. Activations and the coefficients for the trained probes (we only include activations for the 13th decoder of the `llama-3-8b` model and `city_locations` dataset)
+2. Codes to generate plots.
 
 ### `sAwMIL` (Sparse Aware Multiple Instance Learning) Implementation
 
 The code for the `sAwMIL` is partially based on the [garydoranjr/misvm](https://github.com/garydoranjr/misvm) repository (contains the `sbMIL` implementation for older versions of Python and [cvxopt](https://cvxopt.org/)). We adapt [MISVM](https://github.com/garydoranjr/misvm) code for `python=3.11.11` and `cvxopt=1.3.2`. The patched code for the `sAwMIL` is located in [probes/sawmil](probes/sawmil.py) script.
 
 > [!NOTE]
-> We plan to release a **standalone** package that implements `sAwMIL` and `sbMIL` using the [gurobipy](https://www.gurobi.com/) (closer to the end of June 2025).
+> We plan to release a **standalone** package that implements `sAwMIL` and `sbMIL` using the [gurobipy](https://www.gurobi.com/) (closer to the end of September 2025).
 
 ## ⚡ Installation
 
@@ -311,13 +317,46 @@ ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split
 
 ## ✍️ How to Cite?
 
+### Preprint
+
 ```bibtex
-@inproceedings{savcisens2024trilemma,
+@inproceedings{trilemma2025preprint,
       title={The Trilemma of Truth in Large Language Models},
       author={Savcisens, Germans and Eliassi‐Rad, Tina},
       booktitle={arXiv preprint arXiv:2506.23921},
       year={2025}
     }
+```
+
+### Code
+
+The citation for the latest version:
+
+```bibtex
+@software{trilemma2025code,
+  author       = {Savcisens, Germans and
+                  Eliassi-Rad, Tina},
+  title        = {carlomarxdk/trilemma-of-truth: v0.5.1},
+  month        = aug,
+  year         = 2025,
+  publisher    = {Zenodo},
+  version      = {v0.5.1}, 
+  doi          = {10.5281/zenodo.16930865},
+  url          = {https://doi.org/10.5281/zenodo.16930865},
+}
+```
+
+### Data
+
+```bibtex
+@misc{trilemma2025data,
+  author       = { Germans Savcisens and Tina Eliassi-Rad },
+  title        = { trilemma-of-truth (Revision cd49e0e) },
+  year         = 2025,
+  url          = { https://huggingface.co/datasets/carlomarxx/trilemma-of-truth },
+  doi          = { 10.57967/hf/5900 },
+  publisher    = { Hugging Face }
+}
 ```
 
 ## 📝 To Do
