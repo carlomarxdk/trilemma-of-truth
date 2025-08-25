@@ -347,13 +347,13 @@ The citation for the latest version:
 @software{trilemma2025code,
   author       = {Savcisens, Germans and
                   Eliassi-Rad, Tina},
-  title        = {carlomarxdk/trilemma-of-truth: v0.5.1},
+  title        = {carlomarxdk/trilemma-of-truth: SEE VERSION AT THE TOP OF THE REPOSITORY}, #example: v0.5.1
   month        = aug,
   year         = 2025,
   publisher    = {Zenodo},
-  version      = {v0.5.1}, 
-  doi          = {10.5281/zenodo.16930865},
-  url          = {https://doi.org/10.5281/zenodo.16930865},
+  version      = {SEE VERSION AT THE TOP OF THE REPOSITORY},  #example: v0.5.1
+  doi          = {INSERT ZENODO DOI AT THE TOP}, #example: 10.5281/zenodo.15779092
+  url          = {https://doi.org/_INSERT ZENODO DOI AT THE TOP_}, #example: 10.5281/zenodo.15779092
 }
 ```
 
