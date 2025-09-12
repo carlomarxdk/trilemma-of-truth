@@ -81,7 +81,7 @@ Along with the code, we provide the usage examples and results.
 The code for the `sAwMIL` is partially based on the [garydoranjr/misvm](https://github.com/garydoranjr/misvm) repository (contains the `sbMIL` implementation for older versions of Python and [cvxopt](https://cvxopt.org/)). We adapt [MISVM](https://github.com/garydoranjr/misvm) code for `python=3.11.11` and `cvxopt=1.3.2`. The patched code for the `sAwMIL` is located in [probes/sawmil](probes/sawmil.py) script.
 
 > [!NOTE]
-> We plan to release a **standalone** package that implements `sAwMIL` and `sbMIL` using the [gurobipy](https://www.gurobi.com/) (closer to the end of September 2025).
+> The **alpha** standalone `sAwMIL` package is available at [PyPi](https://pypi.org/project/sawmil/) and [carlomarxd/sawmil](https://github.com/carlomarxdk/sawmil).
 
 ## ⚡ Installation
 
