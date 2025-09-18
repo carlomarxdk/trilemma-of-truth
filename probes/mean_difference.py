@@ -9,6 +9,7 @@ from scipy.linalg import cho_factor, cho_solve, LinAlgError
 import logging
 log = logging.getLogger(__name__)
 
+VALID_COVARIANCE_METHODS = ['oas', 'ledoit', 'empirical', 'shrunk', 'diagonal']
 
 def normalize(X, tol: float = 1e-9) -> np.ndarray:
     """
@@ -29,12 +30,13 @@ def robust_covariance(X: np.ndarray, method: str = "oas", fallback_scale: float 
     Args:
         X (np.ndarray): Data matrix of shape (n_samples, n_features).
                         Assumed centered if method='oas' with assume_centered=True.
-        method (str): Which shrinkage estimator to use: {"oas", "ledoit"}.
+        method (str): Which shrinkage estimator to use: {"oas", "ledoit", "empirical", "shrunk", "diagonal"}.
         fallback_scale (float): Scale for the identity fallback if estimation fails.
 
     Returns:
         np.ndarray: Covariance matrix of shape (n_features, n_features).
     """
+    assert method in VALID_COVARIANCE_METHODS, f"Unknown method: {method}, must be one of {VALID_COVARIANCE_METHODS}"
     X = np.asarray(X)
     _, d = X.shape
 
@@ -98,7 +100,7 @@ class MeanDifferenceClassifier(BaseEstimator, ClassifierMixin):
             verbose: If True, prints additional information during fitting and scoring.
         '''
         super().__init__()
-        # If True, the covariance matrix is used to compute the score
+        assert cov_type in VALID_COVARIANCE_METHODS, f"cov_type must be one of {VALID_COVARIANCE_METHODS}"
         self.fit_intercept = fit_intercept
         self.verbose = verbose
         self.with_covariance = with_covariance
@@ -126,6 +128,9 @@ class MeanDifferenceClassifier(BaseEstimator, ClassifierMixin):
         X = np.asarray(X)
         y = np.asarray(y)
         assert type_of_target(y) == "binary", "Labels should be binary."
+        if M is not None:
+            assert self.with_covariance, "If providing M, must have with_covariance=True"
+            assert M.shape[0] == M.shape[1] == X.shape[1], "M must be square and match feature dimension."
 
         pos_acts, neg_acts = X[y == 1], X[y == 0]
         mu_pos, mu_neg = pos_acts.mean(0), neg_acts.mean(0)
@@ -133,7 +138,7 @@ class MeanDifferenceClassifier(BaseEstimator, ClassifierMixin):
 
         if self.with_covariance:
             if M is not None:
-                # supplied covariance matrix
+                # supplied mahalanobis matrix
                 # self.M_ = M
                 w = M @ delta
             else:
@@ -144,7 +149,7 @@ class MeanDifferenceClassifier(BaseEstimator, ClassifierMixin):
                 Sp = ((n_pos - 1) * S_pos + (n_neg - 1) * S_neg) / \
                     max(1, (n_pos + n_neg - 2))
                 Sp = Sp + self.cov_reg * np.eye(Sp.shape[0], dtype=Sp.dtype)
-                # solve pooled @ w = delta
+                # solve pooled @ w = delta (does not require explicit inversion)
                 c, lower = cho_factor(
                     Sp, overwrite_a=False, check_finite=False)
                 w = cho_solve((c, lower), delta, check_finite=False)

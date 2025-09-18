@@ -17,6 +17,7 @@ pandas>=2.2
 polars>=1.0
 protobuf==5.27.2
 pyarrow==16.1.0
+pytest
 scikit-learn==1.5.1
 scipy==1.14
 seaborn>=0.13
