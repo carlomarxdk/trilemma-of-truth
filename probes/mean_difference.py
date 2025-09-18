@@ -1,142 +1,194 @@
 import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin
+from sklearn.covariance import ledoit_wolf, oas
 from sklearn.utils.multiclass import type_of_target
 from sklearn.utils.validation import check_is_fitted
 from scipy.special import expit
+from scipy.linalg import cho_factor, cho_solve, LinAlgError
 
-from sklearn.covariance import oas
 import logging
 log = logging.getLogger(__name__)
 
 
-def normalize(X):
+def normalize(X, tol: float = 1e-9) -> np.ndarray:
     """
     Normalize the rows of a matrix.
+    Args:
+        X: (d,) or (N, d) array
+        tol: small constant to avoid division by zero
     """
     if X.ndim == 1:
-        return X / np.linalg.norm(X)
-    return X / np.linalg.norm(X, axis=1)[:, np.newaxis]
+        return X / (np.linalg.norm(X) + tol)
+    return X / (np.linalg.norm(X, axis=1)[:, np.newaxis] + tol)
 
 
-def robust_covariance(X, fallback_scale=1.0):
+def robust_covariance(X: np.ndarray, method: str = "oas", fallback_scale: float = 1.0) -> np.ndarray:
     """
-    Computes a robust covariance estimate using ledoit_wolf.
-    If an error occurs or NaNs are detected, returns a fallback covariance.
+    Compute a robust covariance estimate with shrinkage, safe against ill-conditioning.
 
     Args:
-        X (np.ndarray): Input data.
-        fallback_scale (float): Scale factor for the identity matrix fallback.
+        X (np.ndarray): Data matrix of shape (n_samples, n_features).
+                        Assumed centered if method='oas' with assume_centered=True.
+        method (str): Which shrinkage estimator to use: {"oas", "ledoit"}.
+        fallback_scale (float): Scale for the identity fallback if estimation fails.
 
     Returns:
-        np.ndarray: Covariance matrix.
+        np.ndarray: Covariance matrix of shape (n_features, n_features).
     """
+    X = np.asarray(X)
+    _, d = X.shape
+
     try:
-        cov, _ = oas(X, assume_centered=True)
-        # Check for NaN values in the computed covariance matrix
+        if method == "oas":
+            cov, _ = oas(X, assume_centered=True)
+        elif method == "ledoit":
+            cov, _ = ledoit_wolf(X, assume_centered=True)
+        elif method == "empirical":
+            cov = np.cov(X, rowvar=False)  
+        elif method == 'diagonal':
+            # Very fast - diagonal covariance only
+            cov = np.diag(np.var(X, axis=0))
+        elif method == 'shrunk':
+            # Fast shrinkage estimator
+            emp_cov = np.cov(X, rowvar=False, bias=False)
+            trace = np.trace(emp_cov)
+            shrinkage = 0.1  # Fixed shrinkage
+            cov = (1 - shrinkage) * emp_cov + shrinkage * \
+                (trace / X.shape[1]) * np.eye(X.shape[1])
+        else:
+            raise ValueError(f"Unknown method: {method}")
+
+        # Quick NaN check
+        if not np.isfinite(X).all():
+            log.warning("Non-finite data detected; using scaled identity.")
+            return fallback_scale * np.eye(X.shape[1])
         if np.isnan(cov).any():
-            raise ValueError("NaN values detected in covariance estimate.")
-    except Exception as e:
+            raise ValueError("Non-finite entries detected in covariance.")
+
+    except (LinAlgError, ValueError, np.linalg.LinAlgError) as e:
+        cov = fallback_scale * np.eye(X.shape[1])       
         log.warning(
-            f"Error computing covariance: {e}. Using fallback covariance.")
-        cov = fallback_scale * np.eye(X.shape[1])
+            f"Covariance estimation failed ({e}); using scaled identity.")
+        cov = fallback_scale * np.eye(d)
+
+    # Regularize tiny negatives due to numerical error
+    cov = 0.5 * (cov + cov.T)  # enforce symmetry
     return cov
 
 
 class MeanDifferenceClassifier(BaseEstimator, ClassifierMixin):
-    # The code is adapted from https://github.com/saprmarks/geometry-of-truth/
+    """
+    Binary mean-difference classifier with optional pooled-covariance weighting (aka Mahalanobis whitening).
+    The code is adapted from https://github.com/saprmarks/geometry-of-truth/
+    """
 
     def __init__(self,
                  fit_intercept: bool = True,
                  with_covariance: bool = False,
-                 cov_reg: float = 1e-6,
-                 verbose: bool = False) -> None:
+                 cov_type: str = 'oas',
+                 cov_reg: float = 1e-8,
+                 tol: float = 1e-8,
+                 verbose: bool = False) -> 'MeanDifferenceClassifier':
+        '''
+        Args:
+            fit_intercept: If True, the decision boundary is at the midpoint between the projected class means.
+            with_covariance: If True, the inverse pooled-covariance matrix is used to compute the score (aka Mahalanobis whitening). Turns it into the Fisher discriminant (LDA).
+            cov_reg: Ridge regularization added to the covariance matrix when with_covariance=True (to ensure invertibility).
+            tol: Tolerance for numerical stability when normalizing the weight vector.
+            verbose: If True, prints additional information during fitting and scoring.
+        '''
         super().__init__()
         # If True, the covariance matrix is used to compute the score
         self.fit_intercept = fit_intercept
         self.verbose = verbose
+        self.with_covariance = with_covariance
+        self.cov_reg = cov_reg
+        self.cov_type = cov_type
+        self.tol = tol
+        self.M_ = None
+
         # Initialize the parameters
         self.intercept_ = None
         self.coef_ = None
-        self.with_covariance = with_covariance
-        self.cov_reg = cov_reg
-        self.M_ = None
+        self.intercept_ = None
+        self.classes_ = np.array([0, 1])
 
-    def fit(self, X, y, M=None):
+    def fit(self, X: np.ndarray, y: np.ndarray, M: np.ndarray = None) -> 'MeanDifferenceClassifier':
         """
         Fit the model to the data.
         Args:
-            M: Mahalanobis matrix
+            X: (N, d) array of input data
+            y: (N,) array of binary labels (0 or 1)
+            M: Mahalanobis matrix (optional), used if with_covariance=True.
+        Returns:
+            self
         """
+        X = np.asarray(X)
+        y = np.asarray(y)
         assert type_of_target(y) == "binary", "Labels should be binary."
+
         pos_acts, neg_acts = X[y == 1], X[y == 0]
-        pos_mean, neg_mean = pos_acts.mean(0), neg_acts.mean(0)
+        mu_pos, mu_neg = pos_acts.mean(0), neg_acts.mean(0)
+        delta = mu_pos - mu_neg
 
-        if self.with_covariance and (M is None):
-            # Compute the Mahalanobis inverse covariance matrix (pooled)
-            cov_pos = robust_covariance(pos_acts)
-            if not np.array_equal(cov_pos, np.eye(cov_pos.shape[0])):
-                cov_neg = robust_covariance(neg_acts)
-                if np.array_equal(cov_neg, np.eye(cov_neg.shape[0])):
-                    cov_neg = cov_pos
-            else:
-                cov_neg = cov_pos
-            n_pos = pos_acts.shape[0]
-            n_neg = neg_acts.shape[0]
-            pooled_cov = ((n_pos - 1) * cov_pos + (n_neg - 1)
-                          * cov_neg) / (n_pos + n_neg - 2)
-            # Check for NaNs in the pooled covariance and substitute if needed.
-            if np.isnan(pooled_cov).any():
-                log.warning(
-                    "NaN detected in pooled covariance; substituting with identity matrix.")
-                pooled_cov = np.eye(pos_acts.shape[1])
-
-            pooled_cov += self.cov_reg * np.eye(pooled_cov.shape[0])
-            self.M_ = np.linalg.inv(pooled_cov)
-        elif self.with_covariance and (M is not None):
-            self.M_ = M
-
-        self.coef_ = pos_mean - neg_mean
-        if type(self.coef_) != np.ndarray:
-            self.coef_ = self.coef_.cpu().numpy()
         if self.with_covariance:
-            self.coef_ = self.M_ @ self.coef_
-        self.coef_ = normalize(self.coef_).reshape(1, -1)
+            if M is not None:
+                # supplied covariance matrix
+                # self.M_ = M
+                w = M @ delta
+            else:
+                S_pos = robust_covariance(pos_acts - mu_pos[None, :], method=self.cov_type, fallback_scale=1.0)
+                S_neg = robust_covariance(neg_acts - mu_neg[None, :], method=self.cov_type, fallback_scale=1.0)
+                n_pos, n_neg = pos_acts.shape[0], neg_acts.shape[0]
+                # pooled covariance
+                Sp = ((n_pos - 1) * S_pos + (n_neg - 1) * S_neg) / \
+                    max(1, (n_pos + n_neg - 2))
+                Sp = Sp + self.cov_reg * np.eye(Sp.shape[0], dtype=Sp.dtype)
+                # solve pooled @ w = delta
+                c, lower = cho_factor(
+                    Sp, overwrite_a=False, check_finite=False)
+                w = cho_solve((c, lower), delta, check_finite=False)
+        else:
+            w = delta
+        w = normalize(w, tol=self.tol)
+        self.coef_ = w.reshape(1, -1)
 
         if self.fit_intercept:
             # Compute the intercept as the difference in the means of the projected features
-            pos_proj_mean = pos_acts @ self.coef_.T
-            neg_proj_mean = neg_acts @ self.coef_.T
-            self.intercept_ = -0.5 * \
-                (pos_proj_mean.mean() + neg_proj_mean.mean())
+            b_pos = (pos_acts @ self.coef_.T).mean()
+            b_neg = (neg_acts @ self.coef_.T).mean()
+            self.intercept_ = float(-0.5 * (b_pos + b_neg))
+        else:
+            self.intercept_ = 0.0
 
         self.is_fitted_ = True
         return self
 
-    def predict(self, X):
+    def predict(self, X: np.ndarray) -> np.ndarray:
         """
         Predict the class of each sample in X.
         """
         return self.predict_proba(X).round()
 
-    def predict_proba(self, X):
+    def predict_proba(self, X: np.ndarray) -> np.ndarray:
         """
         Predict the probability of each sample in X.
         """
         return expit(self.decision_function(X))
 
-    def decision_function(self, X):
+    def decision_function(self, X: np.ndarray) -> np.ndarray:
         """
         Compute the decision function for each sample in X.
+        Args:
+            X: (N, d) array of input data
+        Returns:
+            scores: (N,) array of decision scores
         """
         check_is_fitted(self)
-        score = X @ self.coef_.T
+        X = np.asarray(X)
+        return (X @ self.coef_.T).ravel() + self.intercept_
 
-        if self.intercept_ is not None:
-            return score + self.intercept_
-
-        return score
-
-    def score(self, X, y, scorer, sample_weight=None):  # type: ignore
+    def score(self, X: np.ndarray, y: np.ndarray, scorer, sample_weight=None) -> float:  # type: ignore
         """
         Compute the accuracy of the model.
         """
