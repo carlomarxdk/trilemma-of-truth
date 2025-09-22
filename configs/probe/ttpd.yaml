@@ -1,0 +1,12 @@
+defaults:
+  - base_probe
+
+# Training Truth and Polarity Directions (Single Instance Probe)
+name: ttpd
+with_bags: False
+
+init_params:
+  random_seed: 42
+  verbose: True
+param_grid:
+  random_seed: [42]

@@ -64,7 +64,7 @@ def stack_tensors(tensors, padding_value=0, max_length=None):
 class DataHandler:
     model: str = field(default="llama-3-8b",
                        metadata={"help": "The LLM use in the project."})
-    datasets: List[str] = field(default_factory=lambda: ["cities_combined", "cities_fake"],
+    datasets: List[str] = field(default_factory=lambda: ["city_locations", "city_locations_synthetic"],
                                 metadata={
                                 "help": "The datasets to be used in the project."})
     activation_type: str = field(default="last"),

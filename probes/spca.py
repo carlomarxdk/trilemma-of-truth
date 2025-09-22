@@ -17,7 +17,7 @@ class SupervisedPCA(BaseEstimator, ClassifierMixin):
                  n_components: Union[int, None] = None,
                  cov_type: str = 'oas',
                  cov_fallback_scale: float = 1.0,
-                 base_model: ClassifierMixin = LogisticRegression(penalty='none', intercept=True),
+                 base_model: ClassifierMixin = LogisticRegression(penalty=None, intercept=True),
                  verbose: bool = False,
                  random_seed: int = 42) -> 'SupervisedPCA':
         '''
