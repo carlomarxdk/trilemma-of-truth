@@ -12,7 +12,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import KFold
 from utils_hydra import drop_rows_with_tail_keep
 
-log = logging.getLogger("SawmilProbeRunner")
+log = logging.getLogger("MILRunner-Sawmil")
 
 
 class SawmilProbeRunner(BaseProbeRunner):

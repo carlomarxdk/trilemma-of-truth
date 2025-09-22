@@ -24,18 +24,16 @@ import re
 import pprint
 from utils import should_process_layer
 
+from runners import SVMProbeRunner, MDProbeRunner, SawmilProbeRunner, SPCA_Runner
 
-from runners.runner_svm import SVMProbeRunner
-from runners.runner_md import MDProbeRunner
-from runners.runner_sawmil import SawmilProbeRunner
-
-log = logging.getLogger(__name__)
+log = logging.getLogger("Training")
 
 
 PROBES = {
     'svm': SVMProbeRunner,
     'mean_diff': MDProbeRunner,
     'sawmil': SawmilProbeRunner,
+    'spca': SPCA_Runner
 }
 
 
@@ -322,11 +320,7 @@ def main(cfg: DictConfig):
             # try:
             result = runner.single_training(
                     X=X_tr, y=y_train, mask=mask)
-            # except Exception as e:
-            #     log.error(f"Error: {e}")
-            #     log.warning(
-            #         "\tSkipping the [%s] layer and moving to the next one..." % layer_id)
-            #     continue
+
 
         # CONFORMAL PREDICTION
         X_te = dh_test.test_bags(
@@ -353,7 +347,11 @@ def main(cfg: DictConfig):
                                               y_true=y_test, mask=mask_test, cfg=cfg)
         metric_dict['conformal']["coverage"] = calibrator.coverage(
             scores=yh_te[mask_test], y=y_test[mask_test])
-        metric_dict['conformal']["acceptance_rate"] = calibrator.acceptance_rate(
+        try:
+            metric_dict['conformal']["acceptance_rate"] = runner.conformal_acc_rate(
+            X_te[mask_test])
+        except:
+            metric_dict['conformal']["acceptance_rate"] = calibrator.acceptance_rate(
             yh_te)
 
         if cfg.save_results:

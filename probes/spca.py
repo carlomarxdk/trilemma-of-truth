@@ -17,7 +17,7 @@ class SupervisedPCA(BaseEstimator, ClassifierMixin):
                  n_components: Union[int, None] = None,
                  cov_type: str = 'oas',
                  cov_fallback_scale: float = 1.0,
-                 base_model: ClassifierMixin = LogisticRegression(penalty=None, intercept=True),
+                 base_model: ClassifierMixin = LogisticRegression(penalty='l2', fit_intercept=True, max_iter=2000),
                  verbose: bool = False,
                  random_seed: int = 42) -> 'SupervisedPCA':
         '''
@@ -29,7 +29,7 @@ class SupervisedPCA(BaseEstimator, ClassifierMixin):
             verbose: Whether to print progress.
             random_seed: Random seed for reproducibility.
             '''
-        assert cov_type in VALID_COVARIANCE_METHODS, f"cov_method must be one of {VALID_COVARIANCE_METHODS}"
+        assert cov_type in VALID_COVARIANCE_METHODS, f"cov_type must be one of {VALID_COVARIANCE_METHODS}"
         self.random_seed = random_seed
         self.verbose = verbose
         self.n_components = n_components
@@ -39,6 +39,7 @@ class SupervisedPCA(BaseEstimator, ClassifierMixin):
         self.vals_ = None
         self.base_model = base_model
         self.is_fitted_ = False
+        self.classes_ = np.array([0, 1])
 
     def fit(self, X: np.array, y: np.array) -> 'SupervisedPCA':
         # assert all(attr in df.columns for attr in attributes), "Attributes must be in the dataframe."
@@ -56,8 +57,8 @@ class SupervisedPCA(BaseEstimator, ClassifierMixin):
         Xn = X_neg - mu_n
         
         # covariance matrices
-        S_pos = robust_covariance(Xp, method=self.cov_method, fallback_scale=self.cov_fallback_scale)
-        S_neg = robust_covariance(Xn, method=self.cov_method, fallback_scale=self.cov_fallback_scale)
+        S_pos = robust_covariance(Xp, method=self.cov_type, fallback_scale=self.cov_fallback_scale)
+        S_neg = robust_covariance(Xn, method=self.cov_type, fallback_scale=self.cov_fallback_scale)
         dm = (mu_p - mu_n).ravel()
         M = S_pos + S_neg + np.outer(dm, dm)
         vals, vecs = eigsh(M, k=self.n_components, which="LA")  # top-k only
@@ -78,7 +79,7 @@ class SupervisedPCA(BaseEstimator, ClassifierMixin):
     def predict_proba(self, X: np.array) -> np.array:
         scores = self.decision_function(X)
         probs = expit(scores)
-        return probs
+        return probs.ravel()[:, np.newaxis]
 
     def predict(self, X: np.array) -> np.array:
         scores = self.predict_proba(X)

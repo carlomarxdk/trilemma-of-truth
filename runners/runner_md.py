@@ -11,7 +11,7 @@ import numpy as np
 import logging
 from copy import deepcopy
 
-log = logging.getLogger("SILRunner-Mean-difference-cls")
+log = logging.getLogger("SILRunner-MD")
 
 
 class MDProbeRunner(BaseProbeRunner):

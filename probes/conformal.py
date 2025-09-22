@@ -269,11 +269,13 @@ class InductiveConformalPredictor(BaseEstimator):
         """
         Given new decision function outputs scores, for each new sample
         determine the conformal set and return the prediction.
+        Args:
+            scores: array-like decision function outputs for new samples.
         Returns:
-        - predictions: array-like of predicted labels.
-        - conformal_sets: list of lists; each inner list is the set of candidate labels (from {0,1})
+            predictions: array-like of predicted labels.
+            conformal_sets: list of lists; each inner list is the set of candidate labels (from {0,1})
         that are not rejected at level alpha.
-        - p_values: array-like of p-values for each candidate label.
+            p_values: array-like of p-values for each candidate label.
         """
         conformal_sets, p_vals = self._predict_set(scores)
         preds = []
@@ -299,6 +301,8 @@ class InductiveConformalPredictor(BaseEstimator):
     def acceptance_rate(self, scores):
         """
         Compute the acceptance rate for new samples.
+        Args:
+            scores: array-like decision function outputs for new samples.
         """
         assert self.calibration_scores is not None, "Fit the model first."
         eval = self.evaluate(scores)
