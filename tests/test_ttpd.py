@@ -3,8 +3,6 @@ import pytest
 from sklearn.metrics import roc_auc_score
 from sklearn.linear_model import LogisticRegression
 
-# ---- import the class & helpers under test ----
-# from your_module import TTPD, is_centered
 from probes.ttpd import TTPD, is_centered  # adjust to the real module path
 
 
