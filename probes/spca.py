@@ -16,7 +16,8 @@ class SupervisedPCA(BaseEstimator, ClassifierMixin):
     def __init__(self,
                  n_components: Union[int, None] = None,
                  cov_type: str = 'oas',
-                 base_model: ClassifierMixin = LogisticRegression(),
+                 cov_fallback_scale: float = 1.0,
+                 base_model: ClassifierMixin = LogisticRegression(penalty='none', intercept=True),
                  verbose: bool = False,
                  random_seed: int = 42) -> 'SupervisedPCA':
         '''
@@ -33,6 +34,7 @@ class SupervisedPCA(BaseEstimator, ClassifierMixin):
         self.verbose = verbose
         self.n_components = n_components
         self.cov_type = cov_type
+        self.cov_fallback_scale = cov_fallback_scale
         self.coef_ = None
         self.vals_ = None
         self.base_model = base_model
@@ -54,8 +56,8 @@ class SupervisedPCA(BaseEstimator, ClassifierMixin):
         Xn = X_neg - mu_n
         
         # covariance matrices
-        S_pos = robust_covariance(Xp, method=self.cov_method, fallback_scale=1.0)
-        S_neg = robust_covariance(Xn, method=self.cov_method, fallback_scale=1.0)
+        S_pos = robust_covariance(Xp, method=self.cov_method, fallback_scale=self.cov_fallback_scale)
+        S_neg = robust_covariance(Xn, method=self.cov_method, fallback_scale=self.cov_fallback_scale)
         dm = (mu_p - mu_n).ravel()
         M = S_pos + S_neg + np.outer(dm, dm)
         vals, vecs = eigsh(M, k=self.n_components, which="LA")  # top-k only
@@ -81,3 +83,6 @@ class SupervisedPCA(BaseEstimator, ClassifierMixin):
     def predict(self, X: np.array) -> np.array:
         scores = self.predict_proba(X)
         return  scores.round().astype(int)
+    
+    
+    __all__ = ['SupervisedPCA']
