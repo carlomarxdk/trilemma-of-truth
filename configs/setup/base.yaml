@@ -1,3 +1,4 @@
+# Base configuration for paths
 activations_path: outputs/activations/
 output_path: outputs/
 dataset_path: datasets/

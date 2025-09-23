@@ -78,7 +78,7 @@ def robust_covariance(X: np.ndarray, method: str = "oas", fallback_scale: float 
     return cov
 
 
-class MeanDifferenceClassifier(BaseEstimator, ClassifierMixin):
+class MeanDifferenceClassifier(ClassifierMixin, BaseEstimator):
     """
     Binary mean-difference classifier with optional pooled-covariance weighting (aka Mahalanobis whitening).
     The code is adapted from https://github.com/saprmarks/geometry-of-truth/

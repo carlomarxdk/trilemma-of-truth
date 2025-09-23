@@ -12,7 +12,7 @@ def is_centered(X: np.ndarray, tol: float = 1e-8) -> bool:
     return np.allclose(X.mean(axis=0), 0.0, atol=tol)
 
 
-class TTPD(BaseEstimator, ClassifierMixin):
+class TTPD(ClassifierMixin, BaseEstimator):
     '''
     Training of Truth and Polarity Direction (TTPD) probe introduced in:
         Bürger, Lennart, Fred A. Hamprecht, and Boaz Nadler. 

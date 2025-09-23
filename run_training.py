@@ -68,7 +68,7 @@ def log_stats(cfg):
     datasets_test = cfg.datapack["datasets_test"] if len(
         cfg.datapack["datasets_test"]) > 0 else cfg.datapack["datasets"]
     log.warning(
-        f"Training {cfg.probe['name']}-based probe for {cfg.model['name']} activations [task: {cfg.task}]")
+        f"Training {cfg.probe['name'].upper()}-based probe for {cfg.model['name']} activations [task: {cfg.task}]")
     log.warning(
         f"\t\tTrain datasets: {cfg.datapack['datasets']}")
     log.warning(f"\t\tTest datasets: {datasets_test})")

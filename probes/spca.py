@@ -9,7 +9,7 @@ from scipy.special import expit
 from probes.mean_difference import VALID_COVARIANCE_METHODS, robust_covariance
 
 
-class SupervisedPCA(BaseEstimator, ClassifierMixin):
+class SupervisedPCA(ClassifierMixin, BaseEstimator):
     '''
     Supervised PCA (PCA + LR probe)
     '''
@@ -42,7 +42,6 @@ class SupervisedPCA(BaseEstimator, ClassifierMixin):
         self.classes_ = np.array([0, 1])
 
     def fit(self, X: np.array, y: np.array) -> 'SupervisedPCA':
-        # assert all(attr in df.columns for attr in attributes), "Attributes must be in the dataframe."
         np.random.seed(self.random_seed)
         X = np.asarray(X, dtype=np.float32)  # Use float32 for speed
         y = np.asarray(y).astype(int)

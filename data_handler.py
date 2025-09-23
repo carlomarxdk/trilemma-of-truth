@@ -2,14 +2,13 @@ import polars as pl
 from typing import List
 import torch
 import numpy as np
-import os
 from glob import glob
+import os
 import logging
 from dataclasses import dataclass, field
 LEGAL_ACTIVATION_TYPES = ["last", "full"]
 
 log = logging.getLogger(__name__)
-
 
 def shape_as_tuple(x):
     d = x.shape[0]
@@ -102,16 +101,17 @@ class DataHandler:
         columns = self.column_list()
         for dataset in self.datasets:
             # Load the dataset
-            df = pl.read_csv(f"{self.dataset_path}{dataset}.csv")
+            _path = os.path.join(self.dataset_path, f"{dataset}.csv")
+            df = pl.read_csv(_path)
             df = df.with_columns([
                 pl.col("correct").cast(pl.Int32()),
                 pl.col("negation").cast(pl.Int32()),
                 pl.col("real_object").cast(pl.Int32()),
             ])
-            if self.load_scores != '':
+            if self.load_scores != '' or self.load_scores != False:
                 try:
                     _path = os.path.join(self.output_path,
-                                         "probes", "prompt", self.load_scores, self.model, dataset, "scores.npy")
+                                         "probes", "prompt", str(self.load_scores), self.model, dataset, "scores.npy")
                     scores = np.load(_path)
                     n_scores = scores.shape[-1]
                     df = df.with_columns(
@@ -238,7 +238,7 @@ class DataHandler:
             data_dir = os.path.join(self.activations_path,
                                  self.model, dataset, self.activation_type)
             try:
-                shape = shape_as_tuple(np.load(data_dir + "shape.npy"))
+                shape = shape_as_tuple(np.load(f'{data_dir}/shape.npy'))
                 acts = np.memmap(
                     f'{data_dir}/layer_{layer_id}_{module}_temp.npy', shape=shape, mode="r", dtype=np.float16)
             except:
