@@ -2,6 +2,7 @@ import polars as pl
 from typing import List
 import torch
 import numpy as np
+import os
 from glob import glob
 import logging
 from dataclasses import dataclass, field
@@ -62,6 +63,19 @@ def stack_tensors(tensors, padding_value=0, max_length=None):
 
 @dataclass
 class DataHandler:
+    """
+    Data handler for loading and processing datasets and activations.
+    Args:
+        model (str): The model name.
+        datasets (List[str]): List of dataset names.
+        activation_type (str): Type of activation to load ('last' or 'full').
+        dataset_path (str): Path to the datasets.
+        activations_path (str): Path to the activations.
+        output_path (str): Path to save outputs.
+        with_calibration (bool): Whether to include a calibration set.
+        load_scores (str): Name of the scores to load.
+        verbose (bool): Whether to print verbose logs.
+    """
     model: str = field(default="llama-3-8b",
                        metadata={"help": "The LLM use in the project."})
     datasets: List[str] = field(default_factory=lambda: ["city_locations", "city_locations_synthetic"],
@@ -70,6 +84,7 @@ class DataHandler:
     activation_type: str = field(default="last"),
     dataset_path: str = field(default="datasets/")
     activations_path: str = field(default="outputs/activations/")
+    output_path: str = field(default="outputs/")
     with_calibration: bool = field(default=False,
                                    metadata={"help": "Whether to include a calibration set."})
     load_scores: str = field(default=''),
@@ -95,8 +110,9 @@ class DataHandler:
             ])
             if self.load_scores != '':
                 try:
-                    scores = np.load(
-                        f"outputs/probes/prompt/{self.load_scores}/{self.model}/{dataset}/scores.npy")
+                    _path = os.path.join(self.output_path,
+                                         "probes", "prompt", self.load_scores, self.model, dataset, "scores.npy")
+                    scores = np.load(_path)
                     n_scores = scores.shape[-1]
                     df = df.with_columns(
                         [pl.Series(f"scores_{i}", scores[:, i]) for i in range(n_scores)])
@@ -203,7 +219,9 @@ class DataHandler:
             self.calibration_ids = None
 
     def get_num_layers(self):
-        return len(glob(f"outputs/activations/{self.model}/{self.datasets[0]}/{self.activation_type}/*_e.npy"))
+        _path = os.path.join(self.activations_path,
+                             self.model, self.datasets[0], self.activation_type)
+        return len(glob(f"{_path}/*_e.npy"))
 
     def get_activations(self, layer_id: int, module: str = "e"):
         """
@@ -217,14 +235,14 @@ class DataHandler:
         activations = list()
 
         for dataset in self.datasets:
-            data_dir = f"{self.activations_path}/{self.model}/{dataset}/{self.activation_type}/"
+            data_dir = os.path.join(self.activations_path,
+                                 self.model, dataset, self.activation_type)
             try:
                 shape = shape_as_tuple(np.load(data_dir + "shape.npy"))
                 acts = np.memmap(
-                    data_dir + f'layer_{layer_id}_{module}_temp.npy', shape=shape, mode="r", dtype=np.float16)
+                    f'{data_dir}/layer_{layer_id}_{module}_temp.npy', shape=shape, mode="r", dtype=np.float16)
             except:
-                acts = self._load_npz(
-                    data_dir + f'layer_{layer_id}_{module}.npz')
+                acts = self._load_npz(f'{data_dir}/layer_{layer_id}_{module}.npz')
 
             activations.append(torch.from_numpy(np.array(acts)))
 
@@ -251,8 +269,9 @@ class DataHandler:
     def get_att_mask(self):
         masks = []
         for dataset in self.datasets:
-            data_dir = f"{self.activations_path}/{self.model}/{dataset}/{self.activation_type}/mask.npy"
-            masks.append(torch.from_numpy(np.load(data_dir)))
+            _path = os.path.join(self.activations_path, self.model, dataset, self.activation_type)
+            _mask_path = os.path.join(_path, "mask.npy")
+            masks.append(torch.from_numpy(np.load(_mask_path)))
         return torch.vstack(masks)
 
     def get_train_att_mask(self):
@@ -521,14 +540,15 @@ class DataHandler:
         """
         columns = set()
         for dataset in self.datasets:
+            _path = os.path.join(self.dataset_path, dataset)
             lf = pl.scan_csv(
-                f"{self.dataset_path}{dataset}.csv")
+                f"{_path}.csv")
             try:
                 columns.update(lf.collect_schema().names())
             except:
                 columns.update(lf.columns)
         return list(columns)
-    
+
     def get_train_labels(self):
         '''
         Returns the (multiclass) labels for the training data.
@@ -540,7 +560,7 @@ class DataHandler:
         labels[correct == 1] = 1
         labels[real == 0] = 2
         return labels
-    
+
     def get_cal_labels(self):
         '''
         Returns the (multiclass) labels for the calibration data.
@@ -552,7 +572,7 @@ class DataHandler:
         labels[correct == 1] = 1
         labels[real == 0] = 2
         return labels
-    
+
     def get_test_labels(self):
         '''
         Returns the (multiclass) labels for the test data.
@@ -564,7 +584,6 @@ class DataHandler:
         labels[correct == 1] = 1
         labels[real == 0] = 2
         return labels
-
 
 
 def drop_zero_rows(X):

@@ -5,6 +5,7 @@ hydra:
 
 defaults:
   - model: ???
+  - setup: base
   - _self_
 
 

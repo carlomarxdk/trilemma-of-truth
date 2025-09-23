@@ -19,6 +19,7 @@ defaults:
   - probe: mean_diff
   - datapack: city_locations
   - datapack@datapack_test: city_locations
+  - setup: base
   - _self_
 
 conformal_params:

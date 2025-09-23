@@ -18,6 +18,7 @@ defaults:
   - probe: sawmil
   - datapack: city_locations
   - datapack@datapack_test: city_locations
+  - setup: base
   - _self_
 
 conformal_params:

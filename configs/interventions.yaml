@@ -19,6 +19,7 @@ defaults:
   - model: ???
   - probe: sawmil
   - datapack: ???
+  - setup: base
   - _self_
 
 datapack:

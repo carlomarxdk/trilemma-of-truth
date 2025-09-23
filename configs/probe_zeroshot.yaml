@@ -5,6 +5,7 @@ hydra:
 
 defaults:
   - model: ??? 
+  - setup: base
   - _self_
 
 datasets: ["city_locations", "city_locations_synthetic",
