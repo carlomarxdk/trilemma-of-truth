@@ -193,3 +193,4 @@ configs/setup/explorer.yaml
 outputs/experiments.db
 outputs/experiments.db
 outputs/experiments.db
+/.bash_scripts
