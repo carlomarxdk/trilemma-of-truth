@@ -228,7 +228,7 @@ class SPCA_Runner(BaseProbeRunner):
         """
         Return the direction of the separator.
         """
-        return self.separator.coef_[0]
+        return None
 
     @property
     def bias(self):
@@ -245,8 +245,8 @@ class SPCA_Runner(BaseProbeRunner):
         return None, None
 
     @property
-    def classifier(self):
+    def estimator(self):
         """
-        Return the classifier of the separator.
+        Return the estimator
         """
         return self.separator

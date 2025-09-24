@@ -152,18 +152,18 @@ class MDProbeRunner(BaseProbeRunner):
         """
         Return the direction of the separator.
         """
-        return self.separator.coef_[0]
+        return np.asarray(self.separator.coef_[0])
 
     @property
     def bias(self):
         """
         Return the bias of the separator.
         """
-        return self.separator.intercept_ if self.separator.fit_intercept else 0.0
+        return np.asarray(self.separator.intercept_ if self.separator.fit_intercept else 0.0)
 
     @property
     def direction_bias(self):
         """
         Return, BOTH, the direction and bias of the separator.
         """
-        return self.separator.direction, self.separator.bias
+        return self.direction, self.bias

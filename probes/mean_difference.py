@@ -112,7 +112,6 @@ class MeanDifferenceClassifier(ClassifierMixin, BaseEstimator):
         # Initialize the parameters
         self.intercept_ = None
         self.coef_ = None
-        self.intercept_ = None
         self.classes_ = np.array([0, 1])
 
     def fit(self, X: np.ndarray, y: np.ndarray, M: np.ndarray = None) -> 'MeanDifferenceClassifier':

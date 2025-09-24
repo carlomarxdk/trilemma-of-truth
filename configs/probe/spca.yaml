@@ -16,4 +16,3 @@ param_grid:
   cov_type: ["empirical"] # on search it is better to use empirical covariance (faster)
 
 
-  ## check if polarity is correctly assigned

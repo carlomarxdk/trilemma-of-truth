@@ -10,3 +10,6 @@ init_params:
   verbose: True
 param_grid:
   random_seed: [42]
+
+
+  ## check if polarity is correctly assigned
