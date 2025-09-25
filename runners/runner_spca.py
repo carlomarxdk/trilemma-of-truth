@@ -11,6 +11,7 @@ from sklearn.metrics import (
 )
 import numpy as np
 import logging
+from typing import List
 from copy import deepcopy
 
 log = logging.getLogger("SILRunner-SPCA")
@@ -186,16 +187,19 @@ class SPCA_Runner(BaseProbeRunner):
         # Compute the conformal prediction
         return self.calibrator.predict(yh)
     
-    def conformal_acc_rate(self, X):
-        """
-        Compute the conformal prediction acceptance rate for the given bags.
-        """
-        # Transform the bags using the fitted scaler
-        f_X = deepcopy(X)
-        # Compute the decision function using the separator
-        yh = self.decision_function(f_X)
-        # Compute the conformal prediction acceptance rate
-        return self.calibrator.acceptance_rate(yh)
+    # def conformal_acc_rate(self, X, mask):
+    #     """
+    #     Compute the conformal prediction acceptance rate for the given bags.
+    #     """
+    #     # FOR SPCA
+    #     mask = np.asarray(mask, dtype=bool)
+    #     f_X = deepcopy(X)
+    #     yh = self.decision_function(f_X)
+    #     preds = self.calibrator.predict(yh)
+    #     mask = preds != -1
+    #     v = np.sum(mask) / len(mask)
+    #     assert v ==  self.calibrator.acceptance_rate(yh)
+    #     return self.calibrator.acceptance_rate(yh)
 
     def decision_function(self, X):
         """
@@ -214,7 +218,7 @@ class SPCA_Runner(BaseProbeRunner):
         proba = self.predict_proba(X)
         return np.array(proba > 0.5)    
     
-    def process_input(self, X):
+    def process_input(self, X: List[np.ndarray]) -> np.ndarray:
         return np.vstack([self.scaler.transform(bag)[-1] for bag in X])
 
     def update_metric(self, metric_dict):

@@ -203,3 +203,5 @@ class MeanDifferenceClassifier(ClassifierMixin, BaseEstimator):
             if self.verbose:
                 print("Using discreet label instead of predict_proba.")
             return scorer(y, self.predict(X))
+
+__all__ = ['MeanDifferenceClassifier']

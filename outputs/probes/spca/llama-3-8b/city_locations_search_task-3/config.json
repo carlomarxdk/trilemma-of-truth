@@ -51,26 +51,24 @@
     "end_token": "auto"
   },
   "probe": {
-    "name": "mean_diff",
+    "name": "spca",
     "init_params": {
-      "verbose": false,
-      "with_covariance": true,
-      "cov_type": "oas",
-      "cov_reg": 1e-08,
-      "tol": 1e-08,
-      "fit_intercept": true
+      "verbose": true,
+      "n_components": 500,
+      "cov_type": "oas"
     },
     "param_grid": {
+      "n_components": [
+        1,
+        10,
+        100,
+        500,
+        1000,
+        1500,
+        2000
+      ],
       "cov_type": [
         "empirical"
-      ],
-      "with_covariance": [
-        true,
-        false
-      ],
-      "fit_intercept": [
-        true,
-        false
       ]
     },
     "normalize_data": true,
@@ -161,7 +159,7 @@
     31
   ],
   "trial_name": "city_locations_search_task-3",
-  "output_dir": "outputs/probes/mean_diff/llama-3-8b/city_locations_search_task-3",
+  "output_dir": "outputs/probes/spca/llama-3-8b/city_locations_search_task-3",
   "run_debugging": true,
   "random_seed": 42,
   "save_results": true,

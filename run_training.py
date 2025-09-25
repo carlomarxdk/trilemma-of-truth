@@ -387,6 +387,8 @@ def main(cfg: DictConfig):
         if dh.with_calibration:
             cal_labels = task.return_labels(_y_cal, r_cal)
             y_cal, mask_cal = cal_labels['targets'], cal_labels['mask']
+            
+        print(mask_test)
 
         start_time = time.time()
         runner = PROBES[cfg.probe['name']](cfg)
@@ -419,16 +421,18 @@ def main(cfg: DictConfig):
                                             cfg=cfg)
         metric_dict['default']["coverage"] = 1.0
         metric_dict['default'] = runner.update_metric(metric_dict['default'])
+        
+        
+        
         metric_dict['conformal'] = log_metric(preds=yc_te, scores=yh_te,
                                               y_true=y_test, mask=mask_test, cfg=cfg)
         metric_dict['conformal']["coverage"] = calibrator.coverage(
             scores=yh_te[mask_test], y=y_test[mask_test])
-        try:
-            metric_dict['conformal']["acceptance_rate"] = runner.conformal_acc_rate(
-                X_te[mask_test])
-        except:
-            metric_dict['conformal']["acceptance_rate"] = calibrator.acceptance_rate(
-                yh_te)
+        # try:
+        metric_dict['conformal']["acceptance_rate"] = np.sum(yc_te != -1) / max(yc_te.shape[0],1)
+        # except:
+        #     metric_dict['conformal']["acceptance_rate"] = calibrator.acceptance_rate(
+        #          yh_te)
 
         if cfg.save_results:
             save(concept_direction=runner.direction,
