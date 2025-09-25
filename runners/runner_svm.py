@@ -7,6 +7,7 @@ from sklearn.metrics import (
     average_precision_score as mAP,
 )
 import numpy as np
+from typing import List
 import logging
 from copy import deepcopy
 
@@ -29,7 +30,7 @@ class SVMProbeRunner(BaseProbeRunner):
         self.transformer = None
         self.bag_processor = None
 
-    def single_training(self, X, y, mask):
+    def single_training(self, X: List[np.ndarray], y: np.ndarray, mask: np.ndarray, neg: np.ndarray = None):
         """
         Train transformer and separator on the masked subset of bags.
         Returns dict with 'separator' and fitted 'transformer'.
@@ -79,7 +80,7 @@ class SVMProbeRunner(BaseProbeRunner):
             return arr[mask]
         return arr
 
-    def parameter_search(self, X, y, mask):
+    def parameter_search(self, X: List[np.ndarray], y: np.ndarray, mask: np.ndarray, neg: np.ndarray = None):
         """
         Training with hyperparameter search
         Args:

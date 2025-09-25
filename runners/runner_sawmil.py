@@ -11,6 +11,7 @@ from probes.conformal import InductiveConformalPredictor, symmetric_nonconformit
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import KFold
 from utils_hydra import drop_rows_with_tail_keep
+from typing import List
 
 log = logging.getLogger("MILRunner-Sawmil")
 
@@ -42,7 +43,7 @@ class SawmilProbeRunner(BaseProbeRunner):
             return arr[mask]
         return arr
 
-    def single_training(self, X, y, mask):
+    def single_training(self, X: List[np.ndarray], y: np.ndarray, mask: np.ndarray, neg: np.ndarray = None):
         """
         Wraps the existing single_training(...) function from your script.
         Args:
@@ -68,7 +69,8 @@ class SawmilProbeRunner(BaseProbeRunner):
             # transform each bag
             bags = [self.scaler.transform(bag) for bag, m in zip(X, mask) if m]
         else:
-            raise NotImplementedError("Only normalization pipeline is implemented")
+            raise NotImplementedError(
+                "Only normalization pipeline is implemented")
 
         # =========== Step 3: sparsification (optional) ===========
         self.transformer = None
@@ -83,7 +85,7 @@ class SawmilProbeRunner(BaseProbeRunner):
             )
             processed_bags.append(bag_processed)
             intra_labels.append(intra_labels_for_this_bag)
-            
+
         # =========== Step 5: compute η (eta) ===========
         pos_lengths = [
             len(bag) for bag in processed_bags
@@ -117,7 +119,7 @@ class SawmilProbeRunner(BaseProbeRunner):
             "eta": eta,
         }
 
-    def parameter_search(self, X, y, mask):
+    def parameter_search(self, X: List[np.ndarray], y: np.ndarray, mask: np.ndarray, neg: np.ndarray = None):
         """
         Wraps the existing parameter_search(...) function from your script.
         Args:
@@ -128,7 +130,8 @@ class SawmilProbeRunner(BaseProbeRunner):
             same dict as single_training plus 'best_C'
         """
         log.warning("Running the hyperparameter search...")
-        param_grid = self.cfg.probe.param_grid['C'] # You can redefine this based on your needs
+        # You can redefine this based on your needs
+        param_grid = self.cfg.probe.param_grid['C']
         f_X = deepcopy(X)
         f_y = deepcopy(y)
         f_mask = deepcopy(mask)
@@ -148,7 +151,7 @@ class SawmilProbeRunner(BaseProbeRunner):
         scores = []
         stds = []
         n_samples = len(X)
-        
+
         for i, C in enumerate(param_grid):
             log.warning(f"\tRunning the iteration with C={C}...")
             _inner_scores = []
@@ -166,7 +169,7 @@ class SawmilProbeRunner(BaseProbeRunner):
                 y_train = y[tr_mask]
                 y_test = y[te_mask]
                 np.random.seed(random_seed + j)
-                
+
                 # =========== Step 2: normalization ===========
                 if self.cfg.probe.get("normalize_data", True):
                     log.warning("\t\tNormalizing the data...")
@@ -176,7 +179,8 @@ class SawmilProbeRunner(BaseProbeRunner):
                     # transform each bag
                     bags = [scaler.transform(bag) for bag in X_train]
                 else:
-                    raise NotImplementedError("Only normalization pipeline is implemented")
+                    raise NotImplementedError(
+                        "Only normalization pipeline is implemented")
 
                 limit = self.cfg.get('cv_bag_limit', len(bags))
                 # =========== Step 3: sparsification (optional) ===========
@@ -192,12 +196,13 @@ class SawmilProbeRunner(BaseProbeRunner):
                     )
                     processed_bags.append(bag_processed)
                     intra_labels.append(intra_labels_for_this_bag)
-                    
+
                 # =========== Step 5: compute η (eta) ===========
                 pos_lengths = [
                     len(bag) for bag in processed_bags
                 ]
-                eta = sum([sum(lbl) for lbl in intra_labels]) / sum(pos_lengths)
+                eta = sum([sum(lbl) for lbl in intra_labels]) / \
+                    sum(pos_lengths)
                 # try:
                 if True:
                     separator = sAwMIL(
@@ -208,12 +213,13 @@ class SawmilProbeRunner(BaseProbeRunner):
                         eta=eta,
                     )
                     separator.fit(
-                        bags = processed_bags[:limit],
-                        y = y_train[:limit],
-                        in_bag_labels = intra_labels[:limit],
+                        bags=processed_bags[:limit],
+                        y=y_train[:limit],
+                        in_bag_labels=intra_labels[:limit],
                     )
-                    direction, bias = separator.linearize(normalize=True)             
-                    y_hat = self._decision_function_(X_test, direction = direction, bias = bias, scaler=scaler)
+                    direction, bias = separator.linearize(normalize=True)
+                    y_hat = self._decision_function_(
+                        X_test, direction=direction, bias=bias, scaler=scaler)
                     _inner_scores.append(mAP(y_test, y_hat))
                     log.warning(
                         f"\t\tmAP for {j}th fold: {_inner_scores[-1]}")
@@ -262,7 +268,7 @@ class SawmilProbeRunner(BaseProbeRunner):
             "scaler": result["scaler"],
             "transformer": result["transformer"],
             "best_C": self.cfg.probe["init_params"]["C"],
-        }              
+        }
 
     def conformal_training(self, X_cal, y_cal, mask_cal):
         """
@@ -288,13 +294,12 @@ class SawmilProbeRunner(BaseProbeRunner):
             tie_breaking=config["tie_breaking"],
         )
         self.calibrator.fit(
-            y=y[mask_cal], 
+            y=y[mask_cal],
             scores=scores_cal[mask_cal]
         )
 
         return self.calibrator
-    
-    
+
     def conformal_prediction(self, X):
         """
         Compute the conformal prediction for the given bags.
@@ -313,14 +318,14 @@ class SawmilProbeRunner(BaseProbeRunner):
         output = []
         if type(X) is np.ndarray:
             X = [X]
-            
+
         for bag in X:
             bag = self.scaler.transform(bag)
             bag, _ = self.process_single_bag(bag)
             scores = np.dot(bag, self.direction) + self.bias
             output.append(np.max(scores))
         return np.array(output)
-    
+
     def _decision_function_(self, X: list, direction, bias, scaler):
         """
         Compute raw bag‐scores for a new set of bags, using the trained separator.
@@ -329,7 +334,7 @@ class SawmilProbeRunner(BaseProbeRunner):
         output = []
         if type(X) is np.ndarray:
             X = [X]
-            
+
         for bag in X:
             bag = scaler.transform(bag)
             bag, _ = self.process_single_bag(bag)
@@ -337,12 +342,11 @@ class SawmilProbeRunner(BaseProbeRunner):
             output.append(np.max(scores))
         return np.array(output)
 
-
     def process_input(self, X):
         raise NotImplementedError(
             "SawmilProbeRunner does not support process_input. Use decision_function instead."
         )
-        
+
     def update_metric(self, metric_dict):
         """
         Add probe‐specific hyperparameters to metrics (e.g., C, eta).
@@ -351,7 +355,7 @@ class SawmilProbeRunner(BaseProbeRunner):
         metric_dict["eta"] = self.eta
         return metric_dict
 
-    def process_single_bag(self, bag: np.ndarray, max_bag_size: int =100, rnd_seed_offset: int =0):
+    def process_single_bag(self, bag: np.ndarray, max_bag_size: int = 100, rnd_seed_offset: int = 0):
         ''' 
         Process a single bag
         bag: np.array, shape [ #instances × hidden_size ]
@@ -363,10 +367,10 @@ class SawmilProbeRunner(BaseProbeRunner):
         '''
         num_last_tokens_to_keep = self.cfg.probe["num_known_positives"]
         assume_known = self.cfg.probe.get("assume_known_positives", True)
-            
-        bag_size = bag.shape[0]    
+
+        bag_size = bag.shape[0]
         # 1. Cap the bag size
-        if bag_size >  max_bag_size:
+        if bag_size > max_bag_size:
             # drop FROM the tail but keep last `num_last_tokens_to_keep` items
             rng = self.cfg.random_seed + rnd_seed_offset
             bag_processed = drop_rows_with_tail_keep(
@@ -380,7 +384,7 @@ class SawmilProbeRunner(BaseProbeRunner):
             intra_labels_for_this_bag = (
                 [0] * (bag_processed.shape[0] - num_last_tokens_to_keep)
                 + [1] * num_last_tokens_to_keep
-                )
+            )
         else:
             intra_labels_for_this_bag = [1] * bag_processed.shape[0]
         return bag_processed, intra_labels_for_this_bag

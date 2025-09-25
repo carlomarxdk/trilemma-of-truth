@@ -361,6 +361,10 @@ def prepare_nnsight(cfg):
 def return_label(data):
     """
     Return labels from the dataframe
+    Returns:
+        correct: np.array of correct labels
+        real: np.array of real_object labels
+        negated: np.array of negation labels
     """
     correct, real, negated = data["correct"].values, data["real_object"].values, data["negation"].values
     return correct, real, negated

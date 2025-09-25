@@ -1,0 +1,41 @@
+{
+  "layer_id": 13,
+  "paths": {
+    "config": "outputs/probes/ttpd/llama-3-8b/city_locations_search_task-3/config.json",
+    "metrics": "outputs/probes/ttpd/llama-3-8b/city_locations_search_task-3/metrics_13.json",
+    "coef": "outputs/probes/ttpd/llama-3-8b/city_locations_search_task-3/coef_13.npy",
+    "bias": "outputs/probes/ttpd/llama-3-8b/city_locations_search_task-3/bias_13.npy",
+    "preds": "outputs/probes/ttpd/llama-3-8b/city_locations_search_task-3/y_hat_13.npy",
+    "estimator": "outputs/probes/ttpd/llama-3-8b/city_locations_search_task-3/estimator_13.joblib",
+    "scaler": "outputs/probes/ttpd/llama-3-8b/city_locations_search_task-3/scaler_13.joblib",
+    "transformer": null,
+    "calibrator": "outputs/probes/ttpd/llama-3-8b/city_locations_search_task-3/calibrator_13.joblib"
+  },
+  "shapes": {
+    "coef": [],
+    "bias": [],
+    "y_hat": [
+      1855
+    ],
+    "y_true": [
+      1855
+    ]
+  },
+  "dtypes": {
+    "coef": "",
+    "bias": "",
+    "y_hat": "float64",
+    "y_true": "int32"
+  },
+  "env": {
+    "python": "3.12.8",
+    "numpy": "2.3.3",
+    "joblib": "1.5.2",
+    "hydra": "1.3.2",
+    "sklearn": "1.7.2",
+    "scipy": "1.16.2",
+    "polars": "1.33.1",
+    "pandas": "2.3.2",
+    "torch": "2.4.1"
+  }
+}

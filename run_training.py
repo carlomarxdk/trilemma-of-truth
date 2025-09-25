@@ -32,7 +32,7 @@ from utils import (
 from typing import Optional, Dict, List
 from sklearn.base import TransformerMixin, BaseEstimator
 
-from runners import SVMProbeRunner, MDProbeRunner, SawmilProbeRunner, SPCA_Runner
+from runners import SVMProbeRunner, MDProbeRunner, SawmilProbeRunner, SPCA_Runner, TTPD_Runner
 
 log = logging.getLogger("Training")
 
@@ -40,7 +40,8 @@ PROBES = {
     'svm': SVMProbeRunner,
     'mean_diff': MDProbeRunner,
     'sawmil': SawmilProbeRunner,
-    'spca': SPCA_Runner
+    'spca': SPCA_Runner,
+    'ttpd': TTPD_Runner,
 }
 
 try:
@@ -369,16 +370,16 @@ def main(cfg: DictConfig):
         X_tr = dh.train_bags(
             layer_id=layer_id, drop_zeros=True)["embeddings"]
         data_train = dh.get_train_df().reset_index(drop=True)
-        _y_train, r_train, _ = return_label(data_train)
+        _y_train, r_train, neg_tr = return_label(data_train)
 
         # LOAD THE TEST DATA
         data_test = dh_test.get_test_df().reset_index(drop=True)
-        _y_test, r_test, _ = return_label(data_test)
+        _y_test, r_test, neg_test = return_label(data_test)
 
         # LOAD THE CALIBRATION DATA
         if dh.with_calibration:
             data_cal = dh.get_cal_df().reset_index(drop=True)
-            _y_cal, r_cal, _ = return_label(data_cal)
+            _y_cal, r_cal, neg_cal = return_label(data_cal)
 
         train_labels = task.return_labels(_y_train, r_train)
         y_train, mask = train_labels['targets'], train_labels['mask']
@@ -388,17 +389,16 @@ def main(cfg: DictConfig):
             cal_labels = task.return_labels(_y_cal, r_cal)
             y_cal, mask_cal = cal_labels['targets'], cal_labels['mask']
             
-        print(mask_test)
 
         start_time = time.time()
         runner = PROBES[cfg.probe['name']](cfg)
         if cfg.search:
             result = runner.parameter_search(
-                X=X_tr, y=y_train, mask=mask)
+                X=X_tr, y=y_train, mask=mask, neg=neg_tr)
         else:
             # try:
             result = runner.single_training(
-                X=X_tr, y=y_train, mask=mask)
+                X=X_tr, y=y_train, mask=mask, neg=neg_tr)
 
         # CONFORMAL PREDICTION
         X_te = dh_test.test_bags(
@@ -421,8 +421,6 @@ def main(cfg: DictConfig):
                                             cfg=cfg)
         metric_dict['default']["coverage"] = 1.0
         metric_dict['default'] = runner.update_metric(metric_dict['default'])
-        
-        
         
         metric_dict['conformal'] = log_metric(preds=yc_te, scores=yh_te,
                                               y_true=y_test, mask=mask_test, cfg=cfg)

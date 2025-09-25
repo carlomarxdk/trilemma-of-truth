@@ -1,23 +1,25 @@
 from runners.base import BaseProbeRunner
-from probes.mean_difference import MeanDifferenceClassifier
+from probes.ttpd import TTPD
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import KFold
+from sklearn.model_selection import KFold, GridSearchCV
+from sklearn.pipeline import Pipeline
 from probes.conformal import InductiveConformalPredictor, symmetric_nonconformity
 from sklearn.metrics import (
     average_precision_score as mAP,
     matthews_corrcoef as mcc,
+    make_scorer
 )
 import numpy as np
 import logging
 from typing import List
 from copy import deepcopy
 
-log = logging.getLogger("SILRunner-MD")
+log = logging.getLogger("SILRunner-TTPD")
 
 
-class MDProbeRunner(BaseProbeRunner):
+class TTPD_Runner(BaseProbeRunner):
     """
-    SIL Probe Runner for probes trained on the last instance of the bag (for mean difference probe)
+    SIL Probe Runner for probes trained on the last instance of the bag (for Training Truth and Polarity Direction probe)
     """
 
     def __init__(self, cfg):
@@ -41,32 +43,39 @@ class MDProbeRunner(BaseProbeRunner):
             - mask: mask for the task
         """
         # 0) Get the bags and labels
-        assert len(X) == len(y), "X and y must have the same length"
-        assert np.unique(y).size == 2, "y must be binary"
-        
-        mask = np.array(mask, dtype=bool)
-        y = self.return_target(y, mask)
+        f_mask = np.array(mask, dtype=bool)
+        f_neg = deepcopy(neg) if neg is not None else None
+        f_y = deepcopy(y)
+        f_X = deepcopy(X)
+        assert len(f_X) == len(f_y) == len(f_mask), "X, y and mask must have the same length"
+        assert np.unique(f_y).size == 2, "y must be binary"
+
+        ym = self.return_target(f_y, f_mask)
+        negm = self.return_target(1 - f_neg, f_mask) if f_neg is not None else None
         # 1) Fit transformer on concatenated instances
         if self.cfg.probe.get('normalize_data', True):
             log.warning("\t\tNormalizing the data...")
-            Xf = np.vstack([x[-1] for x, m in zip(X, mask) if m])
-            self.scaler.fit(Xf)
+            Xm = np.vstack([bag[-1] for bag, m in zip(f_X, f_mask) if m])
+            self.scaler.fit(Xm)
         else:
             raise NotImplementedError(
                 "Only a pipeline with the normalization is implemented")
 
-        bags = np.vstack([self.scaler.transform(bag)[-1]
-                for bag, m in zip(X, mask) if m])
+        Xm = np.vstack([self.scaler.transform(bag)[-1]
+                for bag, m in zip(f_X, f_mask) if m])
 
         # 2) Transform each bag (take only the last element)
         cfg = self.cfg.probe
-        limit = cfg.get('train_sample_limit', len(bags))
-        self.separator = MeanDifferenceClassifier(with_covariance=cfg.init_params['with_covariance'],
-                                                  fit_intercept=cfg.init_params['fit_intercept'],
-                                                   verbose=cfg.init_params.get('verbose', True))
-                                     
+        limit = cfg.get('train_sample_limit', Xm.shape[0])
+        log.warning("\t\tFit the data...")
+
+        self.separator = TTPD(
+            verbose=cfg.init_params.get('verbose', False),
+            random_seed=cfg.init_params.get('random_seed', 42)
+        )
+
         self.separator.fit(
-            bags[:limit], y[:limit])
+            Xm[:limit], t_labels=ym[:limit], p_labels=negm[:limit])
 
         return {'separator': self.separator,
                 'scaler': self.scaler,
@@ -87,17 +96,23 @@ class MDProbeRunner(BaseProbeRunner):
             - mask: mask for the data
         """
         log.warning("Running the hyperparameter search... (For MD Probe parameter_search == sigle_training)")
-        return self.single_training(X, y, mask)
-
+        return self.single_training(X, y, mask, neg)
+        
     def conformal_training(self, X_cal, y_cal, mask_cal):
         '''
         Train the conformal predictor on the calibration set.
+        Args:
+            X_cal: array-like, shape (n_samples, n_features)
+                The calibration set features.
+            y_cal: array-like, shape (n_samples,)
+                The calibration set true labels.
+            mask_cal: array-like, shape (n_samples,)
+                The mask for the calibration set.
         '''
-        X = deepcopy(X_cal)
-        y = deepcopy(y_cal)
-        mask = deepcopy(mask_cal)
+        f_X = deepcopy(X_cal)
+        f_y = deepcopy(y_cal)
+        f_mask = np.array(mask_cal, dtype=bool).copy()
         cfg = self.cfg.conformal_params
-        mask_cal = np.array(mask, dtype=bool)
 
         if cfg['nc'] == 'binary':
             nc = symmetric_nonconformity
@@ -107,8 +122,8 @@ class MDProbeRunner(BaseProbeRunner):
         self.calibrator = InductiveConformalPredictor(nonconformity_func=nc,
                                                       alpha=cfg["alpha"],
                                                       tie_breaking=cfg["tie_breaking"])
-        yh_cal = self.decision_function(X)
-        self.calibrator.fit(y=y[mask], scores=yh_cal[mask])
+        yh_cal = self.decision_function(f_X)
+        self.calibrator.fit(y=f_y[f_mask], scores=yh_cal[f_mask])
         return self.calibrator
 
     def conformal_prediction(self, X):
@@ -116,9 +131,9 @@ class MDProbeRunner(BaseProbeRunner):
         Compute the conformal prediction for the given bags.
         """
         # Transform the bags using the fitted scaler
-        X = deepcopy(X)
+        f_X = deepcopy(X)
         # Compute the decision function using the separator
-        yh = self.decision_function(X)
+        yh = self.decision_function(f_X)
         # Compute the conformal prediction
         return self.calibrator.predict(yh)
 
@@ -133,13 +148,16 @@ class MDProbeRunner(BaseProbeRunner):
     
     def predict_proba(self, X):
         Xt = self.process_input(X)
-        return self.separator.predict_proba(Xt).flatten()
+        proba = self.separator.predict_proba(Xt)
+        if proba.ndim > 1 and proba.shape[1] == 2:
+            proba = proba[:, 1]    
+        return proba.flatten()
     
     def predict(self, X):
         proba = self.predict_proba(X)
         return np.array(proba > 0.5)    
     
-    def process_input(self, X):
+    def process_input(self, X: List[np.ndarray]) -> np.ndarray:
         return np.vstack([self.scaler.transform(bag)[-1] for bag in X])
 
     def update_metric(self, metric_dict):
@@ -153,18 +171,25 @@ class MDProbeRunner(BaseProbeRunner):
         """
         Return the direction of the separator.
         """
-        return np.asarray(self.separator.coef_[0])
+        return None
 
     @property
     def bias(self):
         """
         Return the bias of the separator.
         """
-        return np.asarray(self.separator.intercept_ if self.separator.fit_intercept else 0.0)
+        return None
 
     @property
     def direction_bias(self):
         """
         Return, BOTH, the direction and bias of the separator.
         """
-        return self.direction, self.bias
+        return None, None
+
+    @property
+    def estimator(self):
+        """
+        Return the estimator
+        """
+        return self.separator

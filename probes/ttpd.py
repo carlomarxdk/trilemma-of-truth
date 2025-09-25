@@ -40,6 +40,8 @@ class TTPD(ClassifierMixin, BaseEstimator):
         self.w_t = None # truth direction from OLS
         self.w_p = None # polarity direction from LR
         self.w_p_ = None  # polarity direction from OLS (not used downstream)
+        self.mu_ = None  # global centering
+        self.classes_ = np.array([0, 1])
 
     @staticmethod
     def _labels_to_sign(y: np.ndarray) -> np.ndarray:
@@ -63,8 +65,8 @@ class TTPD(ClassifierMixin, BaseEstimator):
         assert np.unique(p).tolist() == [0, 1] or np.unique(
             p).tolist() == [0], "p must be in {0, 1} or {0}"
         X = np.asarray(X, dtype=np.float64)     
-        t_copy = np.asarray(t, dtype=np.float64).ravel().copy()
-        p_copy = np.asarray(p, dtype=np.float64).ravel().copy()
+        t_copy = np.asarray(t, dtype=np.float64).copy().ravel()
+        p_copy = np.asarray(p, dtype=np.float64).copy().ravel()
         Xc = X if is_centered(X) else (X - X.mean(axis=0, keepdims=True))
 
         # design matrix (N,k)
@@ -74,19 +76,17 @@ class TTPD(ClassifierMixin, BaseEstimator):
             A = np.column_stack([t_copy, t_copy * p_copy]
                                 )                 # (N,2)
 
-        # Solve with SVD-based least squares (stable; no explicit inverse)
-        # W has shape (k, d)
-        W, *_ = np.linalg.lstsq(A, Xc, rcond=None)
+        W, *_ = np.linalg.lstsq(A, Xc, rcond=None) # with centered X
 
-        w_t = W[0, :].copy() if W.ndim == 2 else W.copy()
-        w_p = W[1, :].copy() if (W.ndim == 2 and W.shape[0] > 1) else None
-        w_t = np.asarray(w_t, dtype=float).ravel()
+        w_t = W[0, :].ravel()
+        w_p = W[1, :].ravel() if W.shape[0] > 1 else None
+        w_t = np.asarray(w_t, dtype=float)
         if w_p is not None:
             w_p = np.asarray(w_p, dtype=float).ravel()
         return w_t, w_p
-
+    
     @staticmethod
-    def _get_polarity_direction(X: np.ndarray, p: np.ndarray) -> np.ndarray:
+    def _get_polarity_direction(X: np.ndarray, p: np.ndarray, seed: int=42) -> np.ndarray:
         '''
         Get the polarity directions
         Args:
@@ -98,13 +98,12 @@ class TTPD(ClassifierMixin, BaseEstimator):
         assert np.unique(p).tolist() == [0, 1] or np.unique(
             p).tolist() == [0], "p must be in {0, 1} or {0}"
         assert X.shape[0] == p.shape[0], "Mismatched number of samples."
-        p_copy = p.copy().ravel()
+        if np.all(p == 0):
+            return np.zeros(X.shape[1], dtype=float)
 
         lr = LogisticRegression(penalty=None, fit_intercept=True)
-        lr.fit(X, p_copy)
-        w_p = lr.coef_.ravel()
-        
-        return w_p
+        lr.fit(X, p.ravel().astype(int))
+        return lr.coef_.ravel()
 
     def _project(self, X: np.ndarray) -> np.ndarray:
         '''
@@ -131,15 +130,15 @@ class TTPD(ClassifierMixin, BaseEstimator):
         assert type_of_target(t_labels) == "binary", "Labels should be binary."
         assert type_of_target(p_labels) == "binary", "Labels should be binary."
         np.random.seed(self.random_seed)
-        t_labels = np.asarray(t_labels).ravel()
-        p_labels = np.asarray(p_labels).ravel()
+        t_labels = np.asarray(t_labels).ravel().copy()
+        p_labels = np.asarray(p_labels).ravel().copy()
 
         self.w_t, self.w_p_ = self._get_truth_direction(X, self._labels_to_sign(t_labels), p_labels)
         # self.w_p_ is not used downstream
-        self.w_p = self._get_polarity_direction(X, p_labels)
+        self.w_p = self._get_polarity_direction(X, p_labels, seed=self.random_seed)
         
         Xp = self._project(X)
-        self.base.fit(Xp, t_labels)
+        self.base.fit(Xp, self._labels_to_sign(t_labels))
         
         self.is_fitted_ = True
         return self
