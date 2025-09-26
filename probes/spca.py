@@ -17,8 +17,10 @@ class SupervisedPCA(ClassifierMixin, BaseEstimator):
                  n_components: Union[int, None] = None,
                  cov_type: str = 'oas',
                  cov_fallback_scale: float = 1.0,
+                 whitening: bool = True,
                  cov_reg: float = 1e-8,
-                 base_model: ClassifierMixin = LogisticRegression(penalty=None, fit_intercept=True, max_iter=2000),
+                 lr_reg: float = 1.0,
+                 base_model: ClassifierMixin = LogisticRegression(penalty='l2', fit_intercept=True, max_iter=3000, solver='lbfgs'),
                  verbose: bool = False,
                  random_seed: int = 42) -> 'SupervisedPCA':
         '''
@@ -28,6 +30,8 @@ class SupervisedPCA(ClassifierMixin, BaseEstimator):
             cov_type: Type of covariance estimation. One of VALID_COVARIANCE_METHODS
             cov_fallback_scale: Scale for the identity fallback if covariance estimation fails
             cov_reg: Regularization added to the diagonal of the covariance matrix for numerical stability
+            whitening: Whether to whiten the projected data
+            lr_reg: Regularization strength for the logistic regression classifier
             base_model: Base classifier to use after projection
             verbose: Whether to print progress.
             random_seed: Random seed for reproducibility.
@@ -38,11 +42,15 @@ class SupervisedPCA(ClassifierMixin, BaseEstimator):
         self.n_components = n_components
         self.cov_type = cov_type
         self.cov_reg = cov_reg
+        self.lr_reg = lr_reg
+        self.whitening = whitening
         self.cov_fallback_scale = cov_fallback_scale
-        self.coef_ = None
-        self.vals_ = None
         self.base_model = base_model
+        self.base_model.set_params(C=self.lr_reg) # for now works only with classifiers that have C param
+        # fitted attributes
         self.is_fitted_ = False
+        self.components_ = None
+        self.explained_variance_ = None
         self.classes_ = np.array([0, 1])
 
     def fit(self, X: np.array, y: np.array) -> 'SupervisedPCA':
@@ -85,7 +93,7 @@ class SupervisedPCA(ClassifierMixin, BaseEstimator):
         
         self.components_ = vecs
         self.explained_variance_ = vals
-        Z = X @ self.components_
+        Z = self._scores(X)
         self.base_model.fit(Z, y)
         self.is_fitted_ = True
         return self
@@ -93,22 +101,27 @@ class SupervisedPCA(ClassifierMixin, BaseEstimator):
     def decision_function(self, X: np.array) -> np.array:
         check_is_fitted(self, 'is_fitted_')
         X = np.asarray(X, dtype=np.float32)
-        scores = X @ self.components_
-        return self.base_model.decision_function(scores)
+        Z = self._scores(X)
+        return self.base_model.decision_function(Z)
 
     def predict_proba(self, X: np.array) -> np.array:
         check_is_fitted(self, 'is_fitted_')
         X = np.asarray(X, dtype=np.float32)
-        probs =  self.base_model.predict_proba(X @ self.components_)
+        Z = self._scores(X)
+        probs =  self.base_model.predict_proba(Z)
         if probs.shape[1] == 2:
             return probs[:, 1].ravel() 
         return probs.ravel()
     def predict(self, X: np.array) -> np.array:
         check_is_fitted(self, 'is_fitted_')
         X = np.asarray(X, dtype=np.float32)
-        return self.base_model.predict(X @ self.components_)
-        # scores = self.predict_proba(X)
-        # return  scores.round().astype(int)
+        Z = self._scores(X)
+        return self.base_model.predict(Z)
     
+    def _scores(self, X: np.array) -> np.array:
+        scores = X @ self.components_
+        if self.whitening:
+            scores = scores / np.sqrt(self.explained_variance_ + 1e-12)
+        return scores
     
     __all__ = ['SupervisedPCA']

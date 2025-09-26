@@ -183,7 +183,7 @@ def load_data(cfg):
         with_calibration = True
     else:
         with_calibration = False
-    dh = DataHandler(model = cfg.model["name"], datasets=cfg.datapack["datasets"],
+    dh = DataHandler(model=cfg.model["name"], datasets=cfg.datapack["datasets"],
                      dataset_path=cfg.setup["dataset_path"], activations_path=cfg.setup["activations_path"],
                      output_path=cfg.setup["output_path"],
                      activation_type=cfg.agg, with_calibration=with_calibration, load_scores=cfg.datapack[

@@ -1,8 +1,10 @@
 from runners.base import BaseProbeRunner
 from probes.spca import SupervisedPCA
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import KFold, GridSearchCV
+from sklearn.experimental import enable_halving_search_cv 
+from sklearn.model_selection import KFold, HalvingGridSearchCV
 from sklearn.pipeline import Pipeline
+from scipy.stats import randint
 from probes.conformal import InductiveConformalPredictor, symmetric_nonconformity
 from sklearn.metrics import (
     average_precision_score as mAP,
@@ -114,12 +116,14 @@ class SPCA_Runner(BaseProbeRunner):
         pipeline = Pipeline([("scaler", StandardScaler()),
                              ("clf", SupervisedPCA())])
 
-        grid = GridSearchCV(
+        grid = HalvingGridSearchCV(
             estimator=pipeline,
             param_grid=param_grid,
             cv=KFold(n_splits=3, shuffle=True, random_state=42),
+            factor=2,
             refit=False,
             scoring='average_precision',
+            random_state=43,
             n_jobs=-1,
             verbose=1,
             error_score=0.0
@@ -128,6 +132,7 @@ class SPCA_Runner(BaseProbeRunner):
         grid.fit(Xm, ym)
         best_params, _ = self._apply_se_rule(grid.cv_results_, n_folds=3)
         self.cfg.probe.init_params['n_components'] = best_params['clf__n_components']
+        self.cfg.probe.init_params['lr_reg'] = best_params['clf__lr_reg']
         return self.single_training(X, y, mask)
 
     def _apply_se_rule(self, results, n_folds: int = 3):

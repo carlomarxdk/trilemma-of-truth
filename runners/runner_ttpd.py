@@ -1,8 +1,6 @@
 from runners.base import BaseProbeRunner
 from probes.ttpd import TTPD
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import KFold, GridSearchCV
-from sklearn.pipeline import Pipeline
 from probes.conformal import InductiveConformalPredictor, symmetric_nonconformity
 from sklearn.metrics import (
     average_precision_score as mAP,
