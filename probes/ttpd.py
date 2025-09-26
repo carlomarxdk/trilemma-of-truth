@@ -24,7 +24,7 @@ class TTPD(ClassifierMixin, BaseEstimator):
 
     def __init__(self,
                  base: ClassifierMixin = LogisticRegression(
-                     penalty=None, fit_intercept=True),
+                     penalty=None, fit_intercept=True, max_iter=3000, solver='lbfgs'),
                  random_seed: int = 42,
                  verbose: bool = False) -> 'TTPD':
         '''
@@ -62,8 +62,8 @@ class TTPD(ClassifierMixin, BaseEstimator):
             w_p: (d,) array, polarity direction (not used downstream)
         '''
         assert np.unique(t).tolist() == [-1, 1], "t must be in {-1, +1}"
-        assert np.unique(p).tolist() == [0, 1] or np.unique(
-            p).tolist() == [0], "p must be in {0, 1} or {0}"
+        assert np.unique(p).tolist() == [-1,1] or np.unique(
+            p).tolist() == [0], "p must be in {-1, 1} or {0}"
         X = np.asarray(X, dtype=np.float64)     
         t_copy = np.asarray(t, dtype=np.float64).copy().ravel()
         p_copy = np.asarray(p, dtype=np.float64).copy().ravel()
@@ -133,12 +133,12 @@ class TTPD(ClassifierMixin, BaseEstimator):
         t_labels = np.asarray(t_labels).ravel().copy()
         p_labels = np.asarray(p_labels).ravel().copy()
 
-        self.w_t, self.w_p_ = self._get_truth_direction(X, self._labels_to_sign(t_labels), p_labels)
+        self.w_t, self.w_p_ = self._get_truth_direction(X, self._labels_to_sign(t_labels), self._labels_to_sign(p_labels))
         # self.w_p_ is not used downstream
         self.w_p = self._get_polarity_direction(X, p_labels, seed=self.random_seed)
         
         Xp = self._project(X)
-        self.base.fit(Xp, self._labels_to_sign(t_labels))
+        self.base.fit(Xp, t_labels.astype(int))
         
         self.is_fitted_ = True
         return self

@@ -4,7 +4,6 @@ from sklearn.utils.validation import check_is_fitted
 import numpy as np
 from typing import Union
 from scipy.sparse.linalg import eigsh
-# from scipy.special import expit
 
 from probes.mean_difference import VALID_COVARIANCE_METHODS, robust_covariance
 
@@ -123,5 +122,6 @@ class SupervisedPCA(ClassifierMixin, BaseEstimator):
         if self.whitening:
             scores = scores / np.sqrt(self.explained_variance_ + 1e-12)
         return scores
+    
     
     __all__ = ['SupervisedPCA']

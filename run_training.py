@@ -1,16 +1,8 @@
 # Code for ONE-vs-ALL probes, works both for SIL (MD+CP and SVM) and MIL (Sawmil) probes.
 
-from scipy.stats import energy_distance
-from sklearn.metrics import (
-    recall_score as recall,
-    average_precision_score as mAP,
-    matthews_corrcoef as mcc,
-    adjusted_mutual_info_score as ami,
-    adjusted_rand_score as ari,
-)
 import logging
 import hydra
-from utils_hydra import load_data, return_label, safe_bootstrap
+from utils_hydra import load_data, return_label
 from misc.task import Task
 from omegaconf import DictConfig, OmegaConf
 import numpy as np
@@ -27,6 +19,7 @@ from utils import (
     should_process_layer,
     _atomic_joblib_dump,
     _atomic_write_json,
+    log_metric_binary as log_metric,
 )
 
 from typing import Optional, Dict, List
@@ -50,6 +43,7 @@ try:
     log.warning("Patched sklearn is running...")
 except:
     pass
+
 
 def validate_config(cfg: DictConfig):
     assert type(
@@ -82,102 +76,6 @@ def log_stats(cfg):
     log.warning(f"\t\tOutput directory: {cfg.output_dir}")
 
 
-def log_metric(preds, scores, y_true, mask, cfg):
-    """
-    Log the metrics to the Weights and Biases dashboard with prefix and return as a dictionary without prefix.
-    """
-    # yhat = probs.round()
-    is_binary = len(np.unique(y_true)) == 2
-    assert is_binary, "Only binary classification is supported."
-    is_ok = (len(np.unique(preds)) > 0) & (len(np.unique(preds)) < 4)
-    assert is_ok, "Only binary classification is supported (or binary with abstention class '-1')."
-
-    a_mask = (preds != -1).flatten()
-    preds = preds.flatten()
-    scores = scores.flatten()
-    a_rate = np.sum(a_mask[mask]) / len(a_mask[mask])
-
-    def wmcc(y_true, y_pred): return mcc(y_true, y_pred) *\
-        a_rate
-
-    def wami(y_true, y_pred): return ami(y_true, y_pred) *\
-        a_rate
-
-    def wari(y_true, y_pred): return ari(y_true, y_pred) *\
-        a_rate
-
-    full_mask = a_mask & mask
-
-    binary_kwargs = dict(
-        y_true=y_true[full_mask],
-        y_pred=preds[full_mask],
-        n_bootstraps=cfg.eval_params["n_bootstraps"]
-    )
-
-    # Get the values for each metric using the helper.
-    mcc_val = safe_bootstrap(mcc,  **binary_kwargs)
-    ami_val = safe_bootstrap(ami,  **binary_kwargs)
-    ari_val = safe_bootstrap(ari,  **binary_kwargs)
-    recall_val = safe_bootstrap(recall, **binary_kwargs)
-    if np.equal(a_mask.mean(), 1):
-        wmcc_val = mcc_val
-        wami_val = ami_val
-        wari_val = ari_val
-        wrecall_val = recall_val
-    else:
-        wmcc_val = safe_bootstrap(wmcc, **binary_kwargs)
-        wami_val = safe_bootstrap(wami, **binary_kwargs)
-        wari_val = safe_bootstrap(wari,  **binary_kwargs)
-        wrecall_val = safe_bootstrap(recall, **binary_kwargs)
-    try:
-        probs = scores[full_mask]
-        x_min = probs.min()
-        x_max = probs.max()
-
-        # Apply min-max scaling
-        probs_scaled = (probs - x_min) / (x_max - x_min)
-        targets = y_true[full_mask]
-        energy_val = energy_distance(
-            probs_scaled[targets == 0], probs_scaled[targets == 1])
-    except Exception as e:
-        log.warning(
-            f"Error calculating energy distance: {e}. Setting to 1000.")
-        energy_val = 1000
-
-    try:
-        mAP_val = mAP(y_true[full_mask],
-                      scores[full_mask])
-
-    except:
-        try:
-            mAP_val = mAP(y_true[full_mask],
-                          np.zeros_like(scores[full_mask]))
-        except:
-            try:
-                mAP_val = mAP(y_true[mask],
-                              np.zeros_like(scores[mask]))
-            except:
-                mAP_val = 0
-
-    metric_with_ci = {
-        "mcc": mcc_val,
-        "ami": ami_val,
-        "ari": ari_val,
-        "wmcc": wmcc_val,
-        "wami": wami_val,
-        "wari": wari_val,
-        "map": mAP_val,
-        "wmap": mAP_val * a_rate,
-        "energy": energy_val,
-        "wenergy": energy_val * a_rate,
-        "acceptance_rate": a_rate,
-        "recall": recall_val,
-        "wrecall": wrecall_val,
-        "n": y_true[full_mask].shape[0],
-    }
-    return metric_with_ci
-
-
 def save(concept_direction: np.ndarray,
          concept_bias: np.ndarray,
          metric_dict: Dict,
@@ -206,7 +104,7 @@ def save(concept_direction: np.ndarray,
     '''
     output_dir = Path(str(cfg.output_dir))
     output_dir.mkdir(parents=True, exist_ok=True)
-    
+
     # 1. Config (resolved)
     config_path = output_dir / "config.json"
     _atomic_write_json(config_path, OmegaConf.to_container(cfg, resolve=True))
@@ -214,16 +112,20 @@ def save(concept_direction: np.ndarray,
     metrics_path = output_dir / f"metrics_{layer_id}.json"
     _atomic_write_json(metrics_path, metric_dict)
     # 3. Objects
-    est_path = output_dir / f"estimator_{layer_id}.joblib" if estimator is not None else None
+    est_path = output_dir / \
+        f"estimator_{layer_id}.joblib" if estimator is not None else None
     if (estimator is not None):
         _atomic_joblib_dump(est_path, estimator)
-    scl_path = output_dir / f"scaler_{layer_id}.joblib" if scaler is not None else None
+    scl_path = output_dir / \
+        f"scaler_{layer_id}.joblib" if scaler is not None else None
     if (scaler is not None):
         _atomic_joblib_dump(scl_path, scaler)
-    trn_path = output_dir / f"transformer_{layer_id}.joblib" if transformer is not None else None
+    trn_path = output_dir / \
+        f"transformer_{layer_id}.joblib" if transformer is not None else None
     if (transformer is not None):
         _atomic_joblib_dump(trn_path, transformer)
-    clb_path = output_dir / f"calibrator_{layer_id}.joblib" if conf_calibrator is not None else None
+    clb_path = output_dir / \
+        f"calibrator_{layer_id}.joblib" if conf_calibrator is not None else None
     if (conf_calibrator is not None):
         _atomic_joblib_dump(clb_path, conf_calibrator)
 
@@ -233,12 +135,13 @@ def save(concept_direction: np.ndarray,
     np.save(coef_path, concept_direction)
     np.save(bias_path, concept_bias)
 
-    yh_path = output_dir / f"y_hat_{layer_id}.npy" if y_hat is not None else None
+    yh_path = output_dir / \
+        f"y_hat_{layer_id}.npy" if y_hat is not None else None
     if (y_hat is not None):
         np.save(yh_path, y_hat)
     else:
         log.warning("y_hat is None")
-    yt_path = output_dir / f"y_true_{layer_id}.npy" if y_true is not None else None
+    yt_path = output_dir / f"y_true.npy" if y_true is not None else None
     if (y_true is not None):
         np.save(yt_path, y_true)
 
@@ -388,7 +291,6 @@ def main(cfg: DictConfig):
         if dh.with_calibration:
             cal_labels = task.return_labels(_y_cal, r_cal)
             y_cal, mask_cal = cal_labels['targets'], cal_labels['mask']
-            
 
         start_time = time.time()
         runner = PROBES[cfg.probe['name']](cfg)
@@ -421,13 +323,14 @@ def main(cfg: DictConfig):
                                             cfg=cfg)
         metric_dict['default']["coverage"] = 1.0
         metric_dict['default'] = runner.update_metric(metric_dict['default'])
-        
+
         metric_dict['conformal'] = log_metric(preds=yc_te, scores=yh_te,
                                               y_true=y_test, mask=mask_test, cfg=cfg)
         metric_dict['conformal']["coverage"] = calibrator.coverage(
             scores=yh_te[mask_test], y=y_test[mask_test])
         # try:
-        metric_dict['conformal']["acceptance_rate"] = np.sum(yc_te != -1) / max(yc_te.shape[0],1)
+        metric_dict['conformal']["acceptance_rate"] = np.sum(
+            yc_te != -1) / max(yc_te.shape[0], 1)
         # except:
         #     metric_dict['conformal']["acceptance_rate"] = calibrator.acceptance_rate(
         #          yh_te)

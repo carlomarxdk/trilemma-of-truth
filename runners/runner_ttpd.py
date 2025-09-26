@@ -2,11 +2,12 @@ from runners.base import BaseProbeRunner
 from probes.ttpd import TTPD
 from sklearn.preprocessing import StandardScaler
 from probes.conformal import InductiveConformalPredictor, symmetric_nonconformity
-from sklearn.metrics import (
-    average_precision_score as mAP,
-    matthews_corrcoef as mcc,
-    make_scorer
-)
+import joblib
+import json
+from pathlib import Path
+import numpy as np
+import logging
+from typing import List
 import numpy as np
 import logging
 from typing import List
@@ -93,7 +94,7 @@ class TTPD_Runner(BaseProbeRunner):
             - y: labels
             - mask: mask for the data
         """
-        log.warning("Running the hyperparameter search... (For MD Probe parameter_search == sigle_training)")
+        log.warning("Running the hyperparameter search... (For SPCA Probe parameter_search == sigle_training)")
         return self.single_training(X, y, mask, neg)
         
     def conformal_training(self, X_cal, y_cal, mask_cal):
@@ -191,3 +192,107 @@ class TTPD_Runner(BaseProbeRunner):
         Return the estimator
         """
         return self.separator
+    
+
+    def process_bag(self, bag: np.ndarray) -> np.ndarray:
+        """
+        Process a single bag and return the transformed representation.
+        Args:
+            bag: (L, d) array of input data for a single bag
+        Returns:
+            transformed_bag: (d',) array of transformed representation
+        """
+        return self.scaler.transform(bag)
+
+    def bag_decision_function(self, bags: List[np.ndarray], agg: str = 'max') -> np.ndarray:
+        """
+        Compute the decision function for the given bags.
+        """
+        # Transform the bags using the fitted scaler
+        yhat = []
+        for bag in bags:
+            bp = self.process_bag(bag)
+            preds = self.separator.decision_function(bp)
+            if agg == 'max':
+                yhat.append(np.max(preds))
+            elif agg == 'mean':
+                yhat.append(np.mean(preds))
+            else:
+                raise ValueError(f"Unknown aggregation method: {agg}")
+
+        return np.array(yhat).flatten()
+
+    def bag_predict_proba(self, bags: List[np.ndarray], agg: str = 'max') -> np.ndarray:
+        """
+        Compute the predicted probabilities for the given bags.
+        """
+        # Transform the bags using the fitted scaler
+        proba = []
+        for bag in bags:
+            bp = self.process_bag(bag)
+            preds = self.separator.predict_proba(bp)
+            if agg == 'max':
+                # Probability of positive class
+                proba.append(np.max(preds[1:]))
+            elif agg == 'mean':
+                proba.append(np.mean(preds[1:]))
+            else:
+                raise ValueError(f"Unknown aggregation method: {agg}")
+        return np.array(proba).flatten()
+
+    def bag_predict(self, bags: List[np.ndarray], agg: str = 'max', threshold: float = 0.5) -> np.ndarray:
+        """
+        Predict the class labels for the given bags.
+        """
+        proba = self.bag_predict_proba(bags, agg=agg)
+        return np.array(proba > threshold)
+
+    def bag_conformal_prediction(self, bags: List[np.ndarray], agg: str = 'max') -> List[set]:
+        """
+        Compute the conformal prediction for the given bags.
+        """
+        # Transform the bags using the fitted scaler
+        # Compute the decision function using the separator
+        yh = self.bag_decision_function(bags, agg=agg)
+        # Compute the conformal prediction
+        return self.calibrator.predict(yh)
+
+    def load(self, output_dir: str | Path, layer_id: int) -> 'TTPD_Runner':
+        """
+        Reload saved artifacts into this runner.
+        Args:
+            output_dir: path where save(...) stored things
+            layer_id: integer id used in filenames
+        """
+        output_dir = Path(output_dir)
+
+        manifest_path = output_dir / "manifests" / f"manifest_{layer_id}.json"
+        if manifest_path.exists():
+            with open(manifest_path) as f:
+                manifest = json.load(f)
+            paths = manifest["paths"]
+        else:
+            raise FileNotFoundError(f"Manifest not found: {manifest_path}")
+
+        if Path(paths["scaler"]).exists():
+            self.scaler = joblib.load(paths["scaler"])
+        else:
+            raise FileNotFoundError(f"Scaler not found: {paths['scaler']}")
+
+        if paths.get("estimator") and Path(paths["estimator"]).exists():
+            self.separator = joblib.load(paths["estimator"])
+        else:
+            self.separator = None
+
+        if paths.get("calibrator") and Path(paths["calibrator"]).exists():
+            self.calibrator = joblib.load(paths["calibrator"])
+        else:
+            self.calibrator = None
+
+        if paths.get("transformer") and Path(paths["transformer"]).exists():
+            self.transformer = joblib.load(paths["transformer"])
+        else:
+            self.transformer = None
+
+        self.is_fitted_ = True
+        return self

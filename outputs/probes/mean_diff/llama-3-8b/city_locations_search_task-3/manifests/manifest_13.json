@@ -6,7 +6,7 @@
     "coef": "outputs/probes/mean_diff/llama-3-8b/city_locations_search_task-3/coef_13.npy",
     "bias": "outputs/probes/mean_diff/llama-3-8b/city_locations_search_task-3/bias_13.npy",
     "preds": "outputs/probes/mean_diff/llama-3-8b/city_locations_search_task-3/y_hat_13.npy",
-    "estimator": null,
+    "estimator": "outputs/probes/mean_diff/llama-3-8b/city_locations_search_task-3/estimator_13.joblib",
     "scaler": "outputs/probes/mean_diff/llama-3-8b/city_locations_search_task-3/scaler_13.joblib",
     "transformer": null,
     "calibrator": "outputs/probes/mean_diff/llama-3-8b/city_locations_search_task-3/calibrator_13.joblib"

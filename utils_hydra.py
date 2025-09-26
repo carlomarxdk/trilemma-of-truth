@@ -105,50 +105,7 @@ def bootstrap_3_ci(metric_func, arg_1, arg_2, arg_3, n_bootstraps=1000, alpha=0.
     return metric_func(arg_1, arg_2, arg_3), ci_lower, ci_upper
 
 
-def bootstrap_ci(metric_func, y_true, y_pred, n_bootstraps=1000, alpha=0.05, random_state=None):
-    """
-    Calculate bootstrapped confidence intervals for a given scikit-learn metric.
 
-    Parameters:
-    - metric_func: A scikit-learn metric function (e.g., accuracy_score, precision_score).
-    - y_true: Array-like of shape (n_samples,), Ground truth (correct) labels.
-    - y_pred: Array-like of shape (n_samples,), Predicted labels, as returned by a classifier.
-    - n_bootstraps: Number of bootstrap samples to generate (default: 1000).
-    - alpha: Significance level for the confidence intervals (default: 0.05).
-    - random_state: Random seed for reproducibility (default: None).
-
-    Returns:
-    - ci_lower: Lower bound of the confidence interval.
-    - ci_upper: Upper bound of the confidence interval.
-    """
-
-    if random_state is not None:
-        np.random.seed(random_state)
-
-    bootstrapped_scores = []
-
-    for _ in range(n_bootstraps):
-        # Generate a bootstrap sample
-        indices = np.random.randint(0, len(y_true), len(y_true))
-        y_true_bootstrap = y_true[indices]
-        y_pred_bootstrap = y_pred[indices]
-
-        # Calculate the metric for the bootstrap sample
-        score = metric_func(y_true_bootstrap, y_pred_bootstrap)
-        bootstrapped_scores.append(score)
-
-    # Calculate the confidence interval
-    ci_lower = np.percentile(bootstrapped_scores, 100 * (alpha / 2))
-    ci_upper = np.percentile(bootstrapped_scores, 100 * (1 - alpha / 2))
-
-    return metric_func(y_true, y_pred), ci_lower, ci_upper
-
-
-def safe_bootstrap(metric, **kwargs):
-    try:
-        return bootstrap_ci(metric, **kwargs)
-    except Exception:
-        return (0, -1e-6, 1e-6)
 
 
 def weighed_mcc(y_true, y_pred, coverage):

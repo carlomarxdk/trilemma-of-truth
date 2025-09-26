@@ -1,11 +1,4 @@
-from utils_hydra import load_data_with_test, return_label,  safe_bootstrap
-from sklearn.metrics import (
-    normalized_mutual_info_score as nmi,
-    adjusted_mutual_info_score as ami,
-    average_precision_score as mAP,
-    matthews_corrcoef as mcc,
-    adjusted_rand_score as ari,
-)
+from utils_hydra import load_data_with_test
 import logging
 import hydra
 from omegaconf import DictConfig, OmegaConf
@@ -15,16 +8,31 @@ from glob import glob
 import json
 import re
 import pprint
-import pickle
-from copy import deepcopy
+from typing import Dict
+from pathlib import Path
+import sys
+import joblib
 from misc.probe_data import MulticlassProbeData as MPD
 from misc.db import LogDataBase
 
-from utils import should_process_layer
-import warnings
+from utils import (
+    should_process_layer,
+    log_metric_multiclass as log_metric,
+    log_metric_binary,
+    _atomic_write_json,
+    available_layers,
+)
+from runners import SVMProbeRunner, MDProbeRunner, SawmilProbeRunner, SPCA_Runner, TTPD_Runner
 
+PROBES = {
+    'svm': SVMProbeRunner,
+    'mean_diff': MDProbeRunner,
+    'sawmil': SawmilProbeRunner,
+    'spca': SPCA_Runner,
+    'ttpd': TTPD_Runner,
+}
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('Generalization')
 
 
 class NpEncoder(json.JSONEncoder):
@@ -73,8 +81,7 @@ def log_stats(cfg):
 
 
 def checkpointing(cfg, available_layers):
-    output_dir = cfg.output_dir.split(
-        "task")[0] + '-to-' + cfg.datapack_test["name"]
+    output_dir = Path(cfg.output_dir) / f"g_{cfg.datapack_test['name']}"
     recorded_layers = glob(f"{output_dir}/y_hat_*")
     completed_layers = []
     for file in recorded_layers:
@@ -93,85 +100,79 @@ def checkpointing(cfg, available_layers):
     return sorted(missing_layers)
 
 
-def log_metric(preds, scores, y_true, cfg):
-    """
-    Log the metrics to the Weights and Biases dashboard with prefix and return as a dictionary without prefix.
-    """
+def save(metric_dict: Dict,
+         layer_id: int,
+         cfg: DictConfig,
+         y_hat: np.ndarray = None,
+         y_true: np.ndarray = None):
+    '''
+    Save the artifacts of the run.
+    Args:
+        metric_dict: The dictionary containing the metrics.
+        cfg: The configuration object.
+        layer_id: The ID of the layer.
+        y_hat: The predicted labels.
+        y_true: The true labels.
 
-    a_mask = preds != -1
-    a_rate = np.sum(a_mask) / len(a_mask)
+    '''
+    output_dir = Path(str(cfg.output_dir)) / f"g_{cfg.datapack_test['name']}"
+    output_dir.mkdir(parents=True, exist_ok=True)
 
-    def wmcc(y_true, y_pred): return mcc(y_true, y_pred) * \
-        a_rate
-
-    def _mcc(y_true, y_pred): return mcc(y_true, y_pred)
-
-    def wami(y_true, y_pred): return ami(y_true, y_pred) * \
-        a_rate
-
-    def wari(y_true, y_pred): return ari(y_true, y_pred) * \
-        a_rate
-
-    preds_kwargs = dict(
-        y_true=y_true[a_mask],
-        y_pred=preds[a_mask],
-        n_bootstraps=cfg.eval_params["n_bootstraps"]
-    )
-
-    # Get the values for each metric using the helper.
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore",
-                                message="A single label was found in 'y_true' and 'y_pred'.*",
-                                category=UserWarning
-                                )
-        mcc_val = safe_bootstrap(_mcc,  **preds_kwargs)
-    ami_val = safe_bootstrap(ami,  **preds_kwargs)
-    ari_val = safe_bootstrap(ari,  **preds_kwargs)
-    if np.equal(a_mask.mean(), 1):
-        wmcc_val = mcc_val
-        wami_val = ami_val
-        wari_val = ari_val
+    # 1. Metrics
+    metrics_path = output_dir / f"metrics_{layer_id}.json"
+    _atomic_write_json(metrics_path, metric_dict)
+    # 2. Numpy arrays
+    yh_path = output_dir / \
+        f"y_hat_{layer_id}.npy" if y_hat is not None else None
+    if (y_hat is not None):
+        np.save(yh_path, y_hat)
     else:
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore",
-                                    message="A single label was found in 'y_true' and 'y_pred'.*",
-                                    category=UserWarning
-                                    )
-            wmcc_val = safe_bootstrap(wmcc, **preds_kwargs)
-        wami_val = safe_bootstrap(wami, **preds_kwargs)
-        wari_val = safe_bootstrap(wari,  **preds_kwargs)
+        log.warning("y_hat is None")
+    yt_path = output_dir / f"y_true.npy" if y_true is not None else None
+    if (y_true is not None):
+        np.save(yt_path, y_true)
 
-    try:
-        mAP_val = mAP(y_true[a_mask],
-                      scores[a_mask])
-
-    except:
-        try:
-            mAP_val = mAP(y_true[a_mask],
-                          np.zeros_like(scores[a_mask]))
-        except:
-            try:
-                mAP_val = mAP(y_true[a_mask],
-                              np.zeros_like(scores[a_mask]))
-            except:
-                mAP_val = 0
-
-    metric_with_ci = {
-        "mcc": mcc_val,
-        "ami": ami_val,
-        "ari": ari_val,
-        "wmcc": wmcc_val,
-        "wami": wami_val,
-        "wari": wari_val,
-        "map": mAP_val,
-        "wmap": mAP_val * a_rate,
-        "acceptance_rate": a_rate,
-        "n": y_true[a_mask].shape[0],
+        # 6) Manifest (quick glance + reproducibility bits)
+    manifest = {
+        "layer_id": layer_id,
+        "datapack_base": cfg.datapack['name'],
+        "datapack_test": cfg.datapack_test['name'],
+        "probe": cfg.probe['name'],
+        "model": cfg.model['name'],
+        "task": cfg.task,
+        "paths": {
+            "metrics": str(metrics_path),
+        },
+        "shapes": {
+            "y_hat": None if y_hat is None else tuple(np.shape(y_hat)),
+            "y_true": None if y_true is None else tuple(np.shape(y_true)),
+        },
+        "dtypes": {
+            "y_hat": None if y_hat is None else str(getattr(y_hat, "dtype", "")),
+            "y_true": None if y_true is None else str(getattr(y_true, "dtype", "")),
+        },
+        "env": {
+            "python": sys.version.split()[0],
+            "numpy": np.__version__,
+            "joblib": joblib.__version__,
+            "hydra": hydra.__version__,
+            "sklearn": sys.modules['sklearn'].__version__,
+            "scipy": sys.modules['scipy'].__version__,
+            "polars": sys.modules['polars'].__version__ if 'polars' in sys.modules else "",
+            "pandas": sys.modules['pandas'].__version__ if 'pandas' in sys.modules else "",
+            "torch": sys.modules['torch'].__version__ if 'torch' in sys.modules else "",
+        },
     }
-    return metric_with_ci
+    manifest_path = output_dir / "manifests"
+    manifest_path.mkdir(parents=True, exist_ok=True)
+    manifest_path = manifest_path / f"manifest_{layer_id}.json"
+    _atomic_write_json(manifest_path, manifest)
+
+    log.warning(f"Saved artifacts to {output_dir}")
+    return manifest
 
 
-@hydra.main(version_base=None, config_path="configs", config_name="probe_linear_mil")
+@hydra.main(version_base=None, config_path="configs", config_name="probe_sil")
 def main(cfg: DictConfig):
     log.warning(f"Datapack Test: {cfg.datapack_test}")
     validate_config(cfg)
@@ -185,14 +186,12 @@ def main(cfg: DictConfig):
              parameters=f"STARTED",
              progress=0,
              status=0)
-    if cfg.probe['name'] == 'sawmil':
-        probe_path = f'outputs/probes/{cfg.probe["name"]}/{cfg.model["name"]}/{cfg.datapack["name"]}_search_task--1'
-        # reader = MCProbeData(model_name=cfg.model['name'],
-        #                      datapack_name=cfg.datapack['name'],
-        #                      probe_name=cfg.probe['name'])
-        reader = MPD(probe_path)
-    else:
-        raise NotImplementedError()
+    # if cfg.probe['name'] == 'sawmil':
+    #     probe_path = f'outputs/probes/{cfg.probe["name"]}/{cfg.model["name"]}/{cfg.datapack["name"]}_search_task--1'
+    #     reader = MPD(probe_path)
+    # else:
+    #     raise NotImplementedError()
+    
     dh_test = load_data_with_test(cfg)
     data_test = dh_test.get_test_df().reset_index(drop=True)
     labels = dh_test.get_test_labels()
@@ -200,12 +199,12 @@ def main(cfg: DictConfig):
         cfg.model['layers'], cfg.layer_range, method="closest_observation")
     log.warning(f"Layer range: {layer_range[0]} - {layer_range[1]}")
 
-    available_layers = reader.available_layers()
-    print(f"Available layers: {available_layers}")
+    avail_layers = available_layers(cfg.output_dir)
+    print(f"Available layers: {avail_layers}")
 
     # Checkpointing
     if cfg.start_from_checkpoint:
-        missing_layers = checkpointing(cfg, available_layers=available_layers)
+        missing_layers = checkpointing(cfg, available_layers=avail_layers)
         if len(missing_layers) == 0:
             log.warning(
                 "All layers are already processed...")
@@ -230,57 +229,78 @@ def main(cfg: DictConfig):
             log.warning(f"Skipping layer {layer_id}")
             continue
         # LOAD THE TEST DATA
-        if cfg.probe['name'] == 'sawmil':
-            X_te = dh_test.test_bags(
-                layer_id=layer_id)["embeddings"]
-            probs = reader.predict_proba(layer_id=layer_id, bags=X_te)
-            preds = reader.predict(layer_id=layer_id, bags=X_te)
+        runner = PROBES[cfg.probe['name']](cfg)
+        runner.load(output_dir=cfg.output_dir, layer_id=layer_id)
+        
+        
+        # CONFORMAL PREDICTION
+        X_te = dh_test.test_bags(
+            layer_id=layer_id, drop_zeros=True)["embeddings"]
+        
+        bag_yh_te = runner.bag_predict_proba(X_te)
+        bag_yc_te = runner.bag_conformal_prediction(X_te)
+        bag_preds = runner.bag_predict(X_te)
+        
+        metric_dict ={
+            'bag': {},
+            'instance': {}, #last instance in bag
+            'instance_tf': {}, #only on true and false
+        }
 
-            cp = reader.calibrator(layer_id=layer_id)
-            result = cp.evaluate(probs)
-            yc_test = result["predictions"]
-        else:
-            raise NotImplementedError(
-                f"Probe {cfg.probe['name']} not implemented for test data loading.")
-        # Make predictions
-
-        metric_dict = {}
-        metric_dict['default'] = log_metric(y_true=labels,
-                                            preds=preds,
-                                            scores=probs,
+        # Metrics for the whole bag
+        metric_dict['bag']['default'] = log_metric(preds=bag_preds,
+                                            scores=bag_yh_te,
+                                            y_true=labels,
                                             cfg=cfg)
-        metric_dict['conformal'] = log_metric(y_true=labels,
-                                              preds=yc_test,
-                                              scores=probs,
+        metric_dict['bag']['conformal'] = log_metric(y_true=labels,
+                                              preds=bag_yc_te,
+                                              scores=bag_yh_te,
                                               cfg=cfg)
-
-        output_dir = cfg.output_dir.split(
-            "task")[0] + '-to-' + cfg.datapack_test["name"]
-
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
+        
+        # Metrics for the last instance in the bag
+        yh_te = runner.predict_proba(X_te)
+        yc_te = runner.conformal_prediction(X_te)
+        preds = runner.predict(X_te)
+        
+        metric_dict['instance']['default'] = log_metric(preds=preds,
+                                            scores=yh_te,
+                                            y_true=labels,
+                                            cfg=cfg)
+        metric_dict['instance']['conformal'] = log_metric(y_true=labels,
+                                              preds=yc_te,
+                                              scores=yh_te,
+                                              cfg=cfg)
+        
+        # Metrics for the last instance in the bag, only true and false (no neither-valued statements)
+        mask_tf = (labels == 1) | (labels == 0)
+        metric_dict['instance_tf']['default'] = log_metric_binary(preds=preds,
+                                                                  scores=yh_te,
+                                                                  y_true=labels,
+                                                                  mask=mask_tf, cfg=cfg)
+        metric_dict['instance_tf']['conformal'] = log_metric_binary(y_true=labels,
+                                                                   preds=yc_te,
+                                                                   scores=yh_te,
+                                                                   mask=mask_tf, cfg=cfg)
 
         if cfg.save_results:
-            log.warning('Saving path: ' + output_dir)
-            log.warning(
-                f" (Saving) Metric for layer {layer_id}: \n{pprint.pformat(metric_dict, indent=2)}")
-            with open(f"{output_dir}/metrics_{layer_id}.json", "w") as f:
-                json.dump(metric_dict, f, cls=NpEncoder)
-            np.save(f"{output_dir}/y_hat_{layer_id}.npy", probs)
-            np.save(f"{output_dir}/y_true.npy", labels)
+            _ = save(metric_dict=metric_dict,
+                     layer_id=layer_id,
+                     cfg=cfg,
+                     y_hat=bag_yh_te,
+                     y_true=labels)
         else:
             log.warning(
                 f"Metric for layer {layer_id}: \n{pprint.pformat(metric_dict, indent=2)}")
 
         # Write to DATABASE
-        db_params = f"WMCC: {metric_dict['conformal']['wmcc']}Layers: {layer_id}/{reader.available_layers()[-1]}"
+        db_params = f"WMCC: {metric_dict['bag']['conformal']['wmcc']}Layers: {layer_id}/{avail_layers[-1]}"
         db_trial_id = f"{cfg.model.name}-{cfg.datapack.name}-{cfg.datapack_test.name}"
         db.write(trial_id=db_trial_id,
                  model=cfg.model.name,
                  datapack=cfg.datapack.name,
                  task=cfg.task,
                  parameters=db_params,
-                 progress=layer_id/reader.available_layers()[-1],
+                 progress=layer_id/avail_layers[-1],
                  status=0)
 
     db.write(trial_id=f"{cfg.model.name}-{cfg.datapack.name}-{cfg.datapack_test.name}",
