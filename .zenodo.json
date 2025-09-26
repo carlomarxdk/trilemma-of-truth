@@ -20,22 +20,22 @@
     {
       "identifier": "https://github.com/carlomarxdk/sawmil",
       "relation": "isVariantFormOf",
-      "scheme": "url",
+      "scheme": "url"
     },
     {
-     "identifier": "https://github.com/garydoranjr/misvm",
-     "relation": "isDerivedFrom",
-     "scheme": "url",
+      "identifier": "https://github.com/garydoranjr/misvm",
+      "relation": "isDerivedFrom",
+      "scheme": "url"
     },
     {
-     "identifier": "https://github.com/saprmarks/geometry-of-truth",
-     "relation": "isDerivedFrom",
-     "scheme": "url",
+      "identifier": "https://github.com/saprmarks/geometry-of-truth",
+      "relation": "isDerivedFrom",
+      "scheme": "url"
     },
     {
-     "identifier": "https://github.com/sciai-lab/Truth_is_Universal/",
-     "relation": "isDerivedFrom",
-     "scheme": "url",
+      "identifier": "https://github.com/sciai-lab/Truth_is_Universal/",
+      "relation": "isDerivedFrom",
+      "scheme": "url"
     },
     {
       "identifier": "10.48550/arXiv.2506.23921",
@@ -45,7 +45,7 @@
     {
       "identifier": "10.57967/hf/5900",
       "relation": "isSupplementTo",
-      "scheme": "doi",
+      "scheme": "doi"
     }
   ],
   "keywords": [
@@ -62,5 +62,7 @@
     "Algorithmic Auditing",
     "Python Package"
   ]
+}
+
 }
   
