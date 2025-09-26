@@ -10,13 +10,12 @@ train_sample_limit: 1000000 # Limit the number of training samples (aka bags) fo
 init_params:
   n_components: 1000
   cov_type: "oas" #"oas"
-  cov_reg: 1e-6
+  cov_reg: 1e-8
   whitening: True
   lr_reg: 1.0
   verbose: True
 param_grid:
   n_components:  [1, 10, 100, 500, 1000, 1500, 2000] 
-  lr_reg: [ 0.1, 1.0, 10.0, 100.0]
   cov_type: ["empirical"] # on search it is better to use empirical covariance (faster)
 
 
