@@ -54,8 +54,11 @@
     "name": "spca",
     "init_params": {
       "verbose": true,
-      "n_components": 500,
-      "cov_type": "oas"
+      "n_components": 100,
+      "cov_type": "empirical",
+      "cov_reg": 1e-08,
+      "whitening": true,
+      "lr_reg": 1.0
     },
     "param_grid": {
       "n_components": [
