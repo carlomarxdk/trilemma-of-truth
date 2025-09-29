@@ -186,11 +186,6 @@ def main(cfg: DictConfig):
              parameters=f"STARTED",
              progress=0,
              status=0)
-    # if cfg.probe['name'] == 'sawmil':
-    #     probe_path = f'outputs/probes/{cfg.probe["name"]}/{cfg.model["name"]}/{cfg.datapack["name"]}_search_task--1'
-    #     reader = MPD(probe_path)
-    # else:
-    #     raise NotImplementedError()
     
     dh_test = load_data_with_test(cfg)
     labels = dh_test.get_test_labels()

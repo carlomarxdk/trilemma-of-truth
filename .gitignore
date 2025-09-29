@@ -194,3 +194,6 @@ outputs/experiments.db
 outputs/experiments.db
 outputs/experiments.db
 /.bash_scripts
+/outputs/probes
+outputs/experiments.db
+*.db

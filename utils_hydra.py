@@ -159,10 +159,12 @@ def load_data_with_test(cfg):
         with_calibration = True
     else:
         with_calibration = False
+    log.warning(f"Test dataset path: {cfg.setup['dataset_path']}")
     dh = DataHandler(model=cfg.model["name"], datasets=cfg.datapack_test["datasets"],
                      dataset_path=cfg.setup["dataset_path"], activations_path=cfg.setup["activations_path"],
                      output_path=cfg.setup["output_path"],
-                     activation_type=cfg.agg, with_calibration=with_calibration, load_scores='default',
+                     activation_type=cfg.agg, with_calibration=with_calibration, load_scores=cfg.datapack_test[
+                         "load_scores"]
                      )
     dh.assemble(test_size=cfg.datapack_test["test_size"], calibration_size=cfg.datapack_test["cal_size"],
                 seed=cfg.datapack_test["random_seed"], exclusive_split=cfg.datapack_test["exclusive_split"])
