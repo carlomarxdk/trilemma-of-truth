@@ -384,7 +384,8 @@ The citation for the latest version:
 - [x] Check the multiclass MIL (`sAwMIL`)
 - [x] Upload `llama-3-8b` activations for the `city_locations` dataset
 - [x] Add code for interventions and cross-dataset generalization
-- [ ] Check the script for interventions and the cross-dataset generalization
+- [x] Check the script for the cross-dataset generalization
+- [ ] Check the script for the interventions
 - [ ] Add scripts/notebooks for plot generation
 - [x] Add examples: data loading
 - [x] Describe the contents of the repository
