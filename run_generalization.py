@@ -193,7 +193,6 @@ def main(cfg: DictConfig):
     #     raise NotImplementedError()
     
     dh_test = load_data_with_test(cfg)
-    data_test = dh_test.get_test_df().reset_index(drop=True)
     labels = dh_test.get_test_labels()
     layer_range = np.quantile(
         cfg.model['layers'], cfg.layer_range, method="closest_observation")

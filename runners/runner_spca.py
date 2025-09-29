@@ -3,14 +3,7 @@ from probes.spca import SupervisedPCA
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import KFold, GridSearchCV
 from sklearn.pipeline import Pipeline
-from scipy.stats import randint
 from probes.conformal import InductiveConformalPredictor, symmetric_nonconformity
-from sklearn.metrics import (
-    average_precision_score as mAP,
-    matthews_corrcoef as mcc,
-    make_scorer
-)
-import warnings
 import joblib
 import json
 from pathlib import Path
