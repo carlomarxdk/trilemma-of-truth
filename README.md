@@ -40,7 +40,7 @@ We examine two common methods for probing the veracity of LLMs and discover seve
       - [4. Single Instance Probe](#4-single-instance-probe)
         - [4.1 Train *one-vs-all SVM* probe](#41-train-one-vs-all-svm-probe)
         - [4.2 Train *multiclass SVM* probe](#42-train-multiclass-svm-probe)
-        - [4.3 Train the *mean-difference* probe](#43-train-the-mean-difference-probe)
+        - [4.3 Train binary SIL baselines](#43-train-binary-sil-baselines)
       - [5. Extra](#5-extra)
         - [5.1 Gerneralization Performance](#51-gerneralization-performance)
         - [5.2 Interventions](#52-interventions)
@@ -209,9 +209,9 @@ python run_mc_training.py --config-name=probe_sil.yaml \
 model=llama-3-8b datapack=city_locations probe=svm task=-1
 ```
 
-##### 4.3 Train the *mean-difference* probe
+##### 4.3 Train binary SIL baselines
 
-The mean-difference probe is trained to separate *true-vs-false*, thus, use `task=3` .
+The SIL binary baselines are trained to separate *true-vs-false*, thus, use `task=3`, these include `mean_diff`, `spca` and `ttpd`.
 
 ```bash
 python run_training.py --config-name=probe_sil.yaml \
@@ -226,8 +226,10 @@ To check the performance of the probe on another dataset you can run `run_genera
 
 ```bash
 python run_generalization.py --config-name=probe_mil.yaml model=llama-3-8b datapack=city_locations datapack@datapack_test=med_indications
-probe=sawmil search=True  task=-1
+probe=sawmil search=True task=XX
 ```
+
+Use the task nr that you used to train the probe. For example for `mean_diff` (or any other binary SIL), it is `task=3`.
 
 ##### 5.2 Interventions
 
