@@ -50,7 +50,9 @@ We examine two common methods for probing the veracity of LLMs and discover seve
     - [Load Data with `DataHandler`](#load-data-with-datahandler)
     - [Processed Data on Hugging Face 🤗](#processed-data-on-hugging-face-)
   - [✍️ How to Cite?](#️-how-to-cite)
-    - [Preprint](#preprint)
+    - [Manuscript](#manuscript)
+      - [NeurIPS Worksop Version](#neurips-worksop-version)
+      - [Preprint Version](#preprint-version)
     - [Code](#code)
     - [Data](#data)
   - [📝 To Do](#-to-do)
@@ -135,7 +137,8 @@ To run experiments (e.g., train probes) on your machine, you need to collect hid
 
 ```bash
 # To collect hidden activations for (every statement) specific model
-python collect_activations.py model=llama-3-8b # see configs/activations.yaml for all the paramaters
+python collect_activations.py model=llama-3-8b 
+# see configs/activations.yaml for all the paramaters
 ```
 
 After you collected the activations, you can load them using the code in [notebooks/load_and_split_dataset](notebooks/load_and_split_dataset.ipynb) notebook.
@@ -145,7 +148,8 @@ After you collected the activations, you can load them using the code in [notebo
 Files that store activations are pretty heavy. You can run `compress_activations.py` to further reduce the size (the `DataHandler` object can handle both uncompressed and compressed activations):
 
 ```bash
-python compress_activations.py model=llama-3-8b # see configs/activations.yaml for all the paramaters
+python compress_activations.py model=llama-3-8b 
+# see configs/activations.yaml for all the paramaters
 ```
 
 This method reduces the size of the file by 15-60% (earlier layers have lower compression rate).
@@ -156,7 +160,11 @@ You can collect the zero-shot prompting scores without having activations.
 
 ```bash
 # Collect scores with the zero-shot prompting method (aka replies to multiple choice questions)
-python run_zero_shot.py model=llama-3-8b variation=default batch_size=12 # see configs/probe_prompt.yaml for all the available paramaters
+python run_zero_shot.py \
+      model=llama-3-8b \
+      variation=default \
+      batch_size=12 
+# see configs/probe_prompt.yaml for all the available paramaters
 ```
 
 Note that we provide scores for every model in [outputs/probes/prompt](outputs/probes/prompt/) folder. We provide an example on how to load the scores from the zero-shot prompting in  [notebooks/load_and_split_dataset](notebooks/load_and_split_dataset.ipynb) notebook.
@@ -169,8 +177,13 @@ Note that you must collect activations before training this probe. Generally, yo
 
 ```bash
 # Train one-vs-all probe (an example without the hyperparameter search)
-python run_training.py --config-name=probe_mil.yaml \
-model=llama-3-8b datapack=city_locations probe=sawmil task=0 search=False 
+python run_training.py \
+      --config-name=probe_mil.yaml \
+      model=llama-3-8b \
+      datapack=city_locations \
+      probe=sawmil \
+      task=0 \
+      search=False 
 ```
 
 ##### 3.2 Multiclass
@@ -179,8 +192,13 @@ After you collect all the activations and train three one-vs-all `sAwMIL` probes
 The `run_mc_training.py` runs only with the `task=-1`.
 
 ```bash
-python run_mc_training.py --config-name=probe_mil.yaml \
-model=llama-3-8b datapack=city_locations probe=sawmil task=-1 search=False 
+python run_mc_training.py \
+      --config-name=probe_mil.yaml \
+      model=llama-3-8b \
+      datapack=city_locations \
+      probe=sawmil \
+      task=-1 \
+      search=False 
 ```
 
 A small example is provided in the `make_predictions.ipynb` notebook.
@@ -195,8 +213,12 @@ The **Single Instance Learning** probes use only representations of the last tok
 Generally, you need to train three SVM probes: one with `task=0`, one with `task=1` and `task=2`, see [Task Specification](#task-specification).
 
 ```bash
-python run_training.py --config-name=probe_sil.yaml \
-model=llama-3-8b datapack=city_locations probe=svm task=1
+python run_training.py \
+      --config-name=probe_sil.yaml \
+      model=llama-3-8b \
+      datapack=city_locations \
+      probe=svm \
+      task=1
 ```
 
 ##### 4.2 Train *multiclass SVM* probe
@@ -225,8 +247,14 @@ model=llama-3-8b datapack=city_locations probe=mean_diff task=3
 To check the performance of the probe on another dataset you can run `run_generalization.py`. It will load the probe trained on `datapack` and use the test split of the `datapack@datapack_test`.
 
 ```bash
-python run_generalization.py --config-name=probe_mil.yaml model=llama-3-8b datapack=city_locations datapack@datapack_test=med_indications
-probe=sawmil search=True task=XX
+python run_generalization.py \
+      --config-name=probe_mil.yaml \
+      model=llama-3-8b \
+      datapack=city_locations \
+      datapack@datapack_test=med_indications \
+      probe=sawmil \
+      search=True \
+      task=XX
 ```
 
 Use the task nr that you used to train the probe. For example for `mean_diff` (or any other binary SIL), it is `task=3`.
@@ -236,7 +264,11 @@ Use the task nr that you used to train the probe. For example for `mean_diff` (o
 The code for interventions is located in `run_intervention.py`.
 
 ```bash
-python run_intervention.py --config-name=interventions.yaml model=llama-3-8b datapack=city_locations  task=0
+python run_intervention.py \
+      --config-name=interventions.yaml \
+      model=llama-3-8b \
+      datapack=city_locations \
+      task=0
 ```
 
 ### Task specification
@@ -330,7 +362,16 @@ ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split
 
 ## ✍️ How to Cite?
 
-### Preprint
+### Manuscript
+
+#### NeurIPS Worksop Version
+*Version accepted to the [Mechanistic Interpretability Workshop at NeurIPS 2025](https://mechinterpworkshop.com/)*:
+
+```bibtex
+TBA
+```
+
+#### Preprint Version
 
 ```bibtex
 @inproceedings{trilemma2025preprint,
