@@ -8,7 +8,14 @@ import numpy as np
 import pickle as pkl
 import json
 import re
-import os
+import importlib
+from pathlib import Path
+import json
+from typing import Any, Iterable, List, Optional, Union
+import sys
+from packaging import version
+
+
 
 
 
@@ -52,7 +59,199 @@ class MulticlassLayerParams:
     y_true: Optional[np.ndarray]
     
     
+class ExperimentData:
+    '''
+    Class to manage and access experimental data for different models, probes, datasets, and tasks.
+    '''
+    def __init__(self, 
+                 model_name:str, 
+                 probe_name:str, 
+                 dataset_name:str, 
+                 task: int, 
+                 with_search:bool = True):
+        '''
+        Initialize the ExperimentData object with the specified parameters.
+        Args:
+            model_name (str): The name of the model.
+            probe_name (str): The name of the probe.
+            dataset_name (str): The name of the dataset.
+            task (int): The task number.
+            with_search (bool): Whether to include search in the path construction.
+        '''
+        self.model_name = model_name
+        self.probe_name = probe_name
+        self.dataset_name = dataset_name
+        self.task = task
+        self.with_search = with_search
+        
+    @property
+    def base_path(self) -> Path:
+        '''
+        Construct the base path for the experiment data based on the provided parameters.
+        Returns:
+            Path: The constructed base path.
+        '''
+        if self.with_search:
+            return Path('outputs') / 'probes' / self.probe_name / self.model_name / f'{self.dataset_name}_search_task-{str(self.task)}'
+        else:
+            return Path('outputs') / 'probes' / self.probe_name / self.model_name / f'{self.dataset_name}_task-{str(self.task)}'
+        
+    @property
+    def absolute_path(self) -> Path:
+        return self.base_path.absolute()
+    
+    def layer_exists(self, layer:int) -> bool:
+        '''Check if the manifest file for a given layer exists.
+        Args:
+            layer (int): The layer number to check.
+        Returns:
+            bool: True if the manifest file exists, False otherwise.
+        '''
+        path = self.base_path / 'manifests' / f'manifest_{str(layer)}.json'
+        return path.exists()
+    
+    def load_manifest(self, layer:int) -> dict:
+        '''Load the manifest file for a given layer.
+        Args:
+            layer (int): The layer number to load the manifest for.
+        Returns:
+            dict: The content of the manifest file as a dictionary.
+        '''
+        assert self.layer_exists(layer), f"The experimental data for layer {layer} does not exist. Available layers: {self.available_layers()}"
+        with open(self.base_path / 'manifests' / f'manifest_{str(layer)}.json', 'r') as f:
+            manifest = json.load(f)
+        return manifest
+    
+    @property
+    def available_layers(self) -> List[int]:
+        '''Get a list of available layers for which manifest files exist.
+        Returns:
+            list[int]: A list of layer numbers that have manifest files.
+        '''
+        manifests_path = self.base_path / 'manifests'
+        if not manifests_path.exists():
+            return []
+        
+        layer_files = manifests_path.glob('manifest_*.json')
+        layers = [int(f.stem.split('_')[1]) for f in layer_files if f.stem.split('_')[1].isdigit()]
+        return sorted(layers)
+    
+    def available_subexperiments(self) -> List[str]:
+        '''Get a list of available statistics for which stats files exist.
+        Returns:
+            list[str]: A list of statistic names that have stats files.
+        '''
+        folders = [x for x in self.base_path.iterdir() if x.is_dir()]
+        folders = [x.name for x in folders if x.name.startswith('g_')]
+        return sorted(folders)
 
+    def best_layer(self, keys: List[str] = ['conformal', 'wmcc'], path: Optional[Path] = None) -> int:
+        '''Determine the best layer based on a specified metric.
+        Args:
+            keys (list of str): The key or list of keys to navigate through the JSON structure to find the metric.
+            path (Path, optional): The base path to the experiment data. If None, uses the default base path.
+        Returns:
+            int: The layer number that has the highest value for the specified metric.
+        '''
+        results = {}
+        for layer in self.available_layers:
+            metric = self.read_metrics(layer, keys, path=path)
+            results[layer] = metric[0]
+        return max(results, key=results.get)
+    
+    def read_metrics(self, layer_id: int,         
+                keys: Optional[Union[str, Iterable[str]]] = None,
+                default: Any = ...,
+                path: Optional[Path] = None) -> Any:
+        '''Read the metrics from the JSON file for a specific layer.
+        Args:
+            layer_id (int): The layer number to read metrics for.
+            keys (str or list of str, optional): The key or list of keys to navigate through the JSON structure. If None, returns the entire JSON content.
+            default (any, optional): The default value to return if the specified key path does not exist. If not provided and the key path is not found, a KeyError is raised.
+            path (Path, optional): The base path to the experiment data. If None, uses the default base path.
+        Returns:
+            any: The value corresponding to the specified key path, or the entire JSON content if keys is None.
+        Raises:
+            KeyError: If the specified key path does not exist and no default value is provided.
+            AssertionError: If the manifest file for the specified layer does not exist.
+        '''
+        assert self.layer_exists(layer_id), f"The experimental data for layer {layer_id} does not exist. Available layers: {self.available_layers()}"
+        
+        
+        if path is not None:
+            assert path.exists(), f"The provided path {str(path)} does not exist."
+            path = Path(path) 
+        else:
+            path = self.base_path  
+        with open(path / 'manifests' / f'manifest_{str(layer_id)}.json', 'r') as f:
+            metric_path = json.load(f)['paths']['metrics']
+            
+        with open(metric_path, 'r') as f:
+            data = json.load(f)
+        if keys is None:
+            return data
+
+        # Normalize keys to a list
+        if isinstance(keys, str):
+            keys = [keys]
+        else:
+            keys = list(keys)
+
+        cur = data
+        for k in keys:
+            if isinstance(cur, dict) and k in cur:
+                cur = cur[k]
+            else:
+                if default is ...:
+                    path_so_far = "/".join(keys)
+                    raise KeyError(
+                        f"Key path '{path_so_far}' not found (stopped at '{k}')."
+                    )
+                return default
+        return cur
+    
+    def validate_manifest(self, layer_id: int, path: Optional[Path] = None) -> bool:
+        '''Validate the manifest file for a specific layer.
+        Args:
+            layer_id (int): The layer number to validate the manifest for.
+            path (Path, optional): The base path to the experiment data. If None, uses the default base path.
+        Returns:
+            bool: True if the manifest file is valid, False otherwise.  
+        '''
+        assert self.layer_exists(layer_id), f"The experimental data for layer {layer_id} does not exist. Available layers: {self.available_layers()}"
+        manifest = self.load_manifest(layer_id)['env']
+        not_installed = []
+        not_matching = []
+        for pkg, required_version in manifest.items():
+            if pkg == 'python':
+                v = ".".join(map(str, sys.version_info[:3]))
+                if version.parse(v) == version.parse(required_version):
+                    print(f'python: {v} (matches manifest)')
+                elif version.parse(v) != version.parse(required_version):
+                    print(f"python: installed {v}, but manifest requires {required_version}")
+                    not_matching.append(pkg)
+                continue
+                
+            try:
+                # dynamically import the module
+                mod = importlib.import_module(pkg)
+                installed_version = getattr(mod, "__version__", None)
+            except ModuleNotFoundError:
+                print(f"{pkg}: not installed (expected {required_version})")
+                not_installed.append(pkg)
+                continue
+            if version.parse(installed_version) == version.parse(required_version):
+                print(f'{pkg}: installed {installed_version} matches manifest')
+            elif version.parse(installed_version) != version.parse(required_version):
+                print(f"{pkg}: installed {installed_version}, but manifest requires {required_version}")
+                not_matching.append(pkg)
+        if not_installed or not_matching:
+            return False
+        return True
+
+
+
+#### Old code below for backward compatibility ####
 
 class ProbeData:
     """
@@ -185,8 +384,6 @@ class ProbeData:
         if path.exists():
             return np.load(path)
         return None
-    
-
 
 class MulticlassProbeData:
     """

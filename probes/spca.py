@@ -53,6 +53,12 @@ class SupervisedPCA(ClassifierMixin, BaseEstimator):
         self.classes_ = np.array([0, 1])
 
     def fit(self, X: np.array, y: np.array) -> 'SupervisedPCA':
+        '''
+        Get the truth direction using PCA + Logistic Regression.
+        Args:
+            X: (N, d) array of input data
+            y: (N,) array of class labels (0 or 1)
+        '''
         np.random.seed(self.random_seed)
         X = np.asarray(X, dtype=np.float32)  # Use float32 for speed
         y = np.asarray(y).astype(int)
@@ -122,6 +128,6 @@ class SupervisedPCA(ClassifierMixin, BaseEstimator):
         if self.whitening:
             scores = scores / np.sqrt(self.explained_variance_ + 1e-12)
         return scores
-    
+
     
     __all__ = ['SupervisedPCA']

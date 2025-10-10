@@ -56,7 +56,7 @@ class TTPD(ClassifierMixin, BaseEstimator):
         Args:
             X: (N, d) array of input data
             t: (N,) array of truthfulness labels (-1 or +1)
-            p: (N,) array of polarity labels (0 or 1)
+            p: (N,) array of polarity labels (-1 or 1)
         Returns:
             w_t: (d,) array, truth direction
             w_p: (d,) array, polarity direction (not used downstream)
