@@ -134,7 +134,7 @@ class TTPD(ClassifierMixin, BaseEstimator):
         p_labels = np.asarray(p_labels).ravel().copy()
 
         self.w_t, self.w_p_ = self._get_truth_direction(X, self._labels_to_sign(t_labels), self._labels_to_sign(p_labels))
-        # self.w_p_ is not used downstream
+        # self.w_p_ is not used downstream (as per the original implementation)
         self.w_p = self._get_polarity_direction(X, p_labels, seed=self.random_seed)
         
         Xp = self._project(X)
