@@ -197,3 +197,5 @@ outputs/experiments.db
 /outputs/probes
 outputs/experiments.db
 *.db
+/outputs/probes/sawmil
+/outputs/probes/sawmil
