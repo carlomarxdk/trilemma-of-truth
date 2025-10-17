@@ -1,3 +1,4 @@
+from __future__ import annotations
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.utils.validation import check_is_fitted
 
@@ -7,7 +8,12 @@ import logging
 log = logging.getLogger(__name__)
 
 class BinaryLinearProbe(BaseEstimator, ClassifierMixin):
-    def __init__(self, coef: np.ndarray, intercept: np.ndarray) -> 'BinaryLinearProbe':
+    """
+    A binary linear probe with pre-trained coefficients and intercept.
+    This probe does not require fitting; it uses provided coefficients and intercept
+    to make predictions.
+    """
+    def __init__(self, coef: np.ndarray, intercept: np.ndarray) -> BinaryLinearProbe:
         self.coef = np.asarray(coef)
         self.intercept = np.asarray(intercept).ravel()
         self.coef_ = self.coef
@@ -15,7 +21,7 @@ class BinaryLinearProbe(BaseEstimator, ClassifierMixin):
         self.classes_ = [0, 1]
         self.is_fitted_ = True
 
-    def fit(self, X: np.ndarray = None, y: np.ndarray=None) -> 'BinaryLinearProbe':
+    def fit(self, X: np.ndarray = None, y: np.ndarray=None) -> BinaryLinearProbe:
         log.warning("This probe is pre-trained and does not require fitting.")
         return self
     

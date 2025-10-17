@@ -1,4 +1,5 @@
 # Code for ONE-vs-ALL probes, works both for SIL (MD+CP and SVM) and MIL (Sawmil) probes.
+# CODE for MULTICLASS probes, works both for SI-SVM and MIL (Sawmil) probes.
 
 import logging
 import hydra
@@ -63,7 +64,7 @@ def validate_config(cfg: DictConfig):
     OmegaConf.set_struct(cfg, True)
 
     assert len(cfg.layer_range) == 2, "Layer range must be a list of two integers."
-    assert cfg.task != -1, 'Cannot be multiclass task, choose a binary task.'
+    # assert cfg.task != -1, 'Cannot be multiclass task, choose a binary task.'
 
 
 def log_stats(cfg):

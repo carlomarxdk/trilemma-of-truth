@@ -1,7 +1,7 @@
+from __future__ import annotations
 from runners.base import BaseProbeRunner
 from probes.mean_difference import MeanDifferenceClassifier
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import KFold
 from probes.conformal import InductiveConformalPredictor, symmetric_nonconformity
 import joblib
 import json
@@ -295,7 +295,7 @@ class MDProbeRunner(BaseProbeRunner):
         """
         return self.conformal_prediction(X)
 
-    def load(self, output_dir: str | Path, layer_id: int) -> 'MDProbeRunner':
+    def load(self, output_dir: str | Path, layer_id: int) -> MDProbeRunner:
         """
         Reload saved artifacts into this runner.
         Args:

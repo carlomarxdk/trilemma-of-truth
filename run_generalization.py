@@ -22,12 +22,14 @@ from utils import (
     _atomic_write_json,
     available_layers,
 )
-from runners import SVMProbeRunner, MDProbeRunner, SawmilProbeRunner, SPCA_Runner, TTPD_Runner
+from runners import SVMProbeRunner, MDProbeRunner, SawmilProbeRunner, SPCA_Runner, TTPD_Runner, MulticlassMILRunner, MulticlassSILRunner
 
 PROBES = {
     'svm': SVMProbeRunner,
     'mean_diff': MDProbeRunner,
     'sawmil': SawmilProbeRunner,
+    'sawmil_mc': MulticlassMILRunner,
+    'svm_mc': MulticlassSILRunner,
     'spca': SPCA_Runner,
     'ttpd': TTPD_Runner,
 }
@@ -104,7 +106,7 @@ def save(metric_dict: Dict,
          layer_id: int,
          cfg: DictConfig,
          y_hat: np.ndarray = None,
-         y_true: np.ndarray = None):
+         y_true: np.ndarray = None) -> Dict:
     '''
     Save the artifacts of the run.
     Args:
@@ -186,7 +188,7 @@ def main(cfg: DictConfig):
              parameters=f"STARTED",
              progress=0,
              status=0)
-    
+
     dh_test = load_data_with_test(cfg)
     labels = dh_test.get_test_labels()
     layer_range = np.quantile(
@@ -225,46 +227,45 @@ def main(cfg: DictConfig):
         # LOAD THE TEST DATA
         runner = PROBES[cfg.probe['name']](cfg)
         runner.load(output_dir=cfg.output_dir, layer_id=layer_id)
-        
-        
+
         # CONFORMAL PREDICTION
         X_te = dh_test.test_bags(
             layer_id=layer_id, drop_zeros=True)["embeddings"]
-        
+
         bag_yh_te = runner.bag_predict_proba(X_te)
         bag_yc_te = runner.bag_conformal_prediction(X_te)
         bag_preds = runner.bag_predict(X_te)
-        
-        metric_dict ={
+
+        metric_dict = {
             'bag': {},
-            'instance': {}, #last instance in bag
-            'instance_tf': {}, #only on true and false
+            'instance': {},  # last instance in bag
+            'instance_tf': {},  # only on true and false
         }
 
         # Metrics for the whole bag
         metric_dict['bag']['default'] = log_metric(preds=bag_preds,
-                                            scores=bag_yh_te,
-                                            y_true=labels,
-                                            cfg=cfg)
+                                                   scores=bag_yh_te,
+                                                   y_true=labels,
+                                                   cfg=cfg)
         metric_dict['bag']['conformal'] = log_metric(y_true=labels,
-                                              preds=bag_yc_te,
-                                              scores=bag_yh_te,
-                                              cfg=cfg)
-        
+                                                     preds=bag_yc_te,
+                                                     scores=bag_yh_te,
+                                                     cfg=cfg)
+
         # Metrics for the last instance in the bag
         yh_te = runner.inst_predict_proba(X_te)
         yc_te = runner.inst_conformal_prediction(X_te)
         preds = runner.inst_predict(X_te)
-        
+
         metric_dict['instance']['default'] = log_metric(preds=preds,
-                                            scores=yh_te,
-                                            y_true=labels,
-                                            cfg=cfg)
+                                                        scores=yh_te,
+                                                        y_true=labels,
+                                                        cfg=cfg)
         metric_dict['instance']['conformal'] = log_metric(y_true=labels,
-                                              preds=yc_te,
-                                              scores=yh_te,
-                                              cfg=cfg)
-        
+                                                          preds=yc_te,
+                                                          scores=yh_te,
+                                                          cfg=cfg)
+
         # Metrics for the last instance in the bag, only true and false (no neither-valued statements)
         mask_tf = (labels == 1) | (labels == 0)
         metric_dict['instance_tf']['default'] = log_metric_binary(preds=preds,
@@ -272,9 +273,9 @@ def main(cfg: DictConfig):
                                                                   y_true=labels,
                                                                   mask=mask_tf, cfg=cfg)
         metric_dict['instance_tf']['conformal'] = log_metric_binary(y_true=labels,
-                                                                   preds=yc_te,
-                                                                   scores=yh_te,
-                                                                   mask=mask_tf, cfg=cfg)
+                                                                    preds=yc_te,
+                                                                    scores=yh_te,
+                                                                    mask=mask_tf, cfg=cfg)
 
         if cfg.save_results:
             _ = save(metric_dict=metric_dict,

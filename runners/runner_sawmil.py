@@ -1,3 +1,4 @@
+from __future__ import annotations
 from runners.base import BaseProbeRunner
 from sklearn.metrics import (
     average_precision_score as mAP,
@@ -33,7 +34,6 @@ class SawmilProbeRunner(BaseProbeRunner):
         self.scaler = StandardScaler()
         self.transformer = None
         self.calibrator = None
-
         self.eta = None
 
     def return_target(self, y: np.ndarray, mask: np.ndarray = None) -> np.ndarray:
