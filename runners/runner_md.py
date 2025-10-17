@@ -26,58 +26,71 @@ class MDProbeRunner(BaseProbeRunner):
         self.cfg = cfg
         # set random seed
         np.random.seed(getattr(cfg.probe, 'seed', None))
+        self.separator = None
         self.scaler = StandardScaler()
         self.calibrator = None
-        self.separator = None
         self.transformer = None
-        self.bag_processor = None
+
+    def return_target(self, y: np.ndarray, mask: np.ndarray = None) -> np.ndarray:
+        """
+        In case of MD Probe, just apply mask.
+        Args:
+            y: bag_labels or labels
+            mask: mask for the task
+        Returns:
+            yy: masked bag_labels or labels
+        """
+        yy = deepcopy(y)
+        if mask is not None:
+            return yy[mask]
+        return yy
 
     def single_training(self, X: List[np.ndarray], y: np.ndarray, mask: np.ndarray, neg: np.ndarray = None):
         """
         Train transformer and separator on the masked subset of bags.
         Returns dict with 'separator' and fitted 'transformer'.
         Args:
-            - X: an list of bags 
-            - y: bag_abels
-            - mask: mask for the task
+            X: an list of bags 
+            y: bag_labels
+            mask: boolean mask array of length len(X) indicating which bags to train on
+        Returns a dict with keys:
+            'separator', 'scaler', 'transformer'
         """
         # 0) Get the bags and labels
-        assert len(X) == len(y), "X and y must have the same length"
-        assert np.unique(y).size == 2, "y must be binary"
+        f_y = deepcopy(y)
+        f_X = deepcopy(X)
+        f_mask = np.array(mask, dtype=bool)
+        assert len(f_X) == len(f_y) == len(
+            f_mask),  "X, y and mask must have the same length"
+        assert np.unique(f_y).size == 2, "y must be binary"
+
+        ym = self.return_target(f_y, f_mask)
         
-        mask = np.array(mask, dtype=bool)
-        y = self.return_target(y, mask)
         # 1) Fit transformer on concatenated instances
         if self.cfg.probe.get('normalize_data', True):
             log.warning("\t\tNormalizing the data...")
-            Xf = np.vstack([x[-1] for x, m in zip(X, mask) if m])
+            Xf = np.vstack([x[-1] for x, m in zip(f_X, f_mask) if m])
             self.scaler.fit(Xf)
         else:
             raise NotImplementedError(
                 "Only a pipeline with the normalization is implemented")
 
-        bags = np.vstack([self.scaler.transform(bag)[-1]
-                for bag, m in zip(X, mask) if m])
+        Xm = np.vstack([self.scaler.transform(bag)[-1]
+                for bag, m in zip(f_X, f_mask) if m])
 
         # 2) Transform each bag (take only the last element)
         cfg = self.cfg.probe
-        limit = cfg.get('train_sample_limit', len(bags))
+        limit = cfg.get('train_sample_limit', Xm.shape[0])
         self.separator = MeanDifferenceClassifier(with_covariance=cfg.init_params['with_covariance'],
                                                   fit_intercept=cfg.init_params['fit_intercept'],
                                                    verbose=cfg.init_params.get('verbose', True))
                                      
         self.separator.fit(
-            bags[:limit], y[:limit])
+            Xm[:limit], ym[:limit])
 
         return {'separator': self.separator,
                 'scaler': self.scaler,
                 'transformer': np.nan}
-
-    def return_target(self, y, mask=None):
-        yy = deepcopy(y)
-        if mask is not None:
-            return yy[mask]
-        return yy
 
     def parameter_search(self, X: List[np.ndarray], y: np.ndarray, mask: np.ndarray, neg: np.ndarray = None):
         """
@@ -93,12 +106,18 @@ class MDProbeRunner(BaseProbeRunner):
     def conformal_training(self, X_cal, y_cal, mask_cal):
         '''
         Train the conformal predictor on the calibration set.
+        Args:
+            X_cal: array-like, shape (n_samples, n_features)
+                The calibration set features.
+            y_cal: array-like, shape (n_samples,)
+                The calibration set true labels.
+            mask_cal: array-like, shape (n_samples,)
+                The mask for the calibration set.
         '''
-        X = deepcopy(X_cal)
-        y = deepcopy(y_cal)
-        mask = deepcopy(mask_cal)
+        f_X = deepcopy(X_cal)
+        f_y = deepcopy(y_cal)
+        f_mask = np.array(mask_cal, dtype=bool).copy()
         cfg = self.cfg.conformal_params
-        mask_cal = np.array(mask, dtype=bool)
 
         if cfg['nc'] == 'binary':
             nc = symmetric_nonconformity
@@ -108,18 +127,18 @@ class MDProbeRunner(BaseProbeRunner):
         self.calibrator = InductiveConformalPredictor(nonconformity_func=nc,
                                                       alpha=cfg["alpha"],
                                                       tie_breaking=cfg["tie_breaking"])
-        yh_cal = self.decision_function(X)
-        self.calibrator.fit(y=y[mask], scores=yh_cal[mask])
+        yh_cal = self.decision_function(f_X)
+        self.calibrator.fit(y=f_y[f_mask], scores=yh_cal[f_mask])
         return self.calibrator
-
-    def conformal_prediction(self, X):
+    
+    def conformal_prediction(self, X: List[np.ndarray]) -> np.ndarray:
         """
         Compute the conformal prediction for the given bags.
         """
         # Transform the bags using the fitted scaler
-        X = deepcopy(X)
+        f_X = deepcopy(X)
         # Compute the decision function using the separator
-        yh = self.decision_function(X)
+        yh = self.decision_function(f_X)
         # Compute the conformal prediction
         return self.calibrator.predict(yh)
 
@@ -140,8 +159,20 @@ class MDProbeRunner(BaseProbeRunner):
         proba = self.predict_proba(X)
         return np.array(proba > 0.5)    
     
-    def process_input(self, X):
-        return np.vstack([self.scaler.transform(bag)[-1] for bag in X])
+    def _bags_to_instance(self, bags: List[np.ndarray]) -> np.ndarray:
+        """
+        Convert bags to instances by taking the last instance of each bag.
+        Args:
+            bags: list of bags (each is array-like of shape [ #instances × hidden_size ])
+        Returns:
+            instances: array-like of shape [ #bags × hidden_size ]
+        """
+        return np.vstack([bag[-1] for bag in bags])
+    
+    def process_input(self, X: List[np.ndarray] | np.ndarray) -> np.ndarray:
+        if type(X) is np.ndarray:
+            X = [X]
+        return self.scaler.transform(self._bags_to_instance(X))
 
     def update_metric(self, metric_dict):
         """

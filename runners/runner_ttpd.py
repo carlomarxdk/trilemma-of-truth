@@ -26,9 +26,9 @@ class TTPD_Runner(BaseProbeRunner):
         self.cfg = cfg
         # set random seed
         np.random.seed(getattr(cfg.probe, 'seed', None))
+        self.separator = None
         self.scaler = StandardScaler()
         self.calibrator = None
-        self.separator = None
         self.transformer = None
 
     def return_target(self, y: np.ndarray, mask: np.ndarray = None) -> np.ndarray:
@@ -53,6 +53,7 @@ class TTPD_Runner(BaseProbeRunner):
             X: an list of bags 
             y: bag_labels
             mask: boolean mask array of length len(X) indicating which bags to train on
+            neg: affirmative vs negated labels (if statement is negated = 1)
         Returns a dict with keys:
             'separator', 'scaler', 'transformer'
         """
@@ -63,7 +64,7 @@ class TTPD_Runner(BaseProbeRunner):
         f_mask = np.array(mask, dtype=bool)
 
         assert len(f_X) == len(f_y) == len(
-            f_mask), "X, y and mask must have the same length"
+            f_mask) == len(f_neg), "X, y and mask must have the same length"
         assert np.unique(f_y).size == 2, "y must be binary"
 
         ym = self.return_target(f_y, f_mask)
@@ -139,7 +140,7 @@ class TTPD_Runner(BaseProbeRunner):
         self.calibrator.fit(y=f_y[f_mask], scores=yh_cal[f_mask])
         return self.calibrator
 
-    def conformal_prediction(self, X):
+    def conformal_prediction(self, X: List[np.ndarray]) -> np.ndarray:
         """
         Compute the conformal prediction for the given bags.
         """
@@ -170,8 +171,20 @@ class TTPD_Runner(BaseProbeRunner):
         proba = self.predict_proba(X)
         return np.array(proba > 0.5)
 
-    def process_input(self, X: List[np.ndarray]) -> np.ndarray:
-        return np.vstack([self.scaler.transform(bag)[-1] for bag in X])
+    def _bags_to_instance(self, bags: List[np.ndarray]) -> np.ndarray:
+        """
+        Convert bags to instances by taking the last instance of each bag.
+        Args:
+            bags: list of bags (each is array-like of shape [ #instances × hidden_size ])
+        Returns:
+            instances: array-like of shape [ #bags × hidden_size ]
+        """
+        return np.vstack([bag[-1] for bag in bags])
+    
+    def process_input(self, X: List[np.ndarray] | np.ndarray) -> np.ndarray:
+        if type(X) is np.ndarray:
+            X = [X]
+        return self.scaler.transform(self._bags_to_instance(X))
 
     def update_metric(self, metric_dict):
         """

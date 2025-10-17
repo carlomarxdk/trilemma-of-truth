@@ -138,19 +138,18 @@ class SawmilProbeRunner(BaseProbeRunner):
             same dict as single_training plus 'best_C'
         """
         log.warning("Running the hyperparameter search...")
-        # You can redefine this based on your needs
         param_grid = self.cfg.probe.param_grid['C']
         f_X = deepcopy(X)
         f_y = deepcopy(y)
         f_mask = np.array(mask, dtype=bool)
-
-        ym = self.return_targets(f_y, None)  # mask should be None
+        ym = self.return_target(f_y, None)  # mask should be None
 
         assert len(f_X) == len(f_y) == len(
             f_mask), "X, y and mask must have the same length"
         assert np.unique(f_y).size == 2, "y must be binary"
         random_seed = self.cfg.get("random_seed", 42)
-
+        
+        # Cross-validation setup
         kf = KFold(n_splits=self.cfg.get("cv_n_folds", 3), shuffle=True,
                    random_state=random_seed)
         kf.get_n_splits(X)
@@ -198,6 +197,7 @@ class SawmilProbeRunner(BaseProbeRunner):
                         max_bag_size=max_bag_size,
                         rnd_seed_offset=i
                     )
+                    raise NotImplementedError("Should be manually transformed") 
                     processed_bags.append(bag_processed)
                     intra_bag_labels.append(intra_labels_for_this_bag)
 
