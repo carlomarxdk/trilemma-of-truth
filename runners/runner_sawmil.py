@@ -11,7 +11,7 @@ from probes.conformal import InductiveConformalPredictor, symmetric_nonconformit
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import KFold
 from utils_hydra import drop_rows_with_tail_keep
-from typing import List
+from typing import List, Tuple
 import joblib
 import json
 from scipy.special import expit
@@ -148,7 +148,7 @@ class SawmilProbeRunner(BaseProbeRunner):
             f_mask), "X, y and mask must have the same length"
         assert np.unique(f_y).size == 2, "y must be binary"
         random_seed = self.cfg.get("random_seed", 42)
-        
+
         # Cross-validation setup
         kf = KFold(n_splits=self.cfg.get("cv_n_folds", 3), shuffle=True,
                    random_state=random_seed)
@@ -181,33 +181,34 @@ class SawmilProbeRunner(BaseProbeRunner):
                     Xt = np.vstack([bag for bag in X_train])
                     scaler = StandardScaler()
                     scaler.fit(Xt)
-                    # transform each bag
                 else:
                     raise NotImplementedError(
                         "Only normalization pipeline is implemented")
 
                 max_bag_size = self.cfg.probe["max_bag_size"]
-                limit = self.cfg.get('cv_bag_limit', len(f_X))
+                limit = self.cfg.get('cv_bag_limit', len(X_train))
                 processed_bags = []
                 intra_bag_labels = []
 
-                for i, bag in enumerate(f_X):
+                for i, bag in enumerate(X_train):
                     bag_processed, intra_labels_for_this_bag = self._process_bag_for_training(
                         bag=bag,
                         max_bag_size=max_bag_size,
-                        rnd_seed_offset=i
+                        rnd_seed_offset=i,
+                        scaler=scaler
                     )
-                    raise NotImplementedError("Should be manually transformed") 
                     processed_bags.append(bag_processed)
                     intra_bag_labels.append(intra_labels_for_this_bag)
 
+                # log.info(f"\t\tTraining bags processed: {len(processed_bags)}")
                 # 2.1) Compute η (eta)
                 pos_lengths = [
                     len(bag) for bag in processed_bags
                 ]
                 eta = sum([sum(lbl) for lbl in intra_bag_labels]) / \
                     sum(pos_lengths)
-                try:
+                # try:
+                if True:
                     separator = sAwMIL(
                         C=float(C),
                         kernel=self.cfg.probe.get('kernel', 'linear'),
@@ -221,16 +222,16 @@ class SawmilProbeRunner(BaseProbeRunner):
                         in_bag_labels=intra_bag_labels[:limit],
                     )
                     direction, bias = separator.linearize(normalize=True)
-                    y_hat = self._decision_function_(
+                    y_hat = self._decision_function_on_train_(
                         X_test, direction=direction, bias=bias, scaler=scaler)
                     _inner_scores.append(mAP(y_test, y_hat))
                     log.warning(
-                        f"\t\tmAP for {j}th fold: {_inner_scores[-1]}")
-                except Exception as e:
-                    log.error(f"Error: {e}")
-                    log.warning(
-                        "\t\tMoving to the next one...")
-                    _inner_scores.append(0.1)
+                        f"\t\tmAP for {j}th fold: {_inner_scores[-1]:.3f} ({y_hat.shape[0]} samples tested)")
+                # except Exception as e:
+                #     log.error(f"Error: {e}")
+                #     log.warning(
+                #         "\t\tMoving to the next one...")
+                #     _inner_scores.append(0.1)
 
             scores.append(np.mean(_inner_scores))
             stds.append(np.std(_inner_scores))
@@ -269,8 +270,8 @@ class SawmilProbeRunner(BaseProbeRunner):
 
         selected_score = float(means[selected_idx])
         log.warning(
-            f"\tSelected via 1-SE: n_components={params[selected_idx]['clf__n_components']} (mean AP={selected_score:.4f})")
-        return params[selected_idx], selected_score
+            f"\tSelected via 1-SE: n_components={params['C'][selected_idx]} (mean AP={selected_score:.4f})")
+        return params['C'][selected_idx], selected_score
 
     def conformal_training(self, X_cal: List[np.ndarray], y_cal: np.ndarray, mask_cal: np.ndarray):
         """
@@ -330,7 +331,29 @@ class SawmilProbeRunner(BaseProbeRunner):
 
         for bag in X:
             bag = self.process_bag(bag)
-            scores = self.separator.decision_function(bag)
+            scores = self.estimator.decision_function(bag)
+            output.append(np.max(scores))
+        return np.array(output)
+
+    def _decision_function_on_train_(self, X: List[np.ndarray], direction: np.ndarray, bias: float, scaler: StandardScaler) -> np.ndarray:
+        """
+        Predict raw scores for a new set of bags using provided direction and bias.
+        Based on the FULL BAG (not just the last instance).
+        Args:
+            X: list of bags (each is array-like of shape [ #instances × hidden_size ])
+            direction: direction vector of the separator
+            bias: bias term of the separator
+            scaler: fitted scaler to transform the bags
+        Returns:
+            scores: array of shape (N,) where N is the number of bags
+        """
+        output = []
+        if type(X) is np.ndarray:
+            X = [X]
+
+        for bag in X:
+            bag = scaler.transform(bag)
+            scores = np.dot(bag, direction) + bias
             output.append(np.max(scores))
         return np.array(output)
 
@@ -347,7 +370,7 @@ class SawmilProbeRunner(BaseProbeRunner):
         Based on the FULL BAG (not just the last instance).
         """
         return self.predict_proba(X).round()
-    
+
     # Adapter methods for BAG-LEVEL Predictions
 
     def bag_decision_function(self, bags: List[np.ndarray], agg: str = 'max') -> np.ndarray:
@@ -367,15 +390,15 @@ class SawmilProbeRunner(BaseProbeRunner):
         Predict classes for a new set of bags (based on FULL bag).
         """
         return self.predict(bags)
-    
+
     def bag_conformal_prediction(self, bags: List[np.ndarray], agg: str = 'max') -> np.ndarray:
         """
         Predict conformal classes for a new set of bags (based on FULL bag).
         """
         return self.conformal_prediction(bags)
-    
+
     # Adapter methods for INSTANCE-LEVEL Predictions (last instance of each bag)
-    
+
     def inst_decision_function(self, X: List[np.ndarray]) -> np.ndarray:
         """
         Predict raw scores for the LAST INSTANCE of each bag.
@@ -397,7 +420,7 @@ class SawmilProbeRunner(BaseProbeRunner):
         Predict classes for the LAST INSTANCE of each bag.
         """
         return self.inst_predict_proba(X).round()
-    
+
     def inst_conformal_prediction(self, X: List[np.ndarray]) -> np.ndarray:
         """
         Predict conformal classes for the LAST INSTANCE of each bag.
@@ -439,38 +462,59 @@ class SawmilProbeRunner(BaseProbeRunner):
         return metric_dict
 
     @property
-    def direction(self):
+    def direction(self) -> np.ndarray | None:
         """
         Return the direction of the separator.
         """
-        return self.separator.linearize(normalize=True)[0]
+        try:
+            return self.separator.linearize(normalize=True)[0]
+        except:
+            try:
+                return self._direction
+            except:
+                return None
 
     @property
-    def bias(self):
+    def bias(self) -> float | np.ndarray | None:
         """
         Return the bias of the separator.
         """
-        return self.separator.linearize(normalize=True)[1]
+        try:
+            return self.separator.linearize(normalize=True)[1]
+        except:
+            try:
+                return self._bias
+            except:
+                return None
 
     @property
-    def direction_bias(self):
+    def direction_bias(self) -> Tuple[np.ndarray, float] | Tuple[None, None]:
         """
         Return, BOTH, the direction and bias of the separator.
         """
-        return self.separator.linearize(normalize=True)
+        try:
+            return self.separator.linearize(normalize=True)
+        except:
+            try:
+                return self._direction, self._bias
+            except:
+                return None, None
 
     @property
-    def estimator(self):
+    def estimator(self) -> BinaryLinearProbe:
         """
         Return the trained separator.
         """
-        dir, bias = self.direction_bias
-        return BinaryLinearProbe(
-            coef=dir.reshape(1, -1),
-            bias=bias
-        )
+        try:
+            return self.separator
+        except:
+            dir, bias = self.direction_bias
+            return BinaryLinearProbe(
+                coef=dir.reshape(1, -1),
+                intercept=bias
+            )
 
-    def _process_bag_for_training(self, bag: np.ndarray, max_bag_size: int = 100, rnd_seed_offset: int = 0):
+    def _process_bag_for_training(self, bag: np.ndarray, max_bag_size: int = 100, rnd_seed_offset: int = 0, scaler: StandardScaler = None):
         ''' 
         Process a single bag (use this during the training phase).
         Args:
@@ -483,7 +527,10 @@ class SawmilProbeRunner(BaseProbeRunner):
         '''
         num_last_tokens_to_keep = self.cfg.probe["num_known_positives"]
         assume_known = self.cfg.probe.get("assume_known_positives", True)
-        bag = self.process_bag(bag)
+        if scaler is not None:
+            bag = scaler.transform(bag)
+        else:
+            bag = self.scaler.transform(bag)
 
         L = bag.shape[0]
         # 1. Cap the bag size
@@ -541,10 +588,13 @@ class SawmilProbeRunner(BaseProbeRunner):
             self.separator = joblib.load(paths["estimator"])
         else:
             self.separator = BinaryLinearProbe(
-                coef=np.load(paths["direction"]),
-                bias=np.load(paths["bias"])
+                coef=np.load(paths["coef"]),
+                intercept=np.load(paths["bias"])
             )
 
+        self._bias = np.load(paths["bias"])
+        self._direction = np.load(paths["coef"])
+        
         if paths.get("calibrator") and Path(paths["calibrator"]).exists():
             self.calibrator = joblib.load(paths["calibrator"])
         else:

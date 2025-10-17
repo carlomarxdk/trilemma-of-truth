@@ -299,7 +299,7 @@ class MDProbeRunner(BaseProbeRunner):
         """
         Reload saved artifacts into this runner.
         Args:
-            output_dir: path where save(...) stored things
+            output_dir: path where metric files + manifests folder are stored
             layer_id: integer id used in filenames
         """
         output_dir = Path(output_dir)

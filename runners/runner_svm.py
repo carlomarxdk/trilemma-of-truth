@@ -13,6 +13,7 @@ from copy import deepcopy
 from probes.linear import BinaryLinearProbe
 from pathlib import Path
 import joblib
+from scipy.special import expit
 import json
 
 log = logging.getLogger("SILRunner-SVM")
@@ -76,7 +77,8 @@ class SVMProbeRunner(BaseProbeRunner):
             raise NotImplementedError(
                 "Only a pipeline with the normalization is implemented")
 
-        bags = self.process_input(f_X)[f_mask]
+        bags = [bag for bag, m in zip(
+            self._bags_to_single_instance(f_X), f_mask) if m]
 
         # 2) Transform each bag (take only the last element)
         cfg = self.cfg.probe
@@ -119,7 +121,6 @@ class SVMProbeRunner(BaseProbeRunner):
         scores = []
         stds = []
         n_samples = len(X)
-        limit = self.cfg.get('cv_bag_limit', len(bags))
 
         for _, C in enumerate(param_grid):
             log.warning(f"\tRunning the iteration with C={C}...")
@@ -133,8 +134,8 @@ class SVMProbeRunner(BaseProbeRunner):
                 te_mask[test_index] = True
                 tr_mask = tr_mask & f_mask
                 te_mask = te_mask & f_mask
-                X_train = [x for x, m in zip(X, tr_mask) if m]
-                X_test = [x for x, m in zip(X, te_mask) if m]
+                X_train = [x for x, m in zip(f_X, tr_mask) if m]
+                X_test = [x for x, m in zip(f_X, te_mask) if m]
                 y_train = ym[tr_mask]
                 y_test = ym[te_mask]
                 np.random.seed(random_seed + j)
@@ -148,11 +149,12 @@ class SVMProbeRunner(BaseProbeRunner):
                     # Transform bags
                     bags = [scaler.transform(bag)[-1]
                             for bag in X_train]
-                    bags_test = np.vstack([scaler.transform(bag)[-1]
-                                           for bag in X_test])
+                    bags_test = [scaler.transform(bag)[-1]
+                                 for bag in X_test]
                 else:
                     raise NotImplementedError(
                         "Only a pipeline with the normalization is implemented")
+                limit = self.cfg.get('cv_bag_limit', len(bags))
 
                 try:
                     separator = SVM(C=float(C),
@@ -213,8 +215,8 @@ class SVMProbeRunner(BaseProbeRunner):
 
         selected_score = float(means[selected_idx])
         log.warning(
-            f"\tSelected via 1-SE: n_components={params[selected_idx]['clf__n_components']} (mean AP={selected_score:.4f})")
-        return params[selected_idx], selected_score
+            f"\tSelected via 1-SE: n_components={params['C'][selected_idx]} (mean AP={selected_score:.4f})")
+        return params['C'][selected_idx], selected_score
 
     def conformal_training(self, X_cal, y_cal, mask_cal):
         '''
@@ -259,9 +261,12 @@ class SVMProbeRunner(BaseProbeRunner):
         # Compute the decision function using the separator
         return np.dot(Xt, self.direction) + self.bias
 
-    def predict_proba(self, X):
-        Xt = self.process_input(X)
-        return self.separator.predict_proba(Xt).flatten()
+    def predict_proba(self, X: List[np.ndarray]) -> np.ndarray:
+        """
+        Predict logits for a new set of bags.
+        Based on the FULL BAG (not just the last instance).
+        """
+        return expit(self.decision_function(X))
 
     def predict(self, X):
         proba = self.predict_proba(X)
@@ -276,38 +281,60 @@ class SVMProbeRunner(BaseProbeRunner):
         metric_dict['scale_C'] = self.separator.scale_C
         return metric_dict
 
+
     @property
     def direction(self):
         """
         Return the direction of the separator.
         """
-        return self.separator.linearize(normalize=True)[0]
+        try:
+            return self.separator.linearize(normalize=True)[0]
+        except:
+            try:
+                return self._direction
+            except:
+                return None
 
     @property
     def bias(self):
         """
         Return the bias of the separator.
         """
-        return self.separator.linearize(normalize=True)[1]
+        try:
+            return self.separator.linearize(normalize=True)[1]
+        except:
+            try:
+                return self._bias
+            except:
+                return None
 
     @property
     def direction_bias(self):
         """
         Return, BOTH, the direction and bias of the separator.
         """
-        return self.separator.linearize(normalize=True)
+        try:
+            return self.separator.linearize(normalize=True)
+        except:
+            try:
+                return self._direction, self._bias
+            except:
+                return None, None
 
     @property
     def estimator(self):
         """
         Return the trained separator.
         """
-        dir, bias = self.direction_bias
-        return BinaryLinearProbe(
-            coef=dir.reshape(1, -1),
-            bias=bias
-        )
-        
+        try:
+            return self.separator
+        except:
+            dir, bias = self.direction_bias
+            return BinaryLinearProbe(
+                coef=dir.reshape(1, -1),
+                intercept=bias
+            )
+
     def process_bag(self, bag: np.ndarray) -> np.ndarray:
         """
         Process a single bag and return the transformed representation.
@@ -370,25 +397,25 @@ class SVMProbeRunner(BaseProbeRunner):
         yh = self.bag_decision_function(bags, agg=agg)
         # Compute the conformal prediction
         return self.calibrator.predict(yh)
-    
+
     def inst_decision_function(self, X):
         """
         Predict raw scores for the LAST INSTANCE of each bag.
         """
         return self.decision_function(X)
-    
+
     def inst_predict_proba(self, X):
         """
         Predict logits for the LAST INSTANCE of each bag.
         """
         return self.predict_proba(X)
-    
+
     def inst_predict(self, X):
         """
         Predict classes for the LAST INSTANCE of each bag.
         """
         return self.predict(X)
-    
+
     def inst_conformal_prediction(self, X):
         """
         Predict conformal classes for the LAST INSTANCE of each bag.
@@ -405,12 +432,22 @@ class SVMProbeRunner(BaseProbeRunner):
         """
         return np.vstack([bag[-1] for bag in bags])
 
+    def _bags_to_single_instance(self, bags: List[np.ndarray]) -> np.ndarray:
+        """
+        Convert bags to instances by taking the last instance of each bag.
+        Args:
+            bags: list of bags (each is array-like of shape [ #instances × hidden_size ])
+        Returns:
+            instances: array-like of shape [ #bags × hidden_size ]
+        """
+        return [self.scaler.transform(bag)[-1] for bag in bags]
+
     def process_input(self, X: List[np.ndarray] | np.ndarray) -> np.ndarray:
         if type(X) is np.ndarray:
             X = [X]
         return self.scaler.transform(self._bags_to_instance(X))
 
-    def load(self, output_dir: str | Path, layer_id: int) -> 'SawmilProbeRunner':
+    def load(self, output_dir: str | Path, layer_id: int) -> 'SVMProbeRunner':
         """
         Reload saved artifacts into this runner.
         Args:
@@ -436,10 +473,14 @@ class SVMProbeRunner(BaseProbeRunner):
             self.separator = joblib.load(paths["estimator"])
         else:
             self.separator = BinaryLinearProbe(
-                coef=np.load(paths["direction"]),
-                bias=np.load(paths["bias"])
+                coef=np.load(paths["coef"]),
+                intercept=np.load(paths["bias"])
             )
 
+
+        self._bias = np.load(paths["bias"])
+        self._direction = np.load(paths["coef"])
+        
         if paths.get("calibrator") and Path(paths["calibrator"]).exists():
             self.calibrator = joblib.load(paths["calibrator"])
         else:

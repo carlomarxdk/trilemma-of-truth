@@ -252,9 +252,9 @@ def main(cfg: DictConfig):
                                               cfg=cfg)
         
         # Metrics for the last instance in the bag
-        yh_te = runner.predict_proba(X_te)
-        yc_te = runner.conformal_prediction(X_te)
-        preds = runner.predict(X_te)
+        yh_te = runner.inst_predict_proba(X_te)
+        yc_te = runner.inst_conformal_prediction(X_te)
+        preds = runner.inst_predict(X_te)
         
         metric_dict['instance']['default'] = log_metric(preds=preds,
                                             scores=yh_te,

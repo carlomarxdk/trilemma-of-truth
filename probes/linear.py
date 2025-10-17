@@ -7,9 +7,11 @@ import logging
 log = logging.getLogger(__name__)
 
 class BinaryLinearProbe(BaseEstimator, ClassifierMixin):
-    def __init__(self, coef: np.ndarray, bias: np.ndarray) -> 'BinaryLinearProbe':
-        self.coef_ = coef
-        self.intercept_ = bias
+    def __init__(self, coef: np.ndarray, intercept: np.ndarray) -> 'BinaryLinearProbe':
+        self.coef = np.asarray(coef)
+        self.intercept = np.asarray(intercept).ravel()
+        self.coef_ = self.coef
+        self.intercept_ = self.intercept
         self.classes_ = [0, 1]
         self.is_fitted_ = True
 
