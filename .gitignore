@@ -199,3 +199,4 @@ outputs/experiments.db
 *.db
 /outputs/probes/sawmil
 /outputs/probes/sawmil
+/outputs/figures

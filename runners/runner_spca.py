@@ -29,7 +29,6 @@ class SPCA_Runner(BaseProbeRunner):
         self.calibrator = None
         self.separator = None
         self.transformer = None
-        self.bag_processor = None
 
     def single_training(self, X: List[np.ndarray], y: np.ndarray, mask: np.ndarray, neg: np.ndarray = None):
         """
@@ -152,7 +151,7 @@ class SPCA_Runner(BaseProbeRunner):
             f"\tSelected via 1-SE: n_components={params[selected_idx]['clf__n_components']} (mean AP={selected_score:.4f})")
         return params[selected_idx], selected_score
 
-    def conformal_training(self, X_cal, y_cal, mask_cal):
+    def conformal_training(self, X_cal: List[np.ndarray], y_cal: np.ndarray, mask_cal: np.ndarray):
         '''
         Train the conformal predictor on the calibration set.
         Args:
@@ -180,7 +179,7 @@ class SPCA_Runner(BaseProbeRunner):
         self.calibrator.fit(y=f_y[f_mask], scores=yh_cal[f_mask])
         return self.calibrator
 
-    def conformal_prediction(self, X):
+    def conformal_prediction(self, X: List[np.ndarray]):
         """
         Compute the conformal prediction for the given bags.
         """
@@ -191,7 +190,7 @@ class SPCA_Runner(BaseProbeRunner):
         # Compute the conformal prediction
         return self.calibrator.predict(yh)
 
-    def decision_function(self, X):
+    def decision_function(self, X: List[np.ndarray]) -> np.ndarray:
         """
         Compute the decision function for the given bags.
         """
@@ -209,7 +208,26 @@ class SPCA_Runner(BaseProbeRunner):
         return np.array(proba > 0.5)
 
     def process_input(self, X: List[np.ndarray]) -> np.ndarray:
+        """
+        Transform a list of bags into an instance (aka take the last instance of each bag after scaling).
+        Args:
+            X: list of N bags (each bag is an array of shape (L, d))
+        Returns:
+            Xt: array of shape (N, d) where N is the number of bags and
+                d is the feature dimension after scaling
+        """
         return np.vstack([self.scaler.transform(bag)[-1] for bag in X])
+
+    def process_to_instances(self, X: List[np.ndarray]) -> np.ndarray:
+        """
+        Transform a list of bags into an instance (aka take the last instance of each bag after scaling).
+        Args:
+            X: list of N bags (each bag is an array of shape (L, d))
+        Returns:
+            Xt: array of shape (N, d) where N is the number of bags and
+                d is the feature dimension after scaling
+        """
+        return self.process_input(X)
 
     def update_metric(self, metric_dict):
         """
@@ -307,6 +325,30 @@ class SPCA_Runner(BaseProbeRunner):
         yh = self.bag_decision_function(bags, agg=agg)
         # Compute the conformal prediction
         return self.calibrator.predict(yh)
+    
+    def inst_decision_function(self, X):
+        """
+        Predict raw scores for the LAST INSTANCE of each bag.
+        """
+        return self.decision_function(X)
+    
+    def inst_predict_proba(self, X):
+        """
+        Predict logits for the LAST INSTANCE of each bag.
+        """
+        return self.predict_proba(X)
+    
+    def inst_predict(self, X):
+        """
+        Predict classes for the LAST INSTANCE of each bag.
+        """
+        return self.predict(X)
+    
+    def inst_conformal_prediction(self, X):
+        """
+        Predict conformal classes for the LAST INSTANCE of each bag.
+        """
+        return self.conformal_prediction(X)
 
     def load(self, output_dir: str | Path, layer_id: int) -> 'SupervisedPCA':
         """

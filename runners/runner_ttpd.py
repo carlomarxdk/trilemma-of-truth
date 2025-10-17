@@ -30,27 +30,45 @@ class TTPD_Runner(BaseProbeRunner):
         self.calibrator = None
         self.separator = None
         self.transformer = None
-        self.bag_processor = None
+
+    def return_target(self, y: np.ndarray, mask: np.ndarray = None) -> np.ndarray:
+        """
+        In case of TTPD, just apply mask.
+        Args:
+            y: bag_labels or labels
+            mask: mask for the task
+        Returns:
+            yy: masked bag_labels or labels
+        """
+        yy = deepcopy(y)
+        if mask is not None:
+            return yy[mask]
+        return yy
 
     def single_training(self, X: List[np.ndarray], y: np.ndarray, mask: np.ndarray, neg: np.ndarray = None):
         """
         Train transformer and separator on the masked subset of bags.
         Returns dict with 'separator' and fitted 'transformer'.
         Args:
-            - X: an list of bags 
-            - y: bag_abels
-            - mask: mask for the task
+            X: an list of bags 
+            y: bag_labels
+            mask: boolean mask array of length len(X) indicating which bags to train on
+        Returns a dict with keys:
+            'separator', 'scaler', 'transformer'
         """
         # 0) Get the bags and labels
-        f_mask = np.array(mask, dtype=bool)
         f_neg = deepcopy(neg) if neg is not None else None
         f_y = deepcopy(y)
         f_X = deepcopy(X)
-        assert len(f_X) == len(f_y) == len(f_mask), "X, y and mask must have the same length"
+        f_mask = np.array(mask, dtype=bool)
+
+        assert len(f_X) == len(f_y) == len(
+            f_mask), "X, y and mask must have the same length"
         assert np.unique(f_y).size == 2, "y must be binary"
 
         ym = self.return_target(f_y, f_mask)
-        negm = self.return_target(1 - f_neg, f_mask) if f_neg is not None else None
+        negm = self.return_target(
+            1 - f_neg, f_mask) if f_neg is not None else None
         # 1) Fit transformer on concatenated instances
         if self.cfg.probe.get('normalize_data', True):
             log.warning("\t\tNormalizing the data...")
@@ -61,13 +79,14 @@ class TTPD_Runner(BaseProbeRunner):
                 "Only a pipeline with the normalization is implemented")
 
         Xm = np.vstack([self.scaler.transform(bag)[-1]
-                for bag, m in zip(f_X, f_mask) if m])
+                        for bag, m in zip(f_X, f_mask) if m])
 
         # 2) Transform each bag (take only the last element)
         cfg = self.cfg.probe
         limit = cfg.get('train_sample_limit', Xm.shape[0])
         log.warning("\t\tFit the data...")
 
+        # 3) Fit the model
         self.separator = TTPD(
             verbose=cfg.init_params.get('verbose', False),
             random_seed=cfg.init_params.get('random_seed', 42)
@@ -80,23 +99,18 @@ class TTPD_Runner(BaseProbeRunner):
                 'scaler': self.scaler,
                 'transformer': np.nan}
 
-    def return_target(self, y, mask=None):
-        yy = deepcopy(y)
-        if mask is not None:
-            return yy[mask]
-        return yy
-
     def parameter_search(self, X: List[np.ndarray], y: np.ndarray, mask: np.ndarray, neg: np.ndarray = None):
         """
         Training with hyperparameter search
         Args:
-            - X: an array of bags (Sequences, Lenghts, Hidden Size)
-            - y: labels
-            - mask: mask for the data
+            X: an array of bags (Sequences, Lenghts, Hidden Size)
+            y: labels
+            mask: mask for the data
         """
-        log.warning("Running the hyperparameter search... (For SPCA Probe parameter_search == sigle_training)")
+        log.warning(
+            "Running the hyperparameter search... (For SPCA Probe parameter_search == sigle_training)")
         return self.single_training(X, y, mask, neg)
-        
+
     def conformal_training(self, X_cal, y_cal, mask_cal):
         '''
         Train the conformal predictor on the calibration set.
@@ -143,19 +157,19 @@ class TTPD_Runner(BaseProbeRunner):
         # Transform the bags using the fitted scaler
         Xt = self.process_input(X)
         yhat = self.separator.decision_function(Xt)
-        return yhat.flatten() 
-    
+        return yhat.flatten()
+
     def predict_proba(self, X):
         Xt = self.process_input(X)
         proba = self.separator.predict_proba(Xt)
         if proba.ndim > 1 and proba.shape[1] == 2:
-            proba = proba[:, 1]    
+            proba = proba[:, 1]
         return proba.flatten()
-    
+
     def predict(self, X):
         proba = self.predict_proba(X)
-        return np.array(proba > 0.5)    
-    
+        return np.array(proba > 0.5)
+
     def process_input(self, X: List[np.ndarray]) -> np.ndarray:
         return np.vstack([self.scaler.transform(bag)[-1] for bag in X])
 
@@ -192,9 +206,8 @@ class TTPD_Runner(BaseProbeRunner):
         Return the estimator
         """
         return self.separator
-    
 
-    def process_bag(self, bag: np.ndarray) -> np.ndarray:
+    def process_bag(self, bag: np.ndarray, *args, **kwargs) -> np.ndarray:
         """
         Process a single bag and return the transformed representation.
         Args:
@@ -256,6 +269,30 @@ class TTPD_Runner(BaseProbeRunner):
         yh = self.bag_decision_function(bags, agg=agg)
         # Compute the conformal prediction
         return self.calibrator.predict(yh)
+    
+    def inst_decision_function(self, X):
+        """
+        Predict raw scores for the LAST INSTANCE of each bag.
+        """
+        return self.decision_function(X)
+    
+    def inst_predict_proba(self, X):
+        """
+        Predict logits for the LAST INSTANCE of each bag.
+        """
+        return self.predict_proba(X)
+    
+    def inst_predict(self, X):
+        """
+        Predict classes for the LAST INSTANCE of each bag.
+        """
+        return self.predict(X)
+    
+    def inst_conformal_prediction(self, X):
+        """
+        Predict conformal classes for the LAST INSTANCE of each bag.
+        """
+        return self.conformal_prediction(X)
 
     def load(self, output_dir: str | Path, layer_id: int) -> 'TTPD_Runner':
         """

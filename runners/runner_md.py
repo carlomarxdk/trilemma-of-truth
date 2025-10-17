@@ -239,6 +239,30 @@ class MDProbeRunner(BaseProbeRunner):
         yh = self.bag_decision_function(bags, agg=agg)
         # Compute the conformal prediction
         return self.calibrator.predict(yh)
+    
+    def inst_decision_function(self, X):
+        """
+        Predict raw scores for the LAST INSTANCE of each bag.
+        """
+        return self.decision_function(X)
+    
+    def inst_predict_proba(self, X):
+        """
+        Predict logits for the LAST INSTANCE of each bag.
+        """
+        return self.predict_proba(X)
+    
+    def inst_predict(self, X):
+        """
+        Predict classes for the LAST INSTANCE of each bag.
+        """
+        return self.predict(X)
+    
+    def inst_conformal_prediction(self, X):
+        """
+        Predict conformal classes for the LAST INSTANCE of each bag.
+        """
+        return self.conformal_prediction(X)
 
     def load(self, output_dir: str | Path, layer_id: int) -> 'MDProbeRunner':
         """

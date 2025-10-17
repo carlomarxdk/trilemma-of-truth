@@ -117,7 +117,7 @@ class ExperimentData:
         Returns:
             dict: The content of the manifest file as a dictionary.
         '''
-        assert self.layer_exists(layer), f"The experimental data for layer {layer} does not exist. Available layers: {self.available_layers()}"
+        assert self.layer_exists(layer), f"The experimental data for layer {layer} does not exist. Available layers: {self.available_layers}"
         with open(self.base_path / 'manifests' / f'manifest_{str(layer)}.json', 'r') as f:
             manifest = json.load(f)
         return manifest
