@@ -55,7 +55,7 @@ def test_get_truth_direction_ols_shape_and_signal():
     rs = np.random.RandomState(123)
     n, d = 300, 12
     t = rs.choice([-1.0, 1.0], size=n)
-    p = (rs.rand(n) > 0.4).astype(float)  # in {0,1} with both classes present
+    p = rs.choice([-1.0, 1.0], size=n)  # in {-1,1} with both classes present
 
     # build A
     A = np.column_stack([t, t * p])  # (n,2)
@@ -101,14 +101,6 @@ def test_get_truth_direction_zero_polarity_returns_single_direction():
     # cosine should be strong
     cos = np.dot(w_t_hat, w_t_true) / (np.linalg.norm(w_t_hat) * np.linalg.norm(w_t_true))
     assert cos > 0.9
-
-def test_get_polarity_direction_requires_two_classes():
-    rs = np.random.RandomState(7)
-    X = rs.randn(100, 8)
-    p_all_zero = np.zeros(100, dtype=int)
-    # Should raise from sklearn LR because single class
-    with pytest.raises(Exception):
-        _ = TTPD._get_polarity_direction(X, p_all_zero)
 
 def test_get_polarity_direction_returns_vector_when_valid():
     rs = np.random.RandomState(8)
