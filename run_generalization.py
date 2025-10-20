@@ -12,7 +12,6 @@ from typing import Dict
 from pathlib import Path
 import sys
 import joblib
-from misc.probe_data import MulticlassProbeData as MPD
 from misc.db import LogDataBase
 
 from utils import (

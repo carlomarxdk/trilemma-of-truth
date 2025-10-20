@@ -187,7 +187,7 @@ def log_metric_binary(preds: np.ndarray, scores: np.ndarray, y_true: np.ndarray,
     return metric_with_ci
 
 
-def log_metric_multiclass(preds: np.ndarray, scores: np.ndarray, y_true: np.ndarray, cfg) -> Dict[str, float]:
+def log_metric_multiclass(preds: np.ndarray, scores: np.ndarray, y_true: np.ndarray, cfg, mask: np.ndarray | None = None) -> Dict[str, float]:
     """
     Log the metrics to the Weights and Biases dashboard with prefix and return as a dictionary without prefix.
     Args:

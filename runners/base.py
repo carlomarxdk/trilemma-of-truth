@@ -19,7 +19,7 @@ class BaseProbeRunner(ABC):
         '''Needs to be rewriten for probes that return probabilities'''
         scores = self.decision_function(X)
         return np.array(scores > 0)
-    @abs
+    @property   
     def direction(self): ...
     @property
     def bias(self): ...

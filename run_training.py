@@ -21,12 +21,13 @@ from utils import (
     _atomic_joblib_dump,
     _atomic_write_json,
     log_metric_binary as log_metric,
+    log_metric_multiclass as log_metric_mc
 )
 
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Sequence
 from sklearn.base import TransformerMixin, BaseEstimator
 
-from runners import SVMProbeRunner, MDProbeRunner, SawmilProbeRunner, SPCA_Runner, TTPD_Runner
+from runners import SVMProbeRunner, MDProbeRunner, SawmilProbeRunner, SPCA_Runner, TTPD_Runner, MulticlassMILRunner, MulticlassSILRunner
 
 log = logging.getLogger("Training")
 
@@ -34,10 +35,12 @@ PROBES = {
     'svm': SVMProbeRunner,
     'mean_diff': MDProbeRunner,
     'sawmil': SawmilProbeRunner,
+    'sawmil_mc': MulticlassMILRunner,
+    'svm_mc': MulticlassSILRunner,
     'spca': SPCA_Runner,
     'ttpd': TTPD_Runner,
-    
 }
+
 
 try:
     from sklearnex import patch_sklearn
@@ -131,11 +134,15 @@ def save(concept_direction: np.ndarray,
     if (conf_calibrator is not None):
         _atomic_joblib_dump(clb_path, conf_calibrator)
 
+    coef_path = output_dir / \
+        f"coef_{layer_id}.npy" if concept_direction is not None else None
+    bias_path = output_dir / \
+        f"bias_{layer_id}.npy" if concept_bias is not None else None
     # 4. Numpy arrays
-    coef_path = output_dir / f"coef_{layer_id}.npy"
-    bias_path = output_dir / f"bias_{layer_id}.npy"
-    np.save(coef_path, concept_direction)
-    np.save(bias_path, concept_bias)
+    if concept_direction is not None:
+        np.save(coef_path, concept_direction)
+    if concept_bias is not None:
+        np.save(bias_path, concept_bias)
 
     yh_path = output_dir / \
         f"y_hat_{layer_id}.npy" if y_hat is not None else None
@@ -153,8 +160,8 @@ def save(concept_direction: np.ndarray,
         "paths": {
             "config": str(config_path),
             "metrics": str(metrics_path),
-            "coef": str(coef_path),
-            "bias": str(bias_path),
+            "coef": str(coef_path) if coef_path else None,
+            "bias": str(bias_path) if bias_path else None,
             "preds": str(yh_path) if (y_hat is not None or y_true is not None) else None,
             "estimator": str(est_path) if est_path else None,
             "scaler": str(scl_path) if scl_path else None,
@@ -162,14 +169,14 @@ def save(concept_direction: np.ndarray,
             "calibrator": str(clb_path) if clb_path else None,
         },
         "shapes": {
-            "coef": tuple(np.shape(concept_direction)),
-            "bias": tuple(np.shape(concept_bias)),
+            "coef": None if concept_direction is None else tuple(np.shape(concept_direction)),
+            "bias": None if concept_bias is None else tuple(np.shape(concept_bias)),
             "y_hat": None if y_hat is None else tuple(np.shape(y_hat)),
             "y_true": None if y_true is None else tuple(np.shape(y_true)),
         },
         "dtypes": {
-            "coef": str(getattr(concept_direction, "dtype", "")),
-            "bias": str(getattr(concept_bias, "dtype", "")),
+            "coef": None if concept_direction is None else str(getattr(concept_direction, "dtype", "")),
+            "bias": None if concept_bias is None else str(getattr(concept_bias, "dtype", "")),
             "y_hat": None if y_hat is None else str(getattr(y_hat, "dtype", "")),
             "y_true": None if y_true is None else str(getattr(y_true, "dtype", "")),
         },
@@ -192,7 +199,7 @@ def save(concept_direction: np.ndarray,
     return manifest
 
 
-def checkpointing(cfg, layer_range: List[int]) -> List[int]:
+def checkpointing(cfg, layer_range: Sequence[int]) -> List[int]:
     """
     Check which layers are missing from the output directory and return them.
     If a layer is missing, also include the previous layer (to avoid missing values).
@@ -221,7 +228,7 @@ def checkpointing(cfg, layer_range: List[int]) -> List[int]:
     return sorted(missing_layers)
 
 
-@hydra.main(version_base=None, config_path="configs", config_name="probe_sil")
+@hydra.main(version_base=None, config_path="configs", config_name="probe_training")
 def main(cfg: DictConfig):
     validate_config(cfg)
     log_stats(cfg)
@@ -295,15 +302,17 @@ def main(cfg: DictConfig):
             y_cal, mask_cal = cal_labels['targets'], cal_labels['mask']
 
         start_time = time.time()
-        runner = PROBES[cfg.probe['name']](cfg)
+        if task.task == -1 and cfg.probe['name'] in ['sawmil', 'svm']: # MULTICLASS PROBE
+            runner = PROBES[cfg.probe['name']+'_mc'](cfg)
+        else:
+            runner = PROBES[cfg.probe['name']](cfg)
         if cfg.search:
             result = runner.parameter_search(
-                X=X_tr, y=y_train, mask=mask, neg=neg_tr)
+                X=X_tr, y=y_train, mask=mask, neg=neg_tr, layer_id=layer_id)
         else:
             # try:
             result = runner.single_training(
-                X=X_tr, y=y_train, mask=mask, neg=neg_tr)
-
+                X=X_tr, y=y_train, mask=mask, neg=neg_tr, layer_id=layer_id)
         # CONFORMAL PREDICTION
         X_te = dh_test.test_bags(
             layer_id=layer_id, drop_zeros=True)["embeddings"]
@@ -318,21 +327,45 @@ def main(cfg: DictConfig):
         preds = runner.predict(X_te)
         # Assemble Metrics
         metric_dict = {}
-        metric_dict['default'] = log_metric(preds=preds,
-                                            scores=yh_te,
-                                            y_true=y_test,
-                                            mask=mask_test,
-                                            cfg=cfg)
-        metric_dict['default']["coverage"] = 1.0
-        metric_dict['default'] = runner.update_metric(metric_dict['default'])
+        if task.task == -1:
+            metric_dict['default'] = log_metric_mc(preds=preds,
+                                                   scores=yh_te,
+                                                   y_true=y_test,
+                                                   mask=mask_test,
+                                                   cfg=cfg)
+            metric_dict['default']["coverage"] = 1.0
+            metric_dict['default'] = runner.update_metric(
+                metric_dict['default'])
 
-        metric_dict['conformal'] = log_metric(preds=yc_te, scores=yh_te,
-                                              y_true=y_test, mask=mask_test, cfg=cfg)
-        metric_dict['conformal']["coverage"] = calibrator.coverage(
-            scores=yh_te[mask_test], y=y_test[mask_test])
-        # try:
-        metric_dict['conformal']["acceptance_rate"] = np.sum(
-            yc_te != -1) / max(yc_te.shape[0], 1)
+            metric_dict['conformal'] = log_metric_mc(preds=yc_te,
+                                                     scores=yh_te,
+                                                     y_true=y_test,
+                                                     cfg=cfg)
+            metric_dict['conformal']["coverage"] = calibrator.coverage(
+                scores=yh_te[mask_test], y=y_test[mask_test])
+            # try:
+            metric_dict['conformal']["acceptance_rate"] = np.sum(
+                yc_te != -1) / max(yc_te.shape[0], 1)
+        else:
+            metric_dict['default'] = log_metric(preds=preds,
+                                                scores=yh_te,
+                                                y_true=y_test,
+                                                mask=mask_test,
+                                                cfg=cfg)
+            metric_dict['default']["coverage"] = 1.0
+            metric_dict['default'] = runner.update_metric(
+                metric_dict['default'])
+
+            metric_dict['conformal'] = log_metric(preds=yc_te,
+                                                  scores=yh_te,
+                                                  y_true=y_test,
+                                                  mask=mask_test,
+                                                  cfg=cfg)
+            metric_dict['conformal']["coverage"] = calibrator.coverage(
+                scores=yh_te[mask_test], y=y_test[mask_test])
+            # try:
+            metric_dict['conformal']["acceptance_rate"] = np.sum(
+                yc_te != -1) / max(yc_te.shape[0], 1)
         # except:
         #     metric_dict['conformal']["acceptance_rate"] = calibrator.acceptance_rate(
         #          yh_te)

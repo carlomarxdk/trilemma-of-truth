@@ -191,13 +191,9 @@ outputs/activations/llama-3-8b/city_locations/full/layer_7_e.npz
 outputs/activations/llama-3-8b/city_locations_synthetic/full/layer_7_e.npz
 configs/setup/explorer.yaml
 outputs/experiments.db
-outputs/experiments.db
-outputs/experiments.db
 /.bash_scripts
 /outputs/probes
-outputs/experiments.db
 *.db
-/outputs/probes/sawmil
 /outputs/probes/sawmil
 /outputs/figures
 
