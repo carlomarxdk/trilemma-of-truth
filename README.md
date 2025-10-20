@@ -178,27 +178,25 @@ Note that you must collect activations before training this probe. Generally, yo
 ```bash
 # Train one-vs-all probe (an example without the hyperparameter search)
 python run_training.py \
-      --config-name=probe_mil.yaml \
       model=llama-3-8b \
       datapack=city_locations \
       probe=sawmil \
       task=0 \
-      search=False 
+      search=True # True to activate the parameter search
 ```
 
 ##### 3.2 Multiclass
 
 After you collect all the activations and train three one-vs-all `sAwMIL` probes, you can proceed with training the multiclass one.
-The `run_mc_training.py` runs only with the `task=-1`.
+The `run_training.py` runs only with the `task=-1`.
 
 ```bash
-python run_mc_training.py \
-      --config-name=probe_mil.yaml \
+python run_training.py \
       model=llama-3-8b \
       datapack=city_locations \
       probe=sawmil \
       task=-1 \
-      search=False 
+      search=True
 ```
 
 A small example is provided in the `make_predictions.ipynb` notebook.
@@ -214,7 +212,6 @@ Generally, you need to train three SVM probes: one with `task=0`, one with `task
 
 ```bash
 python run_training.py \
-      --config-name=probe_sil.yaml \
       model=llama-3-8b \
       datapack=city_locations \
       probe=svm \
@@ -224,11 +221,14 @@ python run_training.py \
 ##### 4.2 Train *multiclass SVM* probe
 
 After you collect all the activations and train three one-vs-all `SVM` probes, you can proceed with training the multiclass one.
-The `run_mc_training.py` runs only with the `task=-1`.
+The `run_training.py` runs only with the `task=-1`.
 
 ```bash
-python run_mc_training.py --config-name=probe_sil.yaml \
-model=llama-3-8b datapack=city_locations probe=svm task=-1
+python run_training.py \
+      model=llama-3-8b \
+      datapack=city_locations \
+      probe=svm \
+      task=-1
 ```
 
 ##### 4.3 Train binary SIL baselines
@@ -236,8 +236,11 @@ model=llama-3-8b datapack=city_locations probe=svm task=-1
 The SIL binary baselines are trained to separate *true-vs-false*, thus, use `task=3`, these include `mean_diff`, `spca` and `ttpd`.
 
 ```bash
-python run_training.py --config-name=probe_sil.yaml \
-model=llama-3-8b datapack=city_locations probe=mean_diff task=3
+python run_training.py  \
+      model=llama-3-8b \
+      datapack=city_locations \
+      probe=mean_diff \
+      task=3
 ```
 
 #### 5. Extra
@@ -248,13 +251,12 @@ To check the performance of the probe on another dataset you can run `run_genera
 
 ```bash
 python run_generalization.py \
-      --config-name=probe_mil.yaml \
       model=llama-3-8b \
       datapack=city_locations \
       datapack@datapack_test=med_indications \
       probe=sawmil \
       search=True \
-      task=XX
+      task=-1 # Generalization of the multiclass sawmil
 ```
 
 Use the task nr that you used to train the probe. For example for `mean_diff` (or any other binary SIL), it is `task=3`.
