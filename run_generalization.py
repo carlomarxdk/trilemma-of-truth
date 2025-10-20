@@ -21,14 +21,14 @@ from utils import (
     _atomic_write_json,
     available_layers,
 )
-from runners import SVMProbeRunner, MDProbeRunner, SawmilProbeRunner, SPCA_Runner, TTPD_Runner, MulticlassMILRunner, MulticlassSILRunner
+from runners import SVMProbeRunner, MDProbeRunner, SawmilProbeRunner, SPCA_Runner, TTPD_Runner, MulticlassMILRunner, MulticlassSVMRunner
 
 PROBES = {
     'svm': SVMProbeRunner,
     'mean_diff': MDProbeRunner,
     'sawmil': SawmilProbeRunner,
     'sawmil_mc': MulticlassMILRunner,
-    'svm_mc': MulticlassSILRunner,
+    'svm_mc': MulticlassSVMRunner,
     'spca': SPCA_Runner,
     'ttpd': TTPD_Runner,
 }

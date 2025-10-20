@@ -27,7 +27,7 @@ from utils import (
 from typing import Optional, Dict, List, Sequence
 from sklearn.base import TransformerMixin, BaseEstimator
 
-from runners import SVMProbeRunner, MDProbeRunner, SawmilProbeRunner, SPCA_Runner, TTPD_Runner, MulticlassMILRunner, MulticlassSILRunner
+from runners import SVMProbeRunner, MDProbeRunner, SawmilProbeRunner, SPCA_Runner, TTPD_Runner, MulticlassMILRunner, MulticlassSVMRunner
 
 log = logging.getLogger("Training")
 
@@ -36,7 +36,7 @@ PROBES = {
     'mean_diff': MDProbeRunner,
     'sawmil': SawmilProbeRunner,
     'sawmil_mc': MulticlassMILRunner,
-    'svm_mc': MulticlassSILRunner,
+    'svm_mc': MulticlassSVMRunner,
     'spca': SPCA_Runner,
     'ttpd': TTPD_Runner,
 }
@@ -323,6 +323,7 @@ def main(cfg: DictConfig):
         calibrator = runner.conformal_training(X_cal, y_cal, mask_cal)
 
         yh_te = runner.predict_proba(X_te)
+        print(yh_te)
         yc_te = runner.conformal_prediction(X_te)
         preds = runner.predict(X_te)
         # Assemble Metrics

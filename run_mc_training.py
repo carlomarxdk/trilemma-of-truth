@@ -27,7 +27,7 @@ from utils import should_process_layer
 
 # from runners.runner_sil2mc import SILMC_Runner
 from runners.mc_runner_sawmil import MulticlassMILRunner
-from runners.mc_runner_sil import MulticlassSILRunner
+from runners.mc_runner_svm import MulticlassSILRunner
 
 log = logging.getLogger(__name__)
 

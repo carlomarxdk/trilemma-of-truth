@@ -1,25 +1,26 @@
 from __future__ import annotations
 import numpy as np
+from typing import Tuple, Sequence, List, Dict
 from copy import deepcopy
 import logging
-from typing import List, Dict, Tuple, Sequence
+import json
+from pathlib import Path
+import joblib
 from runners.base import BaseProbeRunner
+
+from probes.conformal import MulticlassICP, probability_margin_nc
+from probes.linear import MultiClassBaggedProjector, MulticlassProbe
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 
-from probes.linear import MultiClassBaggedProjector, MulticlassProbe
-import joblib
-import json
-from pathlib import Path
+log = logging.getLogger("MulticlassSVMRunner")
 
-from probes.conformal import MulticlassICP, probability_margin_nc
-
-log = logging.getLogger("MulticlassMILRunner")
+# Run multiclass SIL-SVM etc.
 
 
-class MulticlassMILRunner(BaseProbeRunner):
+class MulticlassSVMRunner(BaseProbeRunner):
     """
-    MIL Multiclass using OvA method.
+    SVM Multiclass using OvA method.
     """
 
     def __init__(self, cfg):
@@ -35,8 +36,7 @@ class MulticlassMILRunner(BaseProbeRunner):
         self.pool = "max"
         self.max_iter = 3000
 
-        #  dict like {1: 'T', 0: 'F', 2: 'N'}
-        self.tasks = cfg.multiclass_params.tasks
+        self.tasks: List[int] = cfg.multiclass_params.tasks
 
     def return_target(self, y: np.ndarray, mask: np.ndarray = None) -> np.ndarray:
         """
@@ -56,7 +56,7 @@ class MulticlassMILRunner(BaseProbeRunner):
 
     def __get_path__(self, task: str) -> str:
         """
-        Get paths to the saved model objects.
+        Get paths to the saved model objects
         """
         probe_name = self.cfg.probe['name']
         model_name = self.cfg.model["name"]
@@ -105,7 +105,7 @@ class MulticlassMILRunner(BaseProbeRunner):
         ym = self.return_target(f_y, f_mask)
         # 1) Fit transformer on concatenated instances
         if self.cfg.probe.get("normalize_data", True):
-            X_all = np.vstack([bag for bag, m in zip(f_X, f_mask) if m])
+            X_all = np.vstack([bag[-1] for bag, m in zip(f_X, f_mask) if m])
             self.scaler.fit(X_all)
         else:
             raise NotImplementedError(
@@ -115,12 +115,14 @@ class MulticlassMILRunner(BaseProbeRunner):
         processed_bags = []
         for _, bag in enumerate(f_X):
             bag_processed = self.scaler.transform(
-                bag) if self.cfg.probe.get("normalize_data", True) else bag
+                bag)[-1] if self.cfg.probe.get("normalize_data", True) else bag[-1]
             processed_bags.append(bag_processed)
 
         coefs, intercepts = self.collect_weights(layer_id=self.layer_id)
         init_cls = MultiClassBaggedProjector(
-            coef=coefs, intercept=intercepts, aggregation=self.pool, classes=[0, 1, 2])
+            coef=coefs, intercept=intercepts,
+            aggregation='max',  # 'max' since we pass only one item, max is ok
+            classes=[0, 1, 2])
 
         separator = MulticlassProbe(
             base=init_cls,
@@ -157,8 +159,23 @@ class MulticlassMILRunner(BaseProbeRunner):
             'separator', 'scaler', 'transformer', 'eta'
         """
         log.warning(
-            "Parameter search not implemented for MulticlassMILRunner; doing single_training.")
+            "Parameter search not implemented for MulticlassSVMRunner; doing single_training.")
         return self.single_training(X, y, mask, layer_id=layer_id, **kwargs)
+
+    def __process_bag_to_instance__(self, bag: np.ndarray) -> np.ndarray:
+        """
+        Process a single bag (scaling) and get the last item.
+        Args:
+            bag: array-like of shape [ #instances × hidden_size ]
+        Returns:
+            processed_bag: array-like of shape [ #instances × hidden_size ]
+        """
+        if self.cfg.probe.get("normalize_data", True):
+            processed_bag = self.scaler.transform(bag)[-1]
+        else:
+            processed_bag = bag[-1]
+
+        return processed_bag
 
     def conformal_training(self, X_cal: Sequence[np.ndarray], y_cal: np.ndarray, mask_cal: np.ndarray) -> MulticlassICP:
         """
@@ -172,6 +189,7 @@ class MulticlassMILRunner(BaseProbeRunner):
         """
         probs_cal = self.predict_proba(
             [b for b, m in zip(X_cal, mask_cal) if m])
+
         y_c = np.asarray(y_cal)[mask_cal]
         self.calibrator = MulticlassICP(
             nonconformity_func=probability_margin_nc,
@@ -183,7 +201,7 @@ class MulticlassMILRunner(BaseProbeRunner):
         return self.calibrator
 
     def conformal_prediction(self, X: Sequence[np.ndarray]) -> List[np.ndarray]:
-        """
+        """Pentoxifylline is indicated for the treatment of chronic occlusive arterial disease.
         Compute the conformal prediction for the given bags.
         """
         probs = self.predict_proba(X)
@@ -192,103 +210,72 @@ class MulticlassMILRunner(BaseProbeRunner):
     def update_metric(self, metric_dict):
         return metric_dict
 
-    def __process_bag__(self, bag: np.ndarray) -> np.ndarray:
-        """
-        Process a single bag (scaling).
-        Args:
-            bag: array-like of shape [ #instances × hidden_size ]
-        Returns:
-            processed_bag: array-like of shape [ #instances × hidden_size ]
-        """
-        return self.scaler.transform(bag) if self.cfg.probe.get("normalize_data", True) else bag
-
-    def process_bags(self, bags: Sequence[np.ndarray]) -> List[np.ndarray]:
-        """
-        Process a list of bags (scaling).
-        Args:
-            bags: list of bags (each is array-like of shape [ #instances × hidden_size ])
-        Returns:
-            processed_bags: list of processed bags
-        """
-        if type(bags) is np.ndarray:
-            bags = [np.asarray(bags)]
-        return [self.__process_bag__(bag) for bag in bags]
-
-    def predict_proba(self, X: Sequence[np.ndarray]) -> np.ndarray:
-        """
-        Predict logits for a new set of bags.
-        Based on the FULL BAG (not just the last instance).
-        """
-        X = self.process_bags(X)
-        return self.separator.predict_proba(X)  # (N, C)
-
-    def predict(self, X: Sequence[np.ndarray]) -> np.ndarray:
-        """
-        Predict the class for a new set of bags.
-        Based on the FULL BAG (not just the last instance).
-        """
-        X = self.process_bags(X)
-        return self.separator.predict(X)        # (N,)
-
     def decision_function(self, X: Sequence[np.ndarray]) -> np.ndarray:
         """
         Predict raw scores for a new set of bags.
-        Based on the FULL BAG (not just the last instance).
+        Based on the LAST ITEM IN THE BAG.
         Args:
             X: list of bags (each is array-like of shape [ #instances × hidden_size ])
         Returns:
             scores: array of shape (N,) where N is the number of bags
         """
-        X = self.process_bags(X)
+        X = [self.__process_bag_to_instance__(bag) for bag in X]
         return self.separator.decision_function(X)
 
-    # Adapter methods for BAG-LEVEL Predictions
+    def predict_proba(self, X: Sequence[np.ndarray]) -> np.ndarray:
+        """
+        Predict logits for a new set of bags.
+        Based on the LAST ITEM IN THE BAG (not just the last instance).
+        """
+        X = [self.__process_bag_to_instance__(bag) for bag in X]
 
+        return self.separator.predict_proba(X)  # (N, C)
+
+    def predict(self, X: Sequence[np.ndarray]) -> np.ndarray:
+        """
+        Predict label for a new set of bags.
+        Based on the LAST ITEM IN THE BAG (not just the last instance).
+        """
+        X = [self.__process_bag_to_instance__(bag) for bag in X]
+        return self.separator.predict(X)  # (N, C)
+
+    # Adapter methods for BAG-LEVEL Predictions (full bag)
     def bag_decision_function(self, bags: Sequence[np.ndarray], agg: str = 'max') -> np.ndarray:
         """
         Predict raw scores for a new set of bags (based on FULL bag).
         """
-        return self.decision_function(bags)
+        bags = self.process_bags(bags)
+        return self.separator.decision_function(bags)
 
     def bag_predict_proba(self, bags: Sequence[np.ndarray], agg: str = 'max') -> np.ndarray:
         """
         Predict logits for a new set of bags (based on FULL bag).
         """
-        return self.predict_proba(bags)
+        bags = self.process_bags(bags)
+        return self.separator.predict_proba(bags)
 
     def bag_predict(self, bags: Sequence[np.ndarray], agg: str = 'max', threshold: float = 0.5) -> np.ndarray:
         """
         Predict classes for a new set of bags (based on FULL bag).
         """
-        return self.predict(bags)
+        bags = self.process_bags(bags)
+        return self.separator.predict(bags)
 
     def bag_conformal_prediction(self, bags: Sequence[np.ndarray], agg: str = 'max') -> np.ndarray:
         """
         Predict conformal classes for a new set of bags (based on FULL bag).
         """
+        bags = self.process_bags(bags)
         return self.conformal_prediction(bags)
 
     # Adapter methods for INSTANCE-LEVEL Predictions (last instance of each bag)
-    def _process_bag_to_instances(self, X: Sequence[np.ndarray]) -> np.ndarray:
-        """
-        Transform a list of bags into an instance (aka take the last instance of each bag after scaling).
-        Args:
-            X: list of N bags (each bag is an array of shape (L, d))
-        Returns:
-            Xt: array of shape (N, d) where N is the number of bags and
-                d is the feature dimension after scaling
-        """
-        return [[bag[-1]] for bag in X]
-
     def inst_decision_function(self, X: Sequence[np.ndarray]) -> np.ndarray:
         """
         Predict raw scores for the LAST INSTANCE of each bag.
         """
         if type(X) is np.ndarray:
             X = [X]
-
-        Xt = self._process_bag_to_instances(X)
-        return self.decision_function(Xt)
+        return self.decision_function(X)
 
     def inst_predict_proba(self, X: Sequence[np.ndarray]) -> np.ndarray:
         """
@@ -297,8 +284,7 @@ class MulticlassMILRunner(BaseProbeRunner):
         if type(X) is np.ndarray:
             X = [X]
 
-        Xt = self._process_bag_to_instances(X)
-        return self.predict_proba(Xt)
+        return self.predict_proba(X)
 
     def inst_predict(self, X: Sequence[np.ndarray]) -> np.ndarray:
         """
@@ -307,8 +293,7 @@ class MulticlassMILRunner(BaseProbeRunner):
         if type(X) is np.ndarray:
             X = [X]
 
-        Xt = self._process_bag_to_instances(X)
-        return self.predict(Xt)
+        return self.predict(X)
 
     def inst_conformal_prediction(self, X: Sequence[np.ndarray]) -> np.ndarray:
         """
@@ -348,7 +333,7 @@ class MulticlassMILRunner(BaseProbeRunner):
         except:
             return None
 
-    def load(self, output_dir: str | Path, layer_id: int) -> MulticlassMILRunner:
+    def load(self, output_dir: str | Path, layer_id: int) -> MulticlassSVMRunner:
         """
         Reload saved artifacts into this runner.
         Args:

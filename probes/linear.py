@@ -89,7 +89,7 @@ class MultiClassBaggedProjector(BaseEstimator, ClassifierMixin):
         X = [np.asarray(bag) for bag in X]
         return X
 
-    def decision_function(self, X: Sequence[np.ndarray]) -> np.ndarray:
+    def decision_function(self, X: Sequence[np.ndarray], agg: str = None) -> np.ndarray:
         """
         Compute the decision function for each sample in X.
         Args:
@@ -102,11 +102,10 @@ class MultiClassBaggedProjector(BaseEstimator, ClassifierMixin):
         scores = []
         for bag in X:
             logits = bag @ self.coef_.T + self.intercept_
-            # print("Logits shape:", logits.shape)
-            # print("Logits:", logits)
-            if self.aggregation == 'max':
+            if logits.ndim == 1:
+                agg = logits
+            elif self.aggregation == 'max':
                 agg = np.max(logits, axis=0)
-                # print("Aggregated logits (max):", agg)
             elif self.aggregation == 'mean':
                 agg = np.mean(logits, axis=0)
             elif self.aggregation == 'sum':

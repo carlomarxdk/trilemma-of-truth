@@ -228,6 +228,7 @@ python run_training.py \
       model=llama-3-8b \
       datapack=city_locations \
       probe=svm \
+      run_debugging=False \ # True would run the training only on the 13th layer
       task=-1
 ```
 
