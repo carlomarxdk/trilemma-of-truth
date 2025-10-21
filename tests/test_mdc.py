@@ -5,9 +5,6 @@ from numpy.testing import assert_allclose, assert_equal
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.metrics import accuracy_score, roc_auc_score
 
-from probes.mean_difference import normalize, robust_covariance, MeanDifferenceClassifier
-
-
 def rng(seed=0):
     return np.random.default_rng(seed)
 

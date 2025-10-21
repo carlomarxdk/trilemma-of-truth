@@ -9,7 +9,7 @@ import json
 from pathlib import Path
 import numpy as np
 import logging
-from typing import List
+from typing import List, Sequence, Dict, Tuple
 from copy import deepcopy
 
 log = logging.getLogger("SILRunner-SPCA")
@@ -30,7 +30,7 @@ class SPCA_Runner(BaseProbeRunner):
         self.separator = None
         self.transformer = None
 
-    def single_training(self, X: List[np.ndarray], y: np.ndarray, mask: np.ndarray, neg: np.ndarray = None):
+    def single_training(self, X: Sequence[np.ndarray], y: np.ndarray, mask: np.ndarray, **kwargs) -> Dict:
         """
         Train transformer and separator on the masked subset of bags.
         Returns dict with 'separator' and fitted 'transformer'.
@@ -87,7 +87,7 @@ class SPCA_Runner(BaseProbeRunner):
             return yy[mask]
         return yy
 
-    def parameter_search(self, X: List[np.ndarray], y: np.ndarray, mask: np.ndarray, neg: np.ndarray = None):
+    def parameter_search(self, X: Sequence[np.ndarray], y: np.ndarray, mask: np.ndarray, **kwargs) -> Dict:
         """
         Training with hyperparameter search
         Args:
@@ -126,9 +126,9 @@ class SPCA_Runner(BaseProbeRunner):
         best_params, _ = self._apply_se_rule(grid.cv_results_, n_folds=3)
         self.cfg.probe.init_params['n_components'] = best_params['clf__n_components']
         # self.cfg.probe.init_params['cov_reg'] = best_params['clf__cov_reg']
-        return self.single_training(X, y, mask)
+        return self.single_training(X, y, mask, **kwargs)
 
-    def _apply_se_rule(self, results, n_folds: int = 3):
+    def _apply_se_rule(self, results: Dict, n_folds: int = 3) -> Tuple[Dict, float]:
         means = results['mean_test_score']
         stds = results['std_test_score']
         params = results['params']
@@ -151,7 +151,7 @@ class SPCA_Runner(BaseProbeRunner):
             f"\tSelected via 1-SE: n_components={params[selected_idx]['clf__n_components']} (mean AP={selected_score:.4f})")
         return params[selected_idx], selected_score
 
-    def conformal_training(self, X_cal: List[np.ndarray], y_cal: np.ndarray, mask_cal: np.ndarray):
+    def conformal_training(self, X_cal: Sequence[np.ndarray], y_cal: np.ndarray, mask_cal: np.ndarray) -> InductiveConformalPredictor:
         '''
         Train the conformal predictor on the calibration set.
         Args:
@@ -179,7 +179,7 @@ class SPCA_Runner(BaseProbeRunner):
         self.calibrator.fit(y=f_y[f_mask], scores=yh_cal[f_mask])
         return self.calibrator
 
-    def conformal_prediction(self, X: List[np.ndarray]):
+    def conformal_prediction(self, X: Sequence[np.ndarray]):
         """
         Compute the conformal prediction for the given bags.
         """
@@ -190,7 +190,7 @@ class SPCA_Runner(BaseProbeRunner):
         # Compute the conformal prediction
         return self.calibrator.predict(yh)
 
-    def decision_function(self, X: List[np.ndarray]) -> np.ndarray:
+    def decision_function(self, X: Sequence[np.ndarray]) -> np.ndarray:
         """
         Compute the decision function for the given bags.
         """
@@ -199,15 +199,15 @@ class SPCA_Runner(BaseProbeRunner):
         yhat = self.separator.decision_function(Xt)
         return yhat.flatten()
 
-    def predict_proba(self, X):
+    def predict_proba(self, X: Sequence[np.ndarray]) -> np.ndarray:
         Xt = self.process_input(X)
         return self.separator.predict_proba(Xt).flatten()
 
-    def predict(self, X):
+    def predict(self, X: Sequence[np.ndarray]) -> np.ndarray:
         proba = self.predict_proba(X)
         return np.array(proba > 0.5)
 
-    def process_input(self, X: List[np.ndarray]) -> np.ndarray:
+    def process_input(self, X: Sequence[np.ndarray]) -> np.ndarray:
         """
         Transform a list of bags into an instance (aka take the last instance of each bag after scaling).
         Args:
@@ -218,7 +218,7 @@ class SPCA_Runner(BaseProbeRunner):
         """
         return np.vstack([self.scaler.transform(bag)[-1] for bag in X])
 
-    def process_to_instances(self, X: List[np.ndarray]) -> np.ndarray:
+    def process_to_instances(self, X: Sequence[np.ndarray]) -> np.ndarray:
         """
         Transform a list of bags into an instance (aka take the last instance of each bag after scaling).
         Args:
@@ -229,28 +229,28 @@ class SPCA_Runner(BaseProbeRunner):
         """
         return self.process_input(X)
 
-    def update_metric(self, metric_dict):
+    def update_metric(self, metric_dict: Dict) -> Dict:
         """
         Add the metric items to the metric dictionary.
         """
         return metric_dict
 
     @property
-    def direction(self):
+    def direction(self) -> np.ndarray | None:
         """
         Return the direction of the separator.
         """
         return None
 
     @property
-    def bias(self):
+    def bias(self) -> float | None:
         """
         Return the bias of the separator.
         """
         return None
 
     @property
-    def direction_bias(self):
+    def direction_bias(self) -> Tuple[np.ndarray | None, float | None]:
         """
         Return, BOTH, the direction and bias of the separator.
         """
@@ -273,7 +273,7 @@ class SPCA_Runner(BaseProbeRunner):
         """
         return self.scaler.transform(bag)
 
-    def bag_decision_function(self, bags: List[np.ndarray], agg: str = 'max') -> np.ndarray:
+    def bag_decision_function(self, bags: Sequence[np.ndarray], agg: str = 'max') -> np.ndarray:
         """
         Compute the decision function for the given bags.
         """
@@ -291,7 +291,7 @@ class SPCA_Runner(BaseProbeRunner):
 
         return np.array(yhat).flatten()
 
-    def bag_predict_proba(self, bags: List[np.ndarray], agg: str = 'max') -> np.ndarray:
+    def bag_predict_proba(self, bags: Sequence[np.ndarray], agg: str = 'max') -> np.ndarray:
         """
         Compute the predicted probabilities for the given bags.
         """
@@ -309,14 +309,14 @@ class SPCA_Runner(BaseProbeRunner):
                 raise ValueError(f"Unknown aggregation method: {agg}")
         return np.array(proba).flatten()
 
-    def bag_predict(self, bags: List[np.ndarray], agg: str = 'max', threshold: float = 0.5) -> np.ndarray:
+    def bag_predict(self, bags: Sequence[np.ndarray], agg: str = 'max', threshold: float = 0.5) -> np.ndarray:
         """
         Predict the class labels for the given bags.
         """
         proba = self.bag_predict_proba(bags, agg=agg)
         return np.array(proba > threshold)
 
-    def bag_conformal_prediction(self, bags: List[np.ndarray], agg: str = 'max') -> List[set]:
+    def bag_conformal_prediction(self, bags: Sequence[np.ndarray], agg: str = 'max') -> List[set]:
         """
         Compute the conformal prediction for the given bags.
         """
@@ -326,31 +326,31 @@ class SPCA_Runner(BaseProbeRunner):
         # Compute the conformal prediction
         return self.calibrator.predict(yh)
     
-    def inst_decision_function(self, X):
+    def inst_decision_function(self, X: Sequence[np.ndarray]) -> np.ndarray:
         """
         Predict raw scores for the LAST INSTANCE of each bag.
         """
         return self.decision_function(X)
     
-    def inst_predict_proba(self, X):
+    def inst_predict_proba(self, X: Sequence[np.ndarray]) -> np.ndarray:
         """
         Predict logits for the LAST INSTANCE of each bag.
         """
         return self.predict_proba(X)
     
-    def inst_predict(self, X):
+    def inst_predict(self, X: Sequence[np.ndarray]) -> np.ndarray:
         """
         Predict classes for the LAST INSTANCE of each bag.
         """
         return self.predict(X)
     
-    def inst_conformal_prediction(self, X):
+    def inst_conformal_prediction(self, X: Sequence[np.ndarray]) -> np.ndarray:
         """
         Predict conformal classes for the LAST INSTANCE of each bag.
         """
         return self.conformal_prediction(X)
 
-    def load(self, output_dir: str | Path, layer_id: int) -> 'SupervisedPCA':
+    def load(self, output_dir: str | Path, layer_id: int) -> SupervisedPCA:
         """
         Reload saved artifacts into this runner.
         Args:

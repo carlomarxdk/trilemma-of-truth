@@ -30,7 +30,7 @@ def test_runner_predictions_have_output_and_consistency(RunnerClass, bagged, tas
             f"Skipping {RunnerClass.__name__}: no files found in {output_dir}")
 
     cfg = load_hydra_config_with_params(
-        model=MODEL_NAME, probe=probe, datapack=DATASET_NAME, task=task, config_name='probe_sil')
+        model=MODEL_NAME, probe=probe, datapack=DATASET_NAME, task=task, config_name='probe_training')
 
     layer_id = 10
     runner = RunnerClass(cfg=cfg).load(

@@ -10,7 +10,7 @@ import numpy as np
 import logging
 import numpy as np
 import logging
-from typing import List
+from typing import List, Sequence, Dict, Set
 from copy import deepcopy
 
 log = logging.getLogger("SILRunner-MD")
@@ -45,7 +45,7 @@ class MDProbeRunner(BaseProbeRunner):
             return yy[mask]
         return yy
 
-    def single_training(self, X: List[np.ndarray], y: np.ndarray, mask: np.ndarray, neg: np.ndarray = None):
+    def single_training(self, X: Sequence[np.ndarray], y: np.ndarray, mask: np.ndarray, neg: np.ndarray = None) -> Dict:
         """
         Train transformer and separator on the masked subset of bags.
         Returns dict with 'separator' and fitted 'transformer'.
@@ -92,7 +92,7 @@ class MDProbeRunner(BaseProbeRunner):
                 'scaler': self.scaler,
                 'transformer': np.nan}
 
-    def parameter_search(self, X: List[np.ndarray], y: np.ndarray, mask: np.ndarray, neg: np.ndarray = None):
+    def parameter_search(self, X: Sequence[np.ndarray], y: np.ndarray, mask: np.ndarray, neg: np.ndarray = None) -> Dict:
         """
         Training with hyperparameter search
         Args:
@@ -103,7 +103,7 @@ class MDProbeRunner(BaseProbeRunner):
         log.warning("Running the hyperparameter search... (For MD Probe parameter_search == sigle_training)")
         return self.single_training(X, y, mask)
 
-    def conformal_training(self, X_cal, y_cal, mask_cal):
+    def conformal_training(self, X_cal: Sequence[np.ndarray], y_cal: np.ndarray, mask_cal: np.ndarray) -> InductiveConformalPredictor:
         '''
         Train the conformal predictor on the calibration set.
         Args:
@@ -131,7 +131,7 @@ class MDProbeRunner(BaseProbeRunner):
         self.calibrator.fit(y=f_y[f_mask], scores=yh_cal[f_mask])
         return self.calibrator
     
-    def conformal_prediction(self, X: List[np.ndarray]) -> np.ndarray:
+    def conformal_prediction(self, X: Sequence[np.ndarray]) -> np.ndarray:
         """
         Compute the conformal prediction for the given bags.
         """
@@ -142,7 +142,7 @@ class MDProbeRunner(BaseProbeRunner):
         # Compute the conformal prediction
         return self.calibrator.predict(yh)
 
-    def decision_function(self, X):
+    def decision_function(self, X: Sequence[np.ndarray]) -> np.ndarray:
         """
         Compute the decision function for the given bags.
         """
@@ -151,7 +151,7 @@ class MDProbeRunner(BaseProbeRunner):
         yhat = self.separator.decision_function(Xt)
         return yhat.flatten() 
     
-    def predict_proba(self, X):
+    def predict_proba(self, X: Sequence[np.ndarray]) -> np.ndarray:
         Xt = self.process_input(X)
         return self.separator.predict_proba(Xt).flatten()
     
@@ -159,7 +159,7 @@ class MDProbeRunner(BaseProbeRunner):
         proba = self.predict_proba(X)
         return np.array(proba > 0.5)    
     
-    def _bags_to_instance(self, bags: List[np.ndarray]) -> np.ndarray:
+    def _bags_to_instance(self, bags: Sequence[np.ndarray]) -> np.ndarray:
         """
         Convert bags to instances by taking the last instance of each bag.
         Args:
@@ -169,7 +169,7 @@ class MDProbeRunner(BaseProbeRunner):
         """
         return np.vstack([bag[-1] for bag in bags])
     
-    def process_input(self, X: List[np.ndarray] | np.ndarray) -> np.ndarray:
+    def process_input(self, X: Sequence[np.ndarray] | np.ndarray) -> np.ndarray:
         if type(X) is np.ndarray:
             X = [X]
         return self.scaler.transform(self._bags_to_instance(X))
@@ -218,7 +218,7 @@ class MDProbeRunner(BaseProbeRunner):
         """
         return self.scaler.transform(bag)
 
-    def bag_decision_function(self, bags: List[np.ndarray], agg: str = 'max') -> np.ndarray:
+    def bag_decision_function(self, bags: Sequence[np.ndarray], agg: str = 'max') -> np.ndarray:
         """
         Compute the decision function for the given bags.
         """
@@ -236,7 +236,7 @@ class MDProbeRunner(BaseProbeRunner):
 
         return np.array(yhat).flatten()
 
-    def bag_predict_proba(self, bags: List[np.ndarray], agg: str = 'max') -> np.ndarray:
+    def bag_predict_proba(self, bags: Sequence[np.ndarray], agg: str = 'max') -> np.ndarray:
         """
         Compute the predicted probabilities for the given bags.
         """
@@ -254,14 +254,14 @@ class MDProbeRunner(BaseProbeRunner):
                 raise ValueError(f"Unknown aggregation method: {agg}")
         return np.array(proba).flatten()
 
-    def bag_predict(self, bags: List[np.ndarray], agg: str = 'max', threshold: float = 0.5) -> np.ndarray:
+    def bag_predict(self, bags: Sequence[np.ndarray], agg: str = 'max', threshold: float = 0.5) -> np.ndarray:
         """
         Predict the class labels for the given bags.
         """
         proba = self.bag_predict_proba(bags, agg=agg)
         return np.array(proba > threshold)
 
-    def bag_conformal_prediction(self, bags: List[np.ndarray], agg: str = 'max') -> List[set]:
+    def bag_conformal_prediction(self, bags: Sequence[np.ndarray], agg: str = 'max') -> List:
         """
         Compute the conformal prediction for the given bags.
         """
@@ -271,25 +271,25 @@ class MDProbeRunner(BaseProbeRunner):
         # Compute the conformal prediction
         return self.calibrator.predict(yh)
     
-    def inst_decision_function(self, X):
+    def inst_decision_function(self, X:  Sequence[np.ndarray]) -> np.ndarray:
         """
         Predict raw scores for the LAST INSTANCE of each bag.
         """
         return self.decision_function(X)
     
-    def inst_predict_proba(self, X):
+    def inst_predict_proba(self, X: Sequence[np.ndarray]) -> np.ndarray:
         """
         Predict logits for the LAST INSTANCE of each bag.
         """
         return self.predict_proba(X)
     
-    def inst_predict(self, X):
+    def inst_predict(self, X: Sequence[np.ndarray]) -> np.ndarray:
         """
         Predict classes for the LAST INSTANCE of each bag.
         """
         return self.predict(X)
     
-    def inst_conformal_prediction(self, X):
+    def inst_conformal_prediction(self, X: Sequence[np.ndarray]) -> List[set]:
         """
         Predict conformal classes for the LAST INSTANCE of each bag.
         """

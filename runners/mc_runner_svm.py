@@ -36,7 +36,7 @@ class MulticlassSVMRunner(BaseProbeRunner):
         self.pool = "max"
         self.max_iter = 3000
 
-        self.tasks: List[int] = cfg.multiclass_params.tasks
+        self.tasks: Sequence[int] = cfg.multiclass_params.tasks
 
     def return_target(self, y: np.ndarray, mask: np.ndarray = None) -> np.ndarray:
         """

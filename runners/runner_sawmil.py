@@ -12,7 +12,7 @@ from probes.conformal import InductiveConformalPredictor, symmetric_nonconformit
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import KFold
 from utils_hydra import drop_rows_with_tail_keep
-from typing import List, Tuple
+from typing import List, Tuple, Sequence, Dict
 import joblib
 import json
 from scipy.special import expit
@@ -51,7 +51,7 @@ class SawmilProbeRunner(BaseProbeRunner):
             return arr[mask]
         return arr
 
-    def single_training(self, X: List[np.ndarray], y: np.ndarray, mask: np.ndarray, neg: np.ndarray = None):
+    def single_training(self, X: Sequence[np.ndarray], y: np.ndarray, mask: np.ndarray, neg: np.ndarray = None) -> Dict:
         """
         Train a model without the hyperparameter search.
         Args:
@@ -127,7 +127,7 @@ class SawmilProbeRunner(BaseProbeRunner):
             "eta": eta,
         }
 
-    def parameter_search(self, X: List[np.ndarray], y: np.ndarray, mask: np.ndarray, neg: np.ndarray = None):
+    def parameter_search(self, X: Sequence[np.ndarray], y: np.ndarray, mask: np.ndarray, neg: np.ndarray = None) -> Dict:
         """
         Wraps the existing parameter_search(...) function from your script.
         Args:
@@ -250,7 +250,7 @@ class SawmilProbeRunner(BaseProbeRunner):
             "best_C": self.cfg.probe["init_params"]["C"],
         }
 
-    def _apply_se_rule(self, scores, stds):
+    def _apply_se_rule(self, scores: Sequence[float], stds: Sequence[float]) -> Tuple[float, float]:
         means = scores
         n_folds = self.cfg["cv_n_folds"]
         params = self.cfg.probe["param_grid"]
@@ -273,7 +273,7 @@ class SawmilProbeRunner(BaseProbeRunner):
             f"\tSelected via 1-SE: n_components={params['C'][selected_idx]} (mean AP={selected_score:.4f})")
         return params['C'][selected_idx], selected_score
 
-    def conformal_training(self, X_cal: List[np.ndarray], y_cal: np.ndarray, mask_cal: np.ndarray):
+    def conformal_training(self, X_cal: Sequence[np.ndarray], y_cal: np.ndarray, mask_cal: np.ndarray):
         """
         Train the InductiveConformalPredictor on the calibration split.
         Args:
@@ -305,7 +305,7 @@ class SawmilProbeRunner(BaseProbeRunner):
         self.calibrator.fit(y=f_y[f_mask], scores=yh_cal[f_mask])
         return self.calibrator
 
-    def conformal_prediction(self, X: List[np.ndarray]):
+    def conformal_prediction(self, X: Sequence[np.ndarray]):
         """
         Compute the conformal prediction for the given bags.
         """
@@ -316,7 +316,7 @@ class SawmilProbeRunner(BaseProbeRunner):
         # Compute the conformal prediction
         return self.calibrator.predict(yh)
 
-    def decision_function(self, X: List[np.ndarray]) -> np.ndarray:
+    def decision_function(self, X: Sequence[np.ndarray]) -> np.ndarray:
         """
         Predict raw scores for a new set of bags.
         Based on the FULL BAG (not just the last instance).
@@ -335,7 +335,7 @@ class SawmilProbeRunner(BaseProbeRunner):
             output.append(np.max(scores))
         return np.array(output)
 
-    def _decision_function_on_train_(self, X: List[np.ndarray], direction: np.ndarray, bias: float, scaler: StandardScaler) -> np.ndarray:
+    def _decision_function_on_train_(self, X: Sequence[np.ndarray], direction: np.ndarray, bias: float, scaler: StandardScaler) -> np.ndarray:
         """
         Predict raw scores for a new set of bags using provided direction and bias.
         Based on the FULL BAG (not just the last instance).
@@ -357,14 +357,14 @@ class SawmilProbeRunner(BaseProbeRunner):
             output.append(np.max(scores))
         return np.array(output)
 
-    def predict_proba(self, X: List[np.ndarray]) -> np.ndarray:
+    def predict_proba(self, X: Sequence[np.ndarray]) -> np.ndarray:
         """
         Predict logits for a new set of bags.
         Based on the FULL BAG (not just the last instance).
         """
         return expit(self.decision_function(X))
 
-    def predict(self, X: List[np.ndarray]) -> np.ndarray:
+    def predict(self, X: Sequence[np.ndarray]) -> np.ndarray:
         """
         Predict the class for a new set of bags.
         Based on the FULL BAG (not just the last instance).
@@ -373,25 +373,25 @@ class SawmilProbeRunner(BaseProbeRunner):
 
     # Adapter methods for BAG-LEVEL Predictions
 
-    def bag_decision_function(self, bags: List[np.ndarray], agg: str = 'max') -> np.ndarray:
+    def bag_decision_function(self, bags: Sequence[np.ndarray], agg: str = 'max') -> np.ndarray:
         """
         Predict raw scores for a new set of bags (based on FULL bag).
         """
         return self.decision_function(bags)
 
-    def bag_predict_proba(self, bags: List[np.ndarray], agg: str = 'max') -> np.ndarray:
+    def bag_predict_proba(self, bags: Sequence[np.ndarray], agg: str = 'max') -> np.ndarray:
         """
         Predict logits for a new set of bags (based on FULL bag).
         """
         return self.predict_proba(bags)
 
-    def bag_predict(self, bags: List[np.ndarray], agg: str = 'max', threshold: float = 0.5) -> np.ndarray:
+    def bag_predict(self, bags: Sequence[np.ndarray], agg: str = 'max', threshold: float = 0.5) -> np.ndarray:
         """
         Predict classes for a new set of bags (based on FULL bag).
         """
         return self.predict(bags)
 
-    def bag_conformal_prediction(self, bags: List[np.ndarray], agg: str = 'max') -> np.ndarray:
+    def bag_conformal_prediction(self, bags: Sequence[np.ndarray], agg: str = 'max') -> np.ndarray:
         """
         Predict conformal classes for a new set of bags (based on FULL bag).
         """
@@ -399,7 +399,7 @@ class SawmilProbeRunner(BaseProbeRunner):
 
     # Adapter methods for INSTANCE-LEVEL Predictions (last instance of each bag)
 
-    def inst_decision_function(self, X: List[np.ndarray]) -> np.ndarray:
+    def inst_decision_function(self, X: Sequence[np.ndarray]) -> np.ndarray:
         """
         Predict raw scores for the LAST INSTANCE of each bag.
         """
@@ -409,26 +409,26 @@ class SawmilProbeRunner(BaseProbeRunner):
         Xt = self._process_bag_to_instances(X)
         return self.estimator.decision_function(Xt)
 
-    def inst_predict_proba(self, X: List[np.ndarray]) -> np.ndarray:
+    def inst_predict_proba(self, X: Sequence[np.ndarray]) -> np.ndarray:
         """
         Predict logits for the LAST INSTANCE of each bag.
         """
         return expit(self.inst_decision_function(X))
 
-    def inst_predict(self, X: List[np.ndarray]) -> np.ndarray:
+    def inst_predict(self, X: Sequence[np.ndarray]) -> np.ndarray:
         """
         Predict classes for the LAST INSTANCE of each bag.
         """
         return self.inst_predict_proba(X).round()
 
-    def inst_conformal_prediction(self, X: List[np.ndarray]) -> np.ndarray:
+    def inst_conformal_prediction(self, X: Sequence[np.ndarray]) -> np.ndarray:
         """
         Predict conformal classes for the LAST INSTANCE of each bag.
         """
         scores = self.inst_decision_function(X)
         return self.calibrator.predict(scores)
 
-    def process_input(self, X: List[np.ndarray]) -> np.ndarray:
+    def process_input(self, X: Sequence[np.ndarray]) -> np.ndarray:
         raise NotImplementedError(
             "Use process_bag instead or process_instance")
 
@@ -442,7 +442,7 @@ class SawmilProbeRunner(BaseProbeRunner):
         """
         return self.scaler.transform(bag)
 
-    def _process_bag_to_instances(self, X: List[np.ndarray]) -> np.ndarray:
+    def _process_bag_to_instances(self, X: Sequence[np.ndarray]) -> np.ndarray:
         """
         Transform a list of bags into an instance (aka take the last instance of each bag after scaling).
         Args:
@@ -452,14 +452,6 @@ class SawmilProbeRunner(BaseProbeRunner):
                 d is the feature dimension after scaling
         """
         return np.vstack([self.process_bag(bag)[-1] for bag in X])
-
-    def update_metric(self, metric_dict):
-        """
-        Add probe‐specific hyperparameters to metrics (e.g., C, eta).
-        """
-        metric_dict["C"] = self.separator.C
-        metric_dict["eta"] = self.eta
-        return metric_dict
 
     @property
     def direction(self) -> np.ndarray | None:
@@ -553,14 +545,16 @@ class SawmilProbeRunner(BaseProbeRunner):
             intra_labels_for_this_bag = [1] * processed_bag.shape[0]
         return processed_bag, intra_labels_for_this_bag
 
-    def update_metric(self, metric_dict):
+    def update_metric(self, metric_dict: Dict) -> Dict:
         """
-        Add the metric items to the metric dictionary.
+        Add probe‐specific hyperparameters to metrics (e.g., C, eta).
         """
         metric_dict['C'] = self.separator.C
         metric_dict['kernel'] = self.separator.kernel
         metric_dict['scale_C'] = self.separator.scale_C
+        metric_dict["eta"] = self.eta
         return metric_dict
+
 
     def load(self, output_dir: str | Path, layer_id: int) -> 'SawmilProbeRunner':
         """
