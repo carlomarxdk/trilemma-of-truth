@@ -239,6 +239,20 @@ class MulticlassSVMRunner(BaseProbeRunner):
         X = [self.__process_bag_to_instance__(bag) for bag in X]
         return self.separator.predict(X)  # (N, C)
 
+    def process_bags(self, bags: Sequence[np.ndarray]) -> List[np.ndarray]:
+        """
+        Process a list of bags (scaling).
+        Args:
+            bags: list of bags (each is array-like of shape [ #instances × hidden_size ])
+        Returns:
+            processed_bags: list of processed bags
+        """
+        processed_bags = []
+        for _, bag in enumerate(bags):
+            bag_processed = self.scaler.transform(
+                bag) if self.cfg.probe.get("normalize_data", True) else bag
+            processed_bags.append(bag_processed)
+        return processed_bags
     # Adapter methods for BAG-LEVEL Predictions (full bag)
     def bag_decision_function(self, bags: Sequence[np.ndarray], agg: str = 'max') -> np.ndarray:
         """

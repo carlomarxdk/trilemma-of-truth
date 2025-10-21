@@ -323,7 +323,6 @@ def main(cfg: DictConfig):
         calibrator = runner.conformal_training(X_cal, y_cal, mask_cal)
 
         yh_te = runner.predict_proba(X_te)
-        print(yh_te)
         yc_te = runner.conformal_prediction(X_te)
         preds = runner.predict(X_te)
         # Assemble Metrics

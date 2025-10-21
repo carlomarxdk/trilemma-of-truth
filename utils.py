@@ -95,11 +95,12 @@ def log_metric_binary(preds: np.ndarray, scores: np.ndarray, y_true: np.ndarray,
     Log the metrics to the Weights and Biases dashboard with prefix and return as a dictionary without prefix.
     """
     # yhat = probs.round()
-    is_binary = len(np.unique(y_true)) == 2
-    if not is_binary:
-        log.warning("Not a binary classification problem.")
-    is_ok = (len(np.unique(preds)) > 0) & (len(np.unique(preds)) < 4)
-    assert is_ok, "Only binary classification is supported (or binary with abstention class '-1')."
+    if cfg.task != -1:
+        is_binary = len(np.unique(y_true)) == 2
+        if not is_binary:
+            log.warning("Not a binary classification problem.")
+        is_ok = (len(np.unique(preds)) > 0) & (len(np.unique(preds)) < 4)
+        assert is_ok, "Only binary classification is supported (or binary with abstention class '-1')."
 
     a_mask = (preds != -1).flatten()
     preds = preds.flatten()

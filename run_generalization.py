@@ -173,7 +173,7 @@ def save(metric_dict: Dict,
     return manifest
 
 
-@hydra.main(version_base=None, config_path="configs", config_name="probe_sil")
+@hydra.main(version_base=None, config_path="configs", config_name="probe_training")
 def main(cfg: DictConfig):
     log.warning(f"Datapack Test: {cfg.datapack_test}")
     validate_config(cfg)
@@ -183,11 +183,13 @@ def main(cfg: DictConfig):
     db.write(trial_id=f"{cfg.model.name}-{cfg.datapack.name}-{cfg.datapack_test.name}",
              model=cfg.model.name,
              datapack=cfg.datapack.name,
-             task=-1,
+             task=cfg.task,
              parameters=f"STARTED",
              progress=0,
              status=0)
-
+    
+    task = cfg.task
+    
     dh_test = load_data_with_test(cfg)
     labels = dh_test.get_test_labels()
     layer_range = np.quantile(
@@ -223,9 +225,14 @@ def main(cfg: DictConfig):
         else:
             log.warning(f"Skipping layer {layer_id}")
             continue
-        # LOAD THE TEST DATA
-        runner = PROBES[cfg.probe['name']](cfg)
+        # INSTANTIATE THE PROBE RUNNER
+        if task == -1 and cfg.probe['name'] in ['sawmil', 'svm']: # MULTICLASS PROBE
+            log.warning("Using multiclass probe runner")
+            runner = PROBES[cfg.probe['name']+'_mc'](cfg)
+        else:
+            runner = PROBES[cfg.probe['name']](cfg)
         runner.load(output_dir=cfg.output_dir, layer_id=layer_id)
+
 
         # CONFORMAL PREDICTION
         X_te = dh_test.test_bags(
