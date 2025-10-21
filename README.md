@@ -366,12 +366,32 @@ ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split
 ## ✍️ How to Cite?
 
 ### Manuscript
+```mermaid
+---
+config:
+  theme: 'neutral'
+---
+timeline
+  section Pre-publication
+    ArXiv Preprint: Initial 75-page manuscript
+    NeurIPS MechInterp Workshop: Version of the ArXiv manuscript adjusted and extended for the workshop : Includes additional probing methods and generalization results
+  section Publication
+    Peer-review: Pending
+```
 
-#### NeurIPS Worksop Version
+#### NeurIPS MechInterp Workshop
+
 *Version accepted to the [Mechanistic Interpretability Workshop at NeurIPS 2025](https://mechinterpworkshop.com/)*:
 
 ```bibtex
-TBA
+@inproceedings{
+savcisens2025trilemma,
+title={Trilemma of Truth in Large Language Models: Preliminary Findings},
+author={Germans Savcisens and Tina Eliassi-Rad},
+booktitle={Mechanistic Interpretability Workshop at NeurIPS 2025},
+year={2025},
+url={https://openreview.net/forum?id=z7dLG2ycRf}
+}
 ```
 
 #### Preprint Version
