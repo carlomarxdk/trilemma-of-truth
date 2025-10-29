@@ -249,6 +249,30 @@ class ExperimentData:
             return False
         return True
 
+    def read_predictions(self, layer_id: int, path: Optional[Path] = None) -> Tuple[np.ndarray, np.ndarray]:
+        '''Read the predictions and true labels from the files for a specific layer.
+        Args:
+            layer_id (int): The layer number to read predictions for.
+            path (Path, optional): The base path to the experiment data. If None, uses the default base path.
+        Returns:
+            tuple: A tuple containing two numpy arrays: (y_hat, y_true).
+        '''
+        y_hat = self._load_npy_if_exists(f"y_hat_{layer_id}.npy", path)
+        y_true = self._load_npy_if_exists("y_true.npy", path)
+        if y_true is None:
+            y_true = self._load_npy_if_exists(f"y_true_{layer_id}.npy", path)
+        return y_hat, y_true
+    
+    def _load_npy_if_exists(self, name: str, path: Optional[Path] = None) -> Optional[np.ndarray]:
+        if path is not None:
+            assert path.exists(), f"The provided path {str(path)} does not exist."
+            path = Path(path) 
+        else:
+            path = self.base_path  
+        file_path = path / name
+        if file_path.exists():
+            return np.load(file_path)
+        return None
 
 
 #### Old code below for backward compatibility ####

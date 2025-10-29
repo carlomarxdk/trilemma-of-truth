@@ -187,9 +187,9 @@ def main(cfg: DictConfig):
              parameters=f"STARTED",
              progress=0,
              status=0)
-    
+
     task = cfg.task
-    
+
     dh_test = load_data_with_test(cfg)
     labels = dh_test.get_test_labels()
     layer_range = np.quantile(
@@ -226,13 +226,12 @@ def main(cfg: DictConfig):
             log.warning(f"Skipping layer {layer_id}")
             continue
         # INSTANTIATE THE PROBE RUNNER
-        if task == -1 and cfg.probe['name'] in ['sawmil', 'svm']: # MULTICLASS PROBE
+        if task == -1 and cfg.probe['name'] in ['sawmil', 'svm']:  # MULTICLASS PROBE
             log.warning("Using multiclass probe runner")
             runner = PROBES[cfg.probe['name']+'_mc'](cfg)
         else:
             runner = PROBES[cfg.probe['name']](cfg)
         runner.load(output_dir=cfg.output_dir, layer_id=layer_id)
-
 
         # CONFORMAL PREDICTION
         X_te = dh_test.test_bags(
@@ -263,6 +262,17 @@ def main(cfg: DictConfig):
         yc_te = runner.inst_conformal_prediction(X_te)
         preds = runner.inst_predict(X_te)
 
+        ###
+        # print(f"Bag preds: {bag_yh_te[:3]}")
+        # print(f"Inst preds: {yh_te[:3]}")
+
+        # print(f"Bag conformal preds: {bag_yc_te[:3]}")
+        # print(f"Inst conformal preds: {yc_te[:3]}")
+
+        if task == -1:
+            # Take only the positive class scores for multiclass
+            yh_te = yh_te[:, 1]
+
         metric_dict['instance']['default'] = log_metric(preds=preds,
                                                         scores=yh_te,
                                                         y_true=labels,
@@ -274,14 +284,17 @@ def main(cfg: DictConfig):
 
         # Metrics for the last instance in the bag, only true and false (no neither-valued statements)
         mask_tf = (labels == 1) | (labels == 0)
+
         metric_dict['instance_tf']['default'] = log_metric_binary(preds=preds,
                                                                   scores=yh_te,
                                                                   y_true=labels,
-                                                                  mask=mask_tf, cfg=cfg)
+                                                                  mask=mask_tf, 
+                                                                  cfg=cfg)
         metric_dict['instance_tf']['conformal'] = log_metric_binary(y_true=labels,
                                                                     preds=yc_te,
                                                                     scores=yh_te,
-                                                                    mask=mask_tf, cfg=cfg)
+                                                                    mask=mask_tf, 
+                                                                    cfg=cfg)
 
         if cfg.save_results:
             _ = save(metric_dict=metric_dict,
