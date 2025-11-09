@@ -239,7 +239,7 @@ def main(cfg: DictConfig):
 
         bag_yh_te = runner.bag_predict_proba(X_te)
         bag_yc_te = runner.bag_conformal_prediction(X_te)
-        bag_preds = runner.bag_predict(X_te)
+        bag_preds = np.asarray(runner.bag_predict(X_te), dtype=int)
 
         metric_dict = {
             'bag': {},
@@ -248,20 +248,21 @@ def main(cfg: DictConfig):
         }
 
         # Metrics for the whole bag
-        metric_dict['bag']['default'] = log_metric(preds=bag_preds,
+        metric_dict['bag']['default'] = log_metric(y_true=labels,
+                                                   preds=bag_preds,
                                                    scores=bag_yh_te,
-                                                   y_true=labels,
                                                    cfg=cfg)
         metric_dict['bag']['conformal'] = log_metric(y_true=labels,
                                                      preds=bag_yc_te,
                                                      scores=bag_yh_te,
                                                      cfg=cfg)
-
+        
+        # print("bag_default", metric_dict['bag']['default']['cm'])
+        # print("bag_conformal", metric_dict['bag']['conformal']['cm'])
         # Metrics for the last instance in the bag
         yh_te = runner.inst_predict_proba(X_te)
         yc_te = runner.inst_conformal_prediction(X_te)
         preds = runner.inst_predict(X_te)
-
         ###
         # print(f"Bag preds: {bag_yh_te[:3]}")
         # print(f"Inst preds: {yh_te[:3]}")
@@ -279,9 +280,10 @@ def main(cfg: DictConfig):
                                                         cfg=cfg)
         metric_dict['instance']['conformal'] = log_metric(y_true=labels,
                                                           preds=yc_te,
-                                                          scores=yh_te,
+                                                          scores=yc_te,
                                                           cfg=cfg)
-
+        # print("inst_default", metric_dict['instance']['default']['cm'])
+        # print("inst_conformal", metric_dict['instance']['conformal']['cm'])
         # Metrics for the last instance in the bag, only true and false (no neither-valued statements)
         mask_tf = (labels == 1) | (labels == 0)
 
@@ -295,6 +297,8 @@ def main(cfg: DictConfig):
                                                                     scores=yh_te,
                                                                     mask=mask_tf, 
                                                                     cfg=cfg)
+        # print("inst_tf_default", metric_dict['instance_tf']['default']['cm'])
+        # print("inst_tf_conformal", metric_dict['instance_tf']['conformal']['cm'])
 
         if cfg.save_results:
             _ = save(metric_dict=metric_dict,

@@ -16,6 +16,7 @@ from sklearn.metrics import (
     adjusted_mutual_info_score as ami,
     adjusted_rand_score as ari,
 )
+from sklearn.metrics import confusion_matrix
 from scipy.stats import energy_distance
 import warnings
 
@@ -169,6 +170,8 @@ def log_metric_binary(preds: np.ndarray, scores: np.ndarray, y_true: np.ndarray,
             except:
                 mAP_val = 0
 
+    cm = confusion_matrix(y_true[mask], preds[mask], labels=[0,1,2,-1]).tolist()
+
     metric_with_ci = {
         "mcc": mcc_val,
         "ami": ami_val,
@@ -184,6 +187,7 @@ def log_metric_binary(preds: np.ndarray, scores: np.ndarray, y_true: np.ndarray,
         "recall": recall_val,
         "wrecall": wrecall_val,
         "n": y_true[full_mask].shape[0],
+        "cm": cm,
     }
     return metric_with_ci
 
@@ -258,6 +262,7 @@ def log_metric_multiclass(preds: np.ndarray, scores: np.ndarray, y_true: np.ndar
             except:
                 mAP_val = 0
 
+    cm = confusion_matrix(y_true[mask].ravel(), preds[mask].ravel(), labels=[0,1,2,-1]).tolist()
     metric_with_ci = {
         "mcc": mcc_val,
         "ami": ami_val,
@@ -269,6 +274,7 @@ def log_metric_multiclass(preds: np.ndarray, scores: np.ndarray, y_true: np.ndar
         "wmap": mAP_val * a_rate,
         "acceptance_rate": a_rate,
         "n": y_true[a_mask].shape[0],
+        "cm": cm,
     }
     return metric_with_ci
 
