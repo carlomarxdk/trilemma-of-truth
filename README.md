@@ -42,7 +42,7 @@ We examine two common methods for probing the veracity of LLMs and discover seve
         - [4.2 Train *multiclass SVM* probe](#42-train-multiclass-svm-probe)
         - [4.3 Train binary SIL baselines](#43-train-binary-sil-baselines)
       - [5. Extra](#5-extra)
-        - [5.1 Generalization Performance](#51-generalization-performance)
+        - [5.1 Gerneralization Performance](#51-gerneralization-performance)
         - [5.2 Interventions](#52-interventions)
     - [Task specification](#task-specification)
   - [🗂️ Dataset](#️-dataset)
@@ -51,7 +51,7 @@ We examine two common methods for probing the veracity of LLMs and discover seve
     - [Processed Data on Hugging Face 🤗](#processed-data-on-hugging-face-)
   - [✍️ How to Cite?](#️-how-to-cite)
     - [Manuscript](#manuscript)
-      - [NeurIPS Workshop Version](#neurips-workshop-version)
+      - [NeurIPS Worksop Version](#neurips-worksop-version)
       - [Preprint Version](#preprint-version)
     - [Code](#code)
     - [Data](#data)
@@ -133,7 +133,7 @@ HYDRA_FULL_ERROR=1 python run_zero_shot.py model=llama-3-8b
 
 #### 1. Collect Hidden Activations
 
-To run experiments (e.g., train probes) on your machine, you need to collect hidden activations. The command below would collect hidden activations for every statement in the datasets, you only have to specify the name of the model, see [configs/activations.yaml](configs/activations.yaml) for more information on the attributes.
+To run experiments (e.g., train probes) on your machine, you need to collect hidden activations. The command below would collect hidden activations for every statement in the datasets, you only have to specify the name of the model, see [configs/activations.yamls](configs/activations.yaml) for more information on the attributes.
 
 ```bash
 # To collect hidden activations for (every statement) specific model
@@ -164,7 +164,7 @@ python run_zero_shot.py \
       model=llama-3-8b \
       variation=default \
       batch_size=12 
-# see configs/probe_zeroshot.yaml for all the available paramaters
+# see configs/probe_prompt.yaml for all the available paramaters
 ```
 
 Note that we provide scores for every model in [outputs/probes/prompt](outputs/probes/prompt/) folder. We provide an example on how to load the scores from the zero-shot prompting in  [notebooks/load_and_split_dataset](notebooks/load_and_split_dataset.ipynb) notebook.
@@ -199,7 +199,7 @@ python run_training.py \
       search=True
 ```
 
-A small example is provided in the `making_predictions.ipynb` notebook.
+A small example is provided in the `make_predictions.ipynb` notebook.
 
 #### 4. Single Instance Probe
 
@@ -246,7 +246,7 @@ python run_training.py  \
 
 #### 5. Extra
 
-##### 5.1 Generalization Performance
+##### 5.1 Gerneralization Performance
 
 To check the performance of the probe on another dataset you can run `run_generalization.py`. It will load the probe trained on `datapack` and use the test split of the `datapack@datapack_test`.
 
@@ -379,7 +379,7 @@ timeline
     Peer-review: Pending
 ```
 
-#### NeurIPS Workshop Version
+#### NeurIPS MechInterp Workshop
 
 *Version accepted to the [Mechanistic Interpretability Workshop at NeurIPS 2025](https://mechinterpworkshop.com/)*:
 
