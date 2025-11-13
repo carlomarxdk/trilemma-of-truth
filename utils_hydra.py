@@ -252,9 +252,9 @@ def prepare_hf_model(cfg, device=None):
             pretrained_model_name_or_path=cfg.model["model"], token=cfg.model["token"],
             torch_dtype=_dtype,  attn_implementation="eager", device_map={"": device})
     elif cfg.model["dtype"] == "float32":
-        _dtype = torch.float32
+        _dtype = torch.float16
         model = AutoModelForCausalLM.from_pretrained(
-            pretrained_model_name_or_path=cfg.model["model"], token=cfg.model["token"], torch_dtype="auto", device_map={"": device})
+            pretrained_model_name_or_path=cfg.model["model"], token=cfg.model["token"], torch_dtype=_dtype, device_map={"": device})
     else:
         raise ValueError("dtype must be either 'bfloat16' or 'float32'.")
 

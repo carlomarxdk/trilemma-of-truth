@@ -244,7 +244,17 @@ class DataHandler:
             except:
                 acts = self._load_npz(f'{data_dir}/layer_{layer_id}_{module}.npz')
 
-            activations.append(torch.from_numpy(np.array(acts)))
+            # activations.append(torch.from_numpy(np.array(acts)))
+                    # --- Convert to float32 (or any dtype you want) ---
+            arr = np.asarray(acts, dtype=np.float32)
+
+            nan_mask = np.isnan(arr)
+            log.debug(f"Number of NaNs in activations: {np.sum(nan_mask)}")
+            # if np.any(nan_mask):
+            #     mean_val = np.nanmean(arr)
+            #     arr[nan_mask] = mean_val
+            activations.append(torch.from_numpy(arr))
+            
 
         if self.activation_type == "full":
             output = stack_tensors(activations)

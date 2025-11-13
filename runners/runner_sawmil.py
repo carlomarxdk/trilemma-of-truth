@@ -51,7 +51,7 @@ class SawmilProbeRunner(BaseProbeRunner):
             return arr[mask]
         return arr
 
-    def single_training(self, X: Sequence[np.ndarray], y: np.ndarray, mask: np.ndarray, neg: np.ndarray = None) -> Dict:
+    def single_training(self, X: Sequence[np.ndarray], y: np.ndarray, mask: np.ndarray, neg: np.ndarray = None, layer_id: int = None) -> Dict:
         """
         Train a model without the hyperparameter search.
         Args:
@@ -127,7 +127,7 @@ class SawmilProbeRunner(BaseProbeRunner):
             "eta": eta,
         }
 
-    def parameter_search(self, X: Sequence[np.ndarray], y: np.ndarray, mask: np.ndarray, neg: np.ndarray = None) -> Dict:
+    def parameter_search(self, X: Sequence[np.ndarray], y: np.ndarray, mask: np.ndarray, neg: np.ndarray = None, layer_id: int = None) -> Dict:
         """
         Wraps the existing parameter_search(...) function from your script.
         Args:
@@ -207,8 +207,7 @@ class SawmilProbeRunner(BaseProbeRunner):
                 ]
                 eta = sum([sum(lbl) for lbl in intra_bag_labels]) / \
                     sum(pos_lengths)
-                # try:
-                if True:
+                try:
                     separator = sAwMIL(
                         C=float(C),
                         kernel=self.cfg.probe.get('kernel', 'linear'),
@@ -224,14 +223,23 @@ class SawmilProbeRunner(BaseProbeRunner):
                     direction, bias = separator.linearize(normalize=True)
                     y_hat = self._decision_function_on_train_(
                         X_test, direction=direction, bias=bias, scaler=scaler)
+                    ## SAFE MAP
+                    nan_mask = np.isnan(y_hat)
+                    if np.any(nan_mask):
+                        log.warning(f"\t\tNaN scores found in fold {j}, setting to 0.0")
+                        y_hat[nan_mask] = 0.0
+                    inf_mask = np.isinf(y_hat)
+                    if np.any(inf_mask):
+                        log.warning(f"\t\tInf scores found in fold {j}, setting to 0.0")
+                        y_hat[inf_mask] = 0.0
                     _inner_scores.append(mAP(y_test, y_hat))
                     log.warning(
                         f"\t\tmAP for {j}th fold: {_inner_scores[-1]:.3f} ({y_hat.shape[0]} samples tested)")
-                # except Exception as e:
-                #     log.error(f"Error: {e}")
-                #     log.warning(
-                #         "\t\tMoving to the next one...")
-                #     _inner_scores.append(0.1)
+                except Exception as e:
+                    log.error(f"Error: {e}")
+                    log.warning(
+                        "\t\tMoving to the next one...")
+                    _inner_scores.append(0.1)
 
             scores.append(np.mean(_inner_scores))
             stds.append(np.std(_inner_scores))
