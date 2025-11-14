@@ -170,7 +170,11 @@ def log_metric_binary(preds: np.ndarray, scores: np.ndarray, y_true: np.ndarray,
             except:
                 mAP_val = 0
 
-    cm = confusion_matrix(y_true[mask], preds[mask], labels=[0,1,2,-1]).tolist()
+    try:
+        cm = confusion_matrix(y_true[mask], preds[mask], labels=[0,1,2,-1]).tolist()
+    except:
+        log.warning("Error calculating confusion matrix.")
+        cm = None
 
     metric_with_ci = {
         "mcc": mcc_val,
@@ -262,7 +266,11 @@ def log_metric_multiclass(preds: np.ndarray, scores: np.ndarray, y_true: np.ndar
             except:
                 mAP_val = 0
 
-    cm = confusion_matrix(y_true[mask].ravel(), preds[mask].ravel(), labels=[0,1,2,-1]).tolist()
+    try:
+        cm = confusion_matrix(y_true[mask].ravel(), preds[mask].ravel(), labels=[0,1,2,-1]).tolist()
+    except:
+        log.warning("Error calculating confusion matrix.")
+        cm = None
     metric_with_ci = {
         "mcc": mcc_val,
         "ami": ami_val,
