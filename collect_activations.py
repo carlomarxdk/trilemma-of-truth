@@ -143,7 +143,7 @@ def main(cfg: DictConfig):
             input_seqs = tokenize(batch, tokenizer, cfg)
             input_ids = input_seqs["input_ids"].to(cfg.device)
             input_att = input_seqs["attention_mask"].to(cfg.device)
-            masks.append(input_att[-MAX_LEN:].detach())
+            masks.append(input_att[:, -MAX_LEN:].detach())
 
             _ = model(input_ids, attention_mask=input_att,
                       use_cache=False)
