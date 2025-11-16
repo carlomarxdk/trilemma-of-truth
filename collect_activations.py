@@ -167,7 +167,10 @@ def main(cfg: DictConfig):
                         "Other aggregation types are not implemented")
 
                 for i in range(batch.shape[0]):
-                    acts_memmap[layer][_last_row + i, :, :] = embeddings[i]
+                    if cfg.agg == 'last':
+                        acts_memmap[layer][_last_row + i, :] = embeddings[i]
+                    elif cfg.agg == 'full':
+                        acts_memmap[layer][_last_row + i, :, :] = embeddings[i]
             _last_row += batch.shape[0]
 
         masks = torch.vstack(masks).to('cpu').numpy()
