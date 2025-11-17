@@ -153,7 +153,7 @@ def main(cfg: DictConfig):
                 if output.dtype != torch.float32:
                     output = output.float()
                 if cfg.agg == 'last':
-                    embeddings = output[:, -1].detach().cpu().numpy().astype(
+                    embeddings = output[:, -1].detach().clone().cpu().numpy().astype(
                         np.float16)
 
                     if torch.isnan(embeddings).any():
@@ -161,7 +161,7 @@ def main(cfg: DictConfig):
                             f"NaN values found in the embeddings for {dataset} | {layer} | {cfg.model.name}")
 
                 elif cfg.agg == 'full':
-                    embeddings = output.detach().cpu().numpy().astype(np.float16)
+                    embeddings = output.detach().clone().cpu().numpy().astype(np.float16)
                 else:
                     raise NotImplementedError(
                         "Other aggregation types are not implemented")
