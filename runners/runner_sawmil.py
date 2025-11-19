@@ -186,7 +186,7 @@ class SawmilProbeRunner(BaseProbeRunner):
                         "Only normalization pipeline is implemented")
 
                 max_bag_size = self.cfg.probe["max_bag_size"]
-                limit = self.cfg.get('cv_bag_limit', len(X_train))
+                limit = self.cfg.get('cv_bag_limit', 600)
                 processed_bags = []
                 intra_bag_labels = []
 
@@ -336,10 +336,11 @@ class SawmilProbeRunner(BaseProbeRunner):
         output = []
         if type(X) is np.ndarray:
             X = [X]
-
+        
+        est = self.estimator
         for bag in X:
             bag = self.process_bag(bag)
-            scores = self.estimator.decision_function(bag)
+            scores = est.decision_function(bag)
             output.append(np.max(scores))
         return np.array(output)
 
@@ -503,18 +504,24 @@ class SawmilProbeRunner(BaseProbeRunner):
     @property
     def estimator(self) -> BinaryLinearProbe:
         """
-        Return the trained separator.
+        Return the trained separator as a BinaryLinearProbe.
         """
         try:
-            return self.separator
-        except:
             dir, bias = self.direction_bias
-            return BinaryLinearProbe(
-                coef=dir.reshape(1, -1),
-                intercept=bias
-            )
+            if dir is not None and bias is not None:
+                return BinaryLinearProbe(
+                    coef=dir.reshape(1, -1),
+                    intercept=bias
+                )
+            else:
+                raise AttributeError("Direction and bias not available")
+        except:
+            try:
+                return self._estimator
+            except:
+                raise AttributeError("Estimator not available")
 
-    def _process_bag_for_training(self, bag: np.ndarray, max_bag_size: int = 100, rnd_seed_offset: int = 0, scaler: StandardScaler = None):
+    def _process_bag_for_training(self, bag: np.ndarray, max_bag_size: int = 10, rnd_seed_offset: int = 0, scaler: StandardScaler = None):
         ''' 
         Process a single bag (use this during the training phase).
         Args:

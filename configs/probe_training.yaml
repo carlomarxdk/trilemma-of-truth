@@ -39,7 +39,7 @@ layer_range: [0.1, 1.0]
 search: True
 # Number of folds the cross validation
 cv_n_folds: 3 
-cv_bag_limit: 1000
+cv_bag_limit: 600
 
 agg: full
 layers: ${model.layers}
