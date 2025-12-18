@@ -1,4 +1,8 @@
-# Description: Experiment script to GENERATE and SAVE activations from a model
+"""Script to generate and save model activations from language models.
+
+This script processes datasets through a language model and saves the hidden
+state activations for downstream analysis tasks.
+"""
 
 from __future__ import annotations
 
@@ -18,6 +22,14 @@ log = logging.getLogger(__name__)
 
 
 def validate_config(cfg: DictConfig):
+    """Validate configuration parameters.
+
+    Args:
+        cfg: Configuration object to validate.
+
+    Raises:
+        AssertionError: If configuration is invalid.
+    """
     assert cfg.agg in [
         "last",
         "mean",
@@ -36,11 +48,26 @@ def validate_config(cfg: DictConfig):
 
 
 def log_stats(cfg):
+    """Log configuration statistics.
+
+    Args:
+        cfg: Configuration object.
+    """
     log.warning(f"Collecting activations for: {cfg.model.name} (device: {cfg.device})")
     log.warning(f"Max length of the input sequences: {cfg.max_length}")
 
 
 def tokenize(batch, tokenizer, cfg):
+    """Tokenize a batch based on model configuration.
+
+    Args:
+        batch: Batch of text strings to tokenize.
+        tokenizer: Tokenizer instance.
+        cfg: Configuration object.
+
+    Returns:
+        Tokenized input sequences.
+    """
     if cfg.model["instruct"]:
         return instruct_tokenize(batch, tokenizer, cfg)
     else:
@@ -48,6 +75,16 @@ def tokenize(batch, tokenizer, cfg):
 
 
 def default_tokenize(batch, tokenizer, cfg):
+    """Tokenize batch using default settings.
+
+    Args:
+        batch: Batch of text strings.
+        tokenizer: Tokenizer instance.
+        cfg: Configuration object.
+
+    Returns:
+        Tokenized input sequences.
+    """
     if cfg.agg == "last":
         input_seqs = tokenizer(batch.tolist(), return_tensors="pt", padding=True)
     elif cfg.agg == "full":
@@ -62,6 +99,16 @@ def default_tokenize(batch, tokenizer, cfg):
 
 
 def instruct_tokenize(batch, tokenizer, cfg):
+    """Tokenize batch using instruction template.
+
+    Args:
+        batch: Batch of text strings.
+        tokenizer: Tokenizer instance with chat template.
+        cfg: Configuration object.
+
+    Returns:
+        Tokenized input sequences formatted as instructions.
+    """
     message_batch = [[{"role": "user", "content": x}] for x in batch]
     text_batch = tokenizer.apply_chat_template(
         message_batch,
@@ -84,14 +131,20 @@ def instruct_tokenize(batch, tokenizer, cfg):
 
 
 class Hook:
-    """
-    Class to extract the outputs from the model
-    """
+    """Hook to extract and store model layer outputs."""
 
     def __init__(self):
+        """Initialize hook with empty output storage."""
         self.out = None
 
     def __call__(self, module, module_inputs, module_outputs):
+        """Extract output from module.
+
+        Args:
+            module: The module being hooked.
+            module_inputs: Input tensors to the module.
+            module_outputs: Output tensors from the module.
+        """
         try:
             output, _ = module_outputs
         except (ValueError, TypeError):

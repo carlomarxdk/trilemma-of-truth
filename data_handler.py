@@ -1,10 +1,15 @@
+"""Data handling utilities for loading and processing datasets and activations.
+
+This module provides the DataHandler class for managing datasets, activations,
+and data splits for machine learning experiments.
+"""
+
 from __future__ import annotations
 
 import logging
 import os
 from dataclasses import dataclass, field
 from glob import glob
-from typing import List
 
 import numpy as np
 import polars as pl
@@ -16,6 +21,17 @@ log = logging.getLogger(__name__)
 
 
 def shape_as_tuple(x):
+    """Convert shape array to tuple.
+
+    Args:
+        x: Array containing shape dimensions.
+
+    Returns:
+        Tuple of shape dimensions (2 or 3 elements).
+
+    Raises:
+        Exception: If the number of dimensions is less than 2.
+    """
     d = x.shape[0]
     if d == 3:
         return (x[0], x[1], x[2])
@@ -26,22 +42,30 @@ def shape_as_tuple(x):
 
 
 def remove_padded(x):
+    """Remove padded rows from a matrix.
+
+    Args:
+        x: Input matrix where padded rows are always first.
+
+    Returns:
+        Matrix with padded rows removed.
+    """
     # padded rows are always first
     mask = (x - x[0]).sum(1) != 0
     return x[mask]
 
 
 def stack_tensors(tensors, padding_value=0, max_length=None):
-    """
-    Stack 3D tensors with different lengths along the 1st dimension, padding with a specified value when needed.
+    """Stack 3D tensors with different lengths, padding along dimension 1.
 
     Args:
-        tensors (list of torch.Tensor): List of 3D tensors to be stacked.
-        padding_value (float, optional): Value to use for padding. Defaults to 0.
-        max_length (int, optional): The length to pad all tensors to. If None, it will use the maximum length found in the tensors.
+        tensors: List of 3D tensors to be stacked.
+        padding_value: Value to use for padding. Defaults to 0.
+        max_length: The length to pad all tensors to. If None, uses the maximum
+            length found in the tensors.
 
     Returns:
-        torch.Tensor: A single stacked tensor with padding applied along the 1st dimension.
+        A single stacked tensor with padding applied along dimension 1.
     """
     # Determine the maximum length of the 1st dimension across all tensors
     if max_length is None:
@@ -115,8 +139,16 @@ class DataHandler:
         seed: int = 42,
         shuffle: bool = True,
     ):
-        """
-        Assemble the data for the project.
+        """Assemble and split the data for the project.
+
+        Args:
+            exclusive_split: If True, ensures objects from train set don't appear
+                in test set.
+            test_size: Fraction of data to use for testing. Defaults to 0.2.
+            calibration_size: Fraction of data to use for calibration.
+                Defaults to 0.2.
+            seed: Random seed for reproducibility. Defaults to 42.
+            shuffle: Whether to shuffle the data splits. Defaults to True.
         """
         data = []
         columns = self.column_list()
@@ -186,9 +218,7 @@ class DataHandler:
         seed: int = 42,
         shuffle: bool = True,
     ):
-        """
-        Split the data into training and testing sets: makes sure that objects from train set do not appear in test set.
-        """
+        """Split data ensuring train objects don't appear in test set."""
         df_train, df_test = self.__generate_exclusive_split__(
             self.data, test_size, seed
         )
@@ -226,9 +256,7 @@ class DataHandler:
                     )
 
     def __generate_exclusive_split__(self, df, test_size, seed):
-        """
-        Split the data into training and testing sets: makes sure that objects from train set do not appear in test set.
-        """
+        """Generate exclusive train/test split based on unique objects."""
         rnd = np.random.default_rng(seed)
         train_objects = (
             df[["object_1", "object_2"]]
@@ -263,6 +291,7 @@ class DataHandler:
         seed: int = 42,
         shuffle: bool = True,
     ):
+        """Split data randomly into train, test, and optional calibration sets."""
         np.random.seed(seed)
         ids = np.arange(len(self.data))
         mask = np.random.rand(len(self.data)) < 1 - test_size
@@ -286,17 +315,31 @@ class DataHandler:
             self.calibration_ids = None
 
     def get_num_layers(self):
+        """Get the number of model layers with saved activations.
+
+        Returns:
+            Number of layers with encoder activations.
+        """
         _path = os.path.join(
             self.activations_path, self.model, self.datasets[0], self.activation_type
         )
         return len(glob(f"{_path}/*_e.npy"))
 
     def get_activations(self, layer_id: int, module: str = "e"):
-        """
-        Get the activations for the given layer (all dataset)
+        """Get the activations for the given layer across all datasets.
+
         Args:
-            layer_id (int): The layer id to get the activations for.
-            module (str): The module to get the activations for (a - attention output, m - mlp output, e - encoder output)
+            layer_id: The layer id to get the activations for.
+            module: The module to get activations for. Options are 'a'
+                (attention output), 'm' (mlp output), or 'e' (encoder output).
+                Defaults to 'e'.
+
+        Returns:
+            Stacked activation tensors from all datasets.
+
+        Raises:
+            AssertionError: If module is not one of 'a', 'm', or 'e'.
+            NotImplementedError: If activation_type is not 'full'.
         """
         assert module in [
             "a",
@@ -340,6 +383,7 @@ class DataHandler:
         return output
 
     def _validate_activations(self, activations):
+        """Validate that activations match the data dimensions."""
         if self.activation_type == "full":
             n = len(activations)
         else:
@@ -351,9 +395,15 @@ class DataHandler:
         ), f"Number of rows in activations ({n}) does not match the number of rows in the data ({n_rows})."
 
     def _load_npz(self, path: str):
+        """Load compressed numpy array from .npz file."""
         return np.load(path)["arr_0"]
 
     def get_att_mask(self):
+        """Get attention masks for all datasets.
+
+        Returns:
+            Vertically stacked attention masks as a torch tensor.
+        """
         masks = []
         for dataset in self.datasets:
             _path = os.path.join(
@@ -364,36 +414,47 @@ class DataHandler:
         return torch.vstack(masks)
 
     def get_train_att_mask(self):
+        """Get attention masks for training data."""
         ids = self.train_ids
         return self.get_att_mask()[ids]
 
     def get_test_att_mask(self):
+        """Get attention masks for test data."""
         ids = self.test_ids
         return self.get_att_mask()[ids]
 
     def get_cal_att_mask(self):
+        """Get attention masks for calibration data."""
         ids = self.calibration_ids
         return self.get_att_mask()[ids]
 
     def get_dataframe(self):
-        """
-        Get the data (from the csv files).
+        """Get the complete dataframe.
+
+        Returns:
+            Full dataset as a pandas DataFrame.
         """
         return self.data
 
     def get_train_df(self):
-        """
-        Get the training data (from the csv files).
+        """Get the training dataframe.
+
+        Returns:
+            Training subset as a pandas DataFrame.
         """
         return self.data.iloc[self.train_ids.tolist()]
 
     def train_labeled(self, layer_id: int = -1):
-        """
-        Get the train data with activation and "correct" label for the given layer.
+        """Get training data with activations and labels for a given layer.
+
         Args:
-            layer_id (int): The layer id to get the activations for.
+            layer_id: The layer id to get activations for. Defaults to -1.
+
         Returns:
-            dict: A dictionary containing the embeddings and the correct labels keys:[embeddings, correct].
+            Dictionary with 'embeddings' and 'correct' keys.
+
+        Raises:
+            NotImplementedError: If activation_type is not 'full' or 'last'.
         """
         correct = self.get_train_df()["correct"].to_numpy()
 
@@ -411,13 +472,17 @@ class DataHandler:
             raise NotImplementedError
 
     def train_bags(self, layer_id: int = -1, drop_zeros: bool = True):
-        """
-        Get the training bags for the given layer.
+        """Get training bags for the given layer.
+
         Args:
-            layer_id (int): The layer id to get the activations for.
-            drop_zeros (bool): Whether to drop padded rows from the bags.
+            layer_id: The layer id to get activations for. Defaults to -1.
+            drop_zeros: Whether to drop padded rows from bags. Defaults to True.
+
         Returns:
-            dict: A dictionary containing the bags, the correct labels and the last embedding keys:[embeddings, correct, last_embedding].
+            Dictionary with keys: 'embeddings', 'correct', and 'last_embedding'.
+
+        Raises:
+            AssertionError: If activation_type is not 'full'.
         """
         assert (
             self.activation_type == "full"
@@ -439,13 +504,17 @@ class DataHandler:
         }
 
     def test_bags(self, layer_id: int = -1, drop_zeros: bool = True):
-        """
-        Get the test bags for the given layer.
+        """Get test bags for the given layer.
+
         Args:
-            layer_id (int): The layer id to get the activations for.
-            drop_zeros (bool): Whether to drop padded rows from the bags.
+            layer_id: The layer id to get activations for. Defaults to -1.
+            drop_zeros: Whether to drop padded rows from bags. Defaults to True.
+
         Returns:
-            dict: A dictionary containing the bags, the correct labels and the last embedding keys:[embeddings, correct, last_embedding].
+            Dictionary with keys: 'embeddings', 'correct', and 'last_embedding'.
+
+        Raises:
+            AssertionError: If activation_type is not 'full'.
         """
         assert (
             self.activation_type == "full"
@@ -467,6 +536,7 @@ class DataHandler:
         }
 
     def _drop_zeros(self, acts, mask: None):
+        """Drop zero rows from activation bags using mask."""
         for bag in acts:
             if bag.shape[0] == 0:
                 print("Bag is empty BEFORE THE DROP ZEROS")
@@ -482,6 +552,7 @@ class DataHandler:
         return bags
 
     def _drop_zeros_eisum(self, act, mask):
+        """Apply mask to activations using einsum."""
         if act.shape[0] == mask.shape[0]:
             return torch.einsum("lh, l -> lh", act, mask)
         else:
@@ -491,13 +562,17 @@ class DataHandler:
             return output
 
     def cal_bags(self, layer_id: int = -1, drop_zeros: bool = True):
-        """
-        Get the calibration bags for the given layer.
+        """Get calibration bags for the given layer.
+
         Args:
-            layer_id (int): The layer id to get the activations for.
-            drop_zeros (bool): Whether to drop padded rows from the bags.
+            layer_id: The layer id to get activations for. Defaults to -1.
+            drop_zeros: Whether to drop padded rows from bags. Defaults to True.
+
         Returns:
-            dict: A dictionary containing the bags, the correct labels and the last embedding keys:[embeddings, correct, last_embedding].
+            Dictionary with keys: 'embeddings', 'correct', and 'last_embedding'.
+
+        Raises:
+            AssertionError: If activation_type is not 'full'.
         """
         assert (
             self.activation_type == "full"
@@ -519,12 +594,16 @@ class DataHandler:
         }
 
     def test_labeled(self, layer_id: int = -1):
-        """
-        Get the test data with activation and "correct" label for the given layer.
+        """Get test data with activations and labels for a given layer.
+
         Args:
-            layer_id (int): The layer id to get the activations for.
+            layer_id: The layer id to get activations for. Defaults to -1.
+
         Returns:
-            dict: A dictionary containing the embeddings and the correct labels keys:[embeddings, correct].
+            Dictionary with 'embeddings' and 'correct' keys.
+
+        Raises:
+            NotImplementedError: If activation_type is not 'full' or 'last'.
         """
         correct = self.get_test_df()["correct"].to_numpy()
 
@@ -542,12 +621,16 @@ class DataHandler:
             raise NotImplementedError
 
     def cal_labeled(self, layer_id: int = -1):
-        """
-        Get the calibration data with activation and "correct" label for the given layer.
+        """Get calibration data with activations and labels for a given layer.
+
         Args:
-            layer_id (int): The layer id to get the activations for.
+            layer_id: The layer id to get activations for. Defaults to -1.
+
         Returns:
-            dict: A dictionary containing the embeddings and the correct labels keys:[embeddings, correct].
+            Dictionary with 'embeddings' and 'correct' keys.
+
+        Raises:
+            NotImplementedError: If activation_type is not 'full' or 'last'.
         """
         correct = self.get_cal_df()["correct"].to_numpy()
 
@@ -565,8 +648,13 @@ class DataHandler:
             raise NotImplementedError
 
     def get_train_scores(self, layer_id: int = -1):
-        """
-        Get the training scores.
+        """Get training scores for a specific layer.
+
+        Args:
+            layer_id: Layer to get scores for. -1 for general scores.
+
+        Returns:
+            Array of training scores.
         """
         if layer_id == -1:
             return self.data.iloc[self.train_ids]["scores"].to_numpy()
@@ -574,8 +662,13 @@ class DataHandler:
             return self.data.iloc[self.train_ids][f"scores_{layer_id}"].to_numpy()
 
     def get_test_scores(self, layer_id: int = -1):
-        """
-        Get the testing scores.
+        """Get test scores for a specific layer.
+
+        Args:
+            layer_id: Layer to get scores for. -1 for general scores.
+
+        Returns:
+            Array of test scores.
         """
         if layer_id == -1:
             return self.data.iloc[self.test_ids]["scores"].to_numpy()
@@ -583,8 +676,13 @@ class DataHandler:
             return self.data.iloc[self.test_ids][f"scores_{layer_id}"].to_numpy()
 
     def get_cal_scores(self, layer_id: int = -1):
-        """
-        Get the calibration scores.
+        """Get calibration scores for a specific layer.
+
+        Args:
+            layer_id: Layer to get scores for. -1 for general scores.
+
+        Returns:
+            Array of calibration scores.
         """
         if layer_id == -1:
             return self.data.iloc[self.calibration_ids]["scores"].to_numpy()
@@ -592,47 +690,65 @@ class DataHandler:
             return self.data.iloc[self.calibration_ids][f"scores_{layer_id}"].to_numpy()
 
     def get_test_df(self):
-        """
-        Get the testing data (from the csv files).
+        """Get the test dataframe.
+
+        Returns:
+            Test subset as a pandas DataFrame.
         """
         return self.data.iloc[self.test_ids.tolist()]
 
     def get_cal_df(self):
-        """
-        Get the calibration data (from the csv files).
+        """Get the calibration dataframe.
+
+        Returns:
+            Calibration subset as a pandas DataFrame.
         """
         return self.data.iloc[self.calibration_ids.tolist()]
 
     def get_train_acts(self, layer_id: int, module: str = "e"):
-        """
-        Get the training activations for the given layer.
+        """Get training activations for a given layer.
+
         Args:
-            layer_id (int): The layer id to get the activations for.
-            module (str): The module to get the activations for (a - attention output, m - mlp output, e - encoder output)
+            layer_id: The layer id to get activations for.
+            module: The module to get activations for ('a', 'm', or 'e').
+                Defaults to 'e'.
+
+        Returns:
+            Training subset of activations.
         """
         return self.get_activations(layer_id, module)[self.train_ids]
 
     def get_test_acts(self, layer_id: int, module: str = "e"):
-        """
-        Get the testing activations for the given layer.
+        """Get test activations for a given layer.
+
         Args:
-            layer_id (int): The layer id to get the activations for.
-            module (str): The module to get the activations for (a - attention output, m - mlp output, e - encoder output)
+            layer_id: The layer id to get activations for.
+            module: The module to get activations for ('a', 'm', or 'e').
+                Defaults to 'e'.
+
+        Returns:
+            Test subset of activations.
         """
         return self.get_activations(layer_id, module)[self.test_ids]
 
     def get_cal_acts(self, layer_id: int, module: str = "e"):
-        """
-        Get the calibration activations for the given layer.
+        """Get calibration activations for a given layer.
+
         Args:
-            layer_id (int): The layer id to get the activations for.
-            module (str): The module to get the activations for (a - attention output, m - mlp output, e - encoder output)
+            layer_id: The layer id to get activations for.
+            module: The module to get activations for ('a', 'm', or 'e').
+                Defaults to 'e'.
+
+        Returns:
+            Calibration subset of activations.
         """
         return self.get_activations(layer_id, module)[self.calibration_ids]
 
     def column_list(self):
-        """
-        Get the list of columns in the datasets.
+        """Get the list of all columns across datasets.
+
+        Returns:
+            List of unique column names from all datasets.
         """
         columns = set()
         for dataset in self.datasets:
@@ -645,8 +761,10 @@ class DataHandler:
         return list(columns)
 
     def get_train_labels(self):
-        """
-        Returns the (multiclass) labels for the training data.
+        """Get multiclass labels for training data.
+
+        Returns:
+            Array of multiclass labels (0: incorrect, 1: correct, 2: unreal).
         """
 
         correct = self.get_train_df()["correct"].to_numpy()
@@ -657,8 +775,10 @@ class DataHandler:
         return labels
 
     def get_cal_labels(self):
-        """
-        Returns the (multiclass) labels for the calibration data.
+        """Get multiclass labels for calibration data.
+
+        Returns:
+            Array of multiclass labels (0: incorrect, 1: correct, 2: unreal).
         """
 
         correct = self.get_cal_df()["correct"].to_numpy()
@@ -669,8 +789,10 @@ class DataHandler:
         return labels
 
     def get_test_labels(self):
-        """
-        Returns the (multiclass) labels for the test data.
+        """Get multiclass labels for test data.
+
+        Returns:
+            Array of multiclass labels (0: incorrect, 1: correct, 2: unreal).
         """
 
         correct = self.get_test_df()["correct"].to_numpy()
@@ -682,13 +804,26 @@ class DataHandler:
 
 
 def drop_zero_rows(X):
-    """
-    Drop rows with all zeros in a matrix.
+    """Drop rows with all zeros from a matrix.
+
+    Args:
+        X: Input matrix.
+
+    Returns:
+        Matrix with zero rows removed.
     """
     return X[(X != 0).any(axis=1)]
 
 
 def unique_rows(a):
+    """Get unique rows from a 2D array.
+
+    Args:
+        a: Input 2D array.
+
+    Returns:
+        Array containing only unique rows.
+    """
     a = np.ascontiguousarray(a)
     unique_a = np.unique(a.view([("", a.dtype)] * a.shape[1]))
     return unique_a.view(a.dtype).reshape((unique_a.shape[0], a.shape[1]))

@@ -1,3 +1,9 @@
+"""Utility functions for Hydra configuration and model preparation.
+
+This module provides helper functions for loading data, preparing models,
+and managing Hydra configurations for experiments.
+"""
+
 from __future__ import annotations
 
 import json
@@ -19,7 +25,10 @@ log = logging.getLogger("utils")
 
 
 class NpEncoder(json.JSONEncoder):
+    """JSON encoder for numpy types."""
+
     def default(self, obj):
+        """Convert numpy types to JSON-serializable types."""
         if isinstance(obj, np.integer):
             return int(obj)
         if isinstance(obj, np.floating):
@@ -32,18 +41,17 @@ class NpEncoder(json.JSONEncoder):
 def drop_rows_with_tail_keep(
     arr, num_rows_to_keep: int, last_rows_to_keep: int = 2, random_seed: int = 42
 ):
-    """
-    Randomly selects a specific number of rows to keep from a 2D numpy array,
-    ensuring the last two rows are always retained.
+    """Randomly select rows to keep while preserving the last N rows.
 
-    Parameters:
-    - arr (numpy.ndarray): 2D NumPy array.
-    - num_rows_to_keep (int): Total number of rows to keep, including the last two rows.
-                              Must be >= 2.
-    - random_seed (int): Random seed for reproducibility.
+    Args:
+        arr: 2D NumPy array.
+        num_rows_to_keep: Total number of rows to keep. Must be >= 2.
+        last_rows_to_keep: Number of rows from the end to always keep.
+            Defaults to 2.
+        random_seed: Random seed for reproducibility. Defaults to 42.
 
     Returns:
-    - numpy.ndarray: 2D array with specified rows retained, keeping the last two rows intact.
+        2D array with specified rows retained, with last rows always included.
     """
     # Separate the last two rows
     last_two_rows = arr[-last_rows_to_keep:]
@@ -68,21 +76,19 @@ def drop_rows_with_tail_keep(
 def bootstrap_3_ci(
     metric_func, arg_1, arg_2, arg_3, n_bootstraps=1000, alpha=0.05, random_state=None
 ):
-    """
-    Calculate bootstrapped confidence intervals for a given scikit-learn metric that can accept multiple arguments.
+    """Calculate bootstrap confidence intervals for a 3-argument metric.
 
-    Parameters:
-    - metric_func: A scikit-learn metric function (e.g., precision_score, f1_score).
-    - n_bootstraps: Number of bootstrap samples to generate (default: 1000).
-    - alpha: Significance level for the confidence intervals (default: 0.05).
-    - random_state: Random seed for reproducibility (default: None).
-    - *args: Positional arguments to be passed to the metric function. For example, y_true, y_pred, etc.
-    - **kwargs: Keyword arguments to be passed to the metric function.
+    Args:
+        metric_func: A metric function accepting 3 arguments.
+        arg_1: First argument for the metric function.
+        arg_2: Second argument for the metric function.
+        arg_3: Third argument for the metric function.
+        n_bootstraps: Number of bootstrap samples. Defaults to 1000.
+        alpha: Significance level for confidence intervals. Defaults to 0.05.
+        random_state: Random seed for reproducibility. Defaults to None.
 
     Returns:
-    - original_score: The metric value calculated on the original data.
-    - ci_lower: Lower bound of the confidence interval.
-    - ci_upper: Upper bound of the confidence interval.
+        Tuple of (metric_value, ci_lower, ci_upper).
     """
 
     if random_state is not None:
@@ -109,32 +115,41 @@ def bootstrap_3_ci(
 
 
 def weighed_mcc(y_true, y_pred, coverage):
-    """MCC adapted for cases with Abstention.
+    """Calculate MCC weighted by coverage for abstention cases.
+
     Args:
-    y_true: np.array, true labels
-    y_pred: np.array, predicted labels
-    coverage: float, acceptance rate (fraction of predictions that are not abstained)
+        y_true: True labels.
+        y_pred: Predicted labels.
+        coverage: Acceptance rate (fraction of non-abstained predictions).
+
     Returns:
-    float, weighed MCC
+        Weighted MCC score.
     """
     return mcc(y_true, y_pred) * coverage
 
 
 def weighed_ami(y_true, y_pred, coverage):
-    """AMI adapted for cases with Abstention
+    """Calculate AMI weighted by coverage for abstention cases.
+
     Args:
-    y_true: np.array, true labels
-    y_pred: np.array, predicted labels
-    coverage: float, acceptance rate (fraction of predictions that are not abstained)
+        y_true: True labels.
+        y_pred: Predicted labels.
+        coverage: Acceptance rate (fraction of non-abstained predictions).
+
     Returns:
-    float, weighed AMI
+        Weighted AMI score.
     """
     return ami(y_true, y_pred) * coverage
 
 
 def load_data(cfg):
-    """
-    Load the data from the config file
+    """Load and prepare data from configuration.
+
+    Args:
+        cfg: Configuration object with datapack and model settings.
+
+    Returns:
+        Configured DataHandler instance with loaded and split data.
     """
     if cfg.datapack.cal_size > 0:
         with_calibration = True
@@ -160,8 +175,13 @@ def load_data(cfg):
 
 
 def load_data_with_test(cfg):
-    """
-    Load the data (TEST) from the config file
+    """Load test data from configuration.
+
+    Args:
+        cfg: Configuration object with datapack_test and model settings.
+
+    Returns:
+        Configured DataHandler instance with loaded test data.
     """
     if cfg.datapack_test.cal_size > 0:
         with_calibration = True
@@ -187,31 +207,26 @@ def load_data_with_test(cfg):
     return dh
 
 
-def return_layers(model, cfg):
-    """
-    Return the layers to save activations from (as a list)
-    """
-    return list(
-        range(
-            len(
-                model.get_submodule(cfg.model["module"]).get_submodule(
-                    cfg.model["encoders"]
-                )
-            )
-        )
-    )
-
-
 def flatten(xss) -> list:
-    """
-    Flatten a list of lists
+    """Flatten a list of lists into a single list.
+
+    Args:
+        xss: List of lists.
+
+    Returns:
+        Flattened list.
     """
     return [x for xs in xss for x in xs]
 
 
 def load_statements(dataset: list) -> list[str]:
-    """
-    Load the dataset from the file
+    """Load statements from a dataset CSV file.
+
+    Args:
+        dataset: Dataset name.
+
+    Returns:
+        List of statement strings.
     """
     return flatten(
         pl.read_csv(f"datasets/{dataset}.csv").select("statement").to_numpy()
@@ -219,8 +234,13 @@ def load_statements(dataset: list) -> list[str]:
 
 
 def load_statements_with_targets(dataset: list) -> list[str]:
-    """
-    Load the dataset from the file
+    """Load statements and correct labels from a dataset CSV file.
+
+    Args:
+        dataset: Dataset name.
+
+    Returns:
+        Tuple of (statements list, correct labels list).
     """
     return flatten(
         pl.read_csv(f"datasets/{dataset}.csv").select("statement").to_numpy()
@@ -228,8 +248,10 @@ def load_statements_with_targets(dataset: list) -> list[str]:
 
 
 def get_device():
-    """
-    Get the device to use for computation
+    """Detect and return the best available device for computation.
+
+    Returns:
+        torch.device instance (CUDA, MPS, or CPU).
     """
     if torch.cuda.is_available():
         # If CUDA is available, select the first CUDA device
@@ -248,6 +270,11 @@ def get_device():
 
 
 def clear_device_cache(device: torch.device):
+    """Clear device memory cache if supported.
+
+    Args:
+        device: torch.device instance to clear cache for.
+    """
     if device.type == "cuda":
         torch.cuda.empty_cache()
     elif device.type == "mps":
@@ -260,8 +287,14 @@ def clear_device_cache(device: torch.device):
 
 
 def return_layers(model, cfg):
-    """
-    Return the layers to save activations from (as a list)
+    """Get list of layer indices from model configuration.
+
+    Args:
+        model: Model instance.
+        cfg: Configuration object with model settings.
+
+    Returns:
+        List of layer indices.
     """
     return list(
         range(
@@ -271,8 +304,17 @@ def return_layers(model, cfg):
 
 
 def prepare_hf_model(cfg, device=None):
-    """
-    Prepare the HuggingFace model and tokenizerz for the experiment
+    """Prepare HuggingFace model and tokenizer for experiments.
+
+    Args:
+        cfg: Configuration object with model settings.
+        device: Device to load model on. If None, uses cfg.device.
+
+    Returns:
+        Tuple of (model, tokenizer).
+
+    Raises:
+        ValueError: If dtype is not 'float16' or 'float32'.
     """
     if device is None:
         device = torch.device(cfg.device)
@@ -310,8 +352,14 @@ def prepare_hf_model(cfg, device=None):
 
 
 def prepare_hf_tokenizer(cfg, device=None):
-    """
-    Prepare the HuggingFace model and tokenizerz for the experiment
+    """Prepare HuggingFace tokenizer without loading model.
+
+    Args:
+        cfg: Configuration object with model settings.
+        device: Device specification (unused but kept for API consistency).
+
+    Returns:
+        Tuple of (None, tokenizer).
     """
     if device is None:
         device = torch.device(cfg.device)
@@ -329,8 +377,13 @@ def prepare_hf_tokenizer(cfg, device=None):
 
 
 def prepare_nnsight(cfg):
-    """
-    Prepare the NNSight model and tokenizer for the experiment
+    """Prepare NNSight LanguageModel and tokenizer for experiments.
+
+    Args:
+        cfg: Configuration object with model settings.
+
+    Returns:
+        Tuple of (model, tokenizer).
     """
     device = torch.device(cfg.device)
     # if cfg.model["dtype"] == "float16":
@@ -365,12 +418,13 @@ def prepare_nnsight(cfg):
 
 
 def return_label(data):
-    """
-    Return labels from the dataframe
+    """Extract labels from dataframe.
+
+    Args:
+        data: Pandas DataFrame with label columns.
+
     Returns:
-        correct: np.array of correct labels
-        real: np.array of real_object labels
-        negated: np.array of negation labels
+        Tuple of (correct, real, negated) label arrays.
     """
     correct, real, negated = (
         data["correct"].values,
@@ -381,12 +435,31 @@ def return_label(data):
 
 
 def normalize(X):
+    """Normalize vectors to unit length.
+
+    Args:
+        X: 1D or 2D array to normalize.
+
+    Returns:
+        Normalized array.
+    """
     if X.ndim == 1:
         return X / np.linalg.norm(X)
     return X / np.linalg.norm(X, axis=1)[:, np.newaxis]
 
 
 def load_hydra_experiment(model, datapack, probe, config_name):
+    """Load Hydra experiment configuration.
+
+    Args:
+        model: Model name override.
+        datapack: Datapack name override.
+        probe: Probe name override.
+        config_name: Base configuration name.
+
+    Returns:
+        Configuration dictionary.
+    """
     with initialize(version_base="1.1", config_path="configs"):
         cfg = compose(
             config_name=config_name,

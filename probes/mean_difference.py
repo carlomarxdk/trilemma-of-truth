@@ -1,3 +1,10 @@
+"""Mean difference classifier with optional covariance weighting.
+
+This module implements a binary mean-difference classifier that can optionally
+use pooled-covariance weighting (Mahalanobis whitening) to improve separation.
+Adapted from https://github.com/saprmarks/geometry-of-truth/
+"""
+
 from __future__ import annotations
 
 import logging
@@ -87,9 +94,24 @@ def robust_covariance(
 
 
 class MeanDifferenceClassifier(ClassifierMixin, BaseEstimator):
-    """
-    Binary mean-difference classifier with optional pooled-covariance weighting (aka Mahalanobis whitening).
-    The code is adapted from https://github.com/saprmarks/geometry-of-truth/
+    """Binary mean-difference classifier with optional covariance weighting.
+
+    This classifier computes the direction between class means and optionally
+    applies Mahalanobis whitening using pooled covariance for improved
+    discrimination (equivalent to Fisher's Linear Discriminant Analysis).
+
+    Args:
+        fit_intercept: If True, centers decision boundary at midpoint between
+            projected class means. Defaults to True.
+        with_covariance: If True, applies inverse pooled-covariance weighting
+            (Mahalanobis whitening). Defaults to False.
+        cov_type: Covariance estimation method. Must be one of 'oas', 'ledoit',
+            'empirical', 'shrunk', or 'diagonal'. Defaults to 'oas'.
+        cov_reg: Ridge regularization for covariance matrix invertibility.
+            Defaults to 1e-8.
+        tol: Tolerance for numerical stability in normalization. Defaults to
+            1e-8.
+        verbose: If True, prints additional information. Defaults to False.
     """
 
     def __init__(
@@ -100,15 +122,8 @@ class MeanDifferenceClassifier(ClassifierMixin, BaseEstimator):
         cov_reg: float = 1e-8,
         tol: float = 1e-8,
         verbose: bool = False,
-    ) -> "MeanDifferenceClassifier":
-        """
-        Args:
-            fit_intercept: If True, the decision boundary is at the midpoint between the projected class means.
-            with_covariance: If True, the inverse pooled-covariance matrix is used to compute the score (aka Mahalanobis whitening). Turns it into the Fisher discriminant (LDA).
-            cov_reg: Ridge regularization added to the covariance matrix when with_covariance=True (to ensure invertibility).
-            tol: Tolerance for numerical stability when normalizing the weight vector.
-            verbose: If True, prints additional information during fitting and scoring.
-        """
+    ) -> MeanDifferenceClassifier:
+        """Initialize the mean difference classifier."""
         super().__init__()
         assert (
             cov_type in VALID_COVARIANCE_METHODS
@@ -128,15 +143,21 @@ class MeanDifferenceClassifier(ClassifierMixin, BaseEstimator):
 
     def fit(
         self, X: np.ndarray, y: np.ndarray, M: np.ndarray = None
-    ) -> "MeanDifferenceClassifier":
-        """
-        Fit the model to the data.
+    ) -> MeanDifferenceClassifier:
+        """Fit the classifier to training data.
+
         Args:
-            X: (N, d) array of input data
-            y: (N,) array of binary labels (0 or 1)
-            M: Mahalanobis matrix (optional), used if with_covariance=True.
+            X: (N, d) array of input data.
+            y: (N,) array of binary labels (0 or 1).
+            M: Optional (d, d) Mahalanobis matrix. If provided, must have
+                with_covariance=True.
+
         Returns:
-            self
+            Self.
+
+        Raises:
+            AssertionError: If y is not binary or if M is provided without
+                with_covariance=True.
         """
         X = np.asarray(X)
         y = np.asarray(y)
@@ -191,14 +212,24 @@ class MeanDifferenceClassifier(ClassifierMixin, BaseEstimator):
         return self
 
     def predict(self, X: np.ndarray) -> np.ndarray:
-        """
-        Predict the class of each sample in X.
+        """Predict class labels for samples in X.
+
+        Args:
+            X: (N, d) array of input data.
+
+        Returns:
+            (N,) array of predicted class labels.
         """
         return self.predict_proba(X).round()
 
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
-        """
-        Predict the probability of each sample in X.
+        """Predict class probabilities for samples in X.
+
+        Args:
+            X: (N, d) array of input data.
+
+        Returns:
+            (N,) array of class probabilities.
         """
         return expit(self.decision_function(X))
 
@@ -215,8 +246,19 @@ class MeanDifferenceClassifier(ClassifierMixin, BaseEstimator):
         return (X @ self.coef_.T).ravel() + self.intercept_
 
     def score(self, X: np.ndarray, y: np.ndarray, scorer, sample_weight=None) -> float:  # type: ignore
-        """
-        Compute the accuracy of the model.
+        """Compute score using the provided scorer function.
+
+        Args:
+            X: (N, d) array of input data.
+            y: (N,) array of true labels.
+            scorer: Scoring function to apply.
+            sample_weight: Sample weights (unused, kept for API compatibility).
+
+        Returns:
+            Score computed by the scorer function.
+
+        Raises:
+            AssertionError: If y is not binary.
         """
         assert type_of_target(y) == "binary", "Labels should be binary."
         try:
