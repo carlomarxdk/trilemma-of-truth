@@ -1,22 +1,19 @@
 # misc/probe_data.py
 from __future__ import annotations
-from dataclasses import dataclass
-from functools import lru_cache
-from pathlib import Path
-from typing import Optional, Any, Dict, List, Tuple
-import numpy as np
-import pickle as pkl
-import json
-import re
+
 import importlib
-from pathlib import Path
 import json
-from typing import Any, Iterable, List, Optional, Union
+import pickle as pkl
+import re
 import sys
+from collections.abc import Iterable
+from dataclasses import dataclass
+from functools import cache
+from pathlib import Path
+from typing import Any
+
+import numpy as np
 from packaging import version
-
-
-
 
 
 @dataclass(frozen=True)
@@ -31,16 +28,18 @@ class LayerParams:
     - metrics_default / metrics_conformal: optional dicts
     - y_hat / y_true: optional arrays for stored predictions
     """
-    direction: Optional[np.ndarray]
-    bias: Optional[float]
-    scaler: Optional[Any]
-    calibrator: Optional[Any]
-    model: Optional[Any]
-    metrics_default: Optional[Dict]
-    metrics_conformal: Optional[Dict]
-    y_hat: Optional[np.ndarray]
-    y_true: Optional[np.ndarray]
-    
+
+    direction: np.ndarray | None
+    bias: float | None
+    scaler: Any | None
+    calibrator: Any | None
+    model: Any | None
+    metrics_default: dict | None
+    metrics_conformal: dict | None
+    y_hat: np.ndarray | None
+    y_true: np.ndarray | None
+
+
 @dataclass(frozen=True)
 class MulticlassLayerParams:
     """
@@ -51,25 +50,29 @@ class MulticlassLayerParams:
       - y_hat: optional stored probabilities (N, C)
       - y_true: optional labels (N,)
     """
-    cls: Optional[Any]
-    calibrator: Optional[Any]
-    metrics_default: Optional[Dict]
-    metrics_conformal: Optional[Dict]
-    y_hat: Optional[np.ndarray]
-    y_true: Optional[np.ndarray]
-    
-    
+
+    cls: Any | None
+    calibrator: Any | None
+    metrics_default: dict | None
+    metrics_conformal: dict | None
+    y_hat: np.ndarray | None
+    y_true: np.ndarray | None
+
+
 class ExperimentData:
-    '''
+    """
     Class to manage and access experimental data for different models, probes, datasets, and tasks.
-    '''
-    def __init__(self, 
-                 model_name:str, 
-                 probe_name:str, 
-                 dataset_name:str, 
-                 task: int, 
-                 with_search:bool = True):
-        '''
+    """
+
+    def __init__(
+        self,
+        model_name: str,
+        probe_name: str,
+        dataset_name: str,
+        task: int,
+        with_search: bool = True,
+    ):
+        """
         Initialize the ExperimentData object with the specified parameters.
         Args:
             model_name (str): The name of the model.
@@ -77,93 +80,116 @@ class ExperimentData:
             dataset_name (str): The name of the dataset.
             task (int): The task number.
             with_search (bool): Whether to include search in the path construction.
-        '''
+        """
         self.model_name = model_name
         self.probe_name = probe_name
         self.dataset_name = dataset_name
         self.task = task
         self.with_search = with_search
-        
+
     @property
     def base_path(self) -> Path:
-        '''
+        """
         Construct the base path for the experiment data based on the provided parameters.
         Returns:
             Path: The constructed base path.
-        '''
+        """
         if self.with_search:
-            return Path('outputs') / 'probes' / self.probe_name / self.model_name / f'{self.dataset_name}_search_task-{str(self.task)}'
+            return (
+                Path("outputs")
+                / "probes"
+                / self.probe_name
+                / self.model_name
+                / f"{self.dataset_name}_search_task-{str(self.task)}"
+            )
         else:
-            return Path('outputs') / 'probes' / self.probe_name / self.model_name / f'{self.dataset_name}_task-{str(self.task)}'
-        
+            return (
+                Path("outputs")
+                / "probes"
+                / self.probe_name
+                / self.model_name
+                / f"{self.dataset_name}_task-{str(self.task)}"
+            )
+
     @property
     def absolute_path(self) -> Path:
         return self.base_path.absolute()
-    
-    def layer_exists(self, layer:int) -> bool:
-        '''Check if the manifest file for a given layer exists.
+
+    def layer_exists(self, layer: int) -> bool:
+        """Check if the manifest file for a given layer exists.
         Args:
             layer (int): The layer number to check.
         Returns:
             bool: True if the manifest file exists, False otherwise.
-        '''
-        path = self.base_path / 'manifests' / f'manifest_{str(layer)}.json'
+        """
+        path = self.base_path / "manifests" / f"manifest_{str(layer)}.json"
         return path.exists()
-    
-    def load_manifest(self, layer:int) -> dict:
-        '''Load the manifest file for a given layer.
+
+    def load_manifest(self, layer: int) -> dict:
+        """Load the manifest file for a given layer.
         Args:
             layer (int): The layer number to load the manifest for.
         Returns:
             dict: The content of the manifest file as a dictionary.
-        '''
-        assert self.layer_exists(layer), f"The experimental data for layer {layer} does not exist. Available layers: {self.available_layers}"
-        with open(self.base_path / 'manifests' / f'manifest_{str(layer)}.json', 'r') as f:
+        """
+        assert self.layer_exists(
+            layer
+        ), f"The experimental data for layer {layer} does not exist. Available layers: {self.available_layers}"
+        with open(self.base_path / "manifests" / f"manifest_{str(layer)}.json") as f:
             manifest = json.load(f)
         return manifest
-    
+
     @property
-    def available_layers(self) -> List[int]:
-        '''Get a list of available layers for which manifest files exist.
+    def available_layers(self) -> list[int]:
+        """Get a list of available layers for which manifest files exist.
         Returns:
             list[int]: A list of layer numbers that have manifest files.
-        '''
-        manifests_path = self.base_path / 'manifests'
+        """
+        manifests_path = self.base_path / "manifests"
         if not manifests_path.exists():
             return []
-        
-        layer_files = manifests_path.glob('manifest_*.json')
-        layers = [int(f.stem.split('_')[1]) for f in layer_files if f.stem.split('_')[1].isdigit()]
+
+        layer_files = manifests_path.glob("manifest_*.json")
+        layers = [
+            int(f.stem.split("_")[1])
+            for f in layer_files
+            if f.stem.split("_")[1].isdigit()
+        ]
         return sorted(layers)
-    
-    def available_subexperiments(self) -> List[str]:
-        '''Get a list of available statistics for which stats files exist.
+
+    def available_subexperiments(self) -> list[str]:
+        """Get a list of available statistics for which stats files exist.
         Returns:
             list[str]: A list of statistic names that have stats files.
-        '''
+        """
         folders = [x for x in self.base_path.iterdir() if x.is_dir()]
-        folders = [x.name for x in folders if x.name.startswith('g_')]
+        folders = [x.name for x in folders if x.name.startswith("g_")]
         return sorted(folders)
 
-    def best_layer(self, keys: List[str] = ['conformal', 'wmcc'], path: Optional[Path] = None) -> int:
-        '''Determine the best layer based on a specified metric.
+    def best_layer(
+        self, keys: list[str] = ["conformal", "wmcc"], path: Path | None = None
+    ) -> int:
+        """Determine the best layer based on a specified metric.
         Args:
             keys (list of str): The key or list of keys to navigate through the JSON structure to find the metric.
             path (Path, optional): The base path to the experiment data. If None, uses the default base path.
         Returns:
             int: The layer number that has the highest value for the specified metric.
-        '''
+        """
         results = {}
         for layer in self.available_layers:
             metric = self.read_metrics(layer, keys, path=path)
             results[layer] = metric[0]
         return max(results, key=results.get)
-    
-    def read_metrics(self, layer_id: int,         
-                keys: Optional[Union[str, Iterable[str]]] = None,
-                default: Any = ...,
-                path: Optional[Path] = None) -> Any:
-        '''Read the metrics from the JSON file for a specific layer.
+
+    def read_metrics(
+        self,
+        layer_id: int,
+        keys: str | Iterable[str] | None = None,
+        default: Any = ...,
+        path: Path | None = None,
+    ) -> Any:
+        """Read the metrics from the JSON file for a specific layer.
         Args:
             layer_id (int): The layer number to read metrics for.
             keys (str or list of str, optional): The key or list of keys to navigate through the JSON structure. If None, returns the entire JSON content.
@@ -174,19 +200,20 @@ class ExperimentData:
         Raises:
             KeyError: If the specified key path does not exist and no default value is provided.
             AssertionError: If the manifest file for the specified layer does not exist.
-        '''
-        assert self.layer_exists(layer_id), f"The experimental data for layer {layer_id} does not exist. Available layers: {self.available_layers()}"
-        
-        
+        """
+        assert self.layer_exists(
+            layer_id
+        ), f"The experimental data for layer {layer_id} does not exist. Available layers: {self.available_layers()}"
+
         if path is not None:
             assert path.exists(), f"The provided path {str(path)} does not exist."
-            path = Path(path) 
+            path = Path(path)
         else:
-            path = self.base_path  
-        with open(path / 'manifests' / f'manifest_{str(layer_id)}.json', 'r') as f:
-            metric_path = json.load(f)['paths']['metrics']
-            
-        with open(metric_path, 'r') as f:
+            path = self.base_path
+        with open(path / "manifests" / f"manifest_{str(layer_id)}.json") as f:
+            metric_path = json.load(f)["paths"]["metrics"]
+
+        with open(metric_path) as f:
             data = json.load(f)
         if keys is None:
             return data
@@ -209,29 +236,33 @@ class ExperimentData:
                     )
                 return default
         return cur
-    
-    def validate_manifest(self, layer_id: int, path: Optional[Path] = None) -> bool:
-        '''Validate the manifest file for a specific layer.
+
+    def validate_manifest(self, layer_id: int, path: Path | None = None) -> bool:
+        """Validate the manifest file for a specific layer.
         Args:
             layer_id (int): The layer number to validate the manifest for.
             path (Path, optional): The base path to the experiment data. If None, uses the default base path.
         Returns:
-            bool: True if the manifest file is valid, False otherwise.  
-        '''
-        assert self.layer_exists(layer_id), f"The experimental data for layer {layer_id} does not exist. Available layers: {self.available_layers()}"
-        manifest = self.load_manifest(layer_id)['env']
+            bool: True if the manifest file is valid, False otherwise.
+        """
+        assert self.layer_exists(
+            layer_id
+        ), f"The experimental data for layer {layer_id} does not exist. Available layers: {self.available_layers()}"
+        manifest = self.load_manifest(layer_id)["env"]
         not_installed = []
         not_matching = []
         for pkg, required_version in manifest.items():
-            if pkg == 'python':
+            if pkg == "python":
                 v = ".".join(map(str, sys.version_info[:3]))
                 if version.parse(v) == version.parse(required_version):
-                    print(f'python: {v} (matches manifest)')
+                    print(f"python: {v} (matches manifest)")
                 elif version.parse(v) != version.parse(required_version):
-                    print(f"python: installed {v}, but manifest requires {required_version}")
+                    print(
+                        f"python: installed {v}, but manifest requires {required_version}"
+                    )
                     not_matching.append(pkg)
                 continue
-                
+
             try:
                 # dynamically import the module
                 mod = importlib.import_module(pkg)
@@ -241,34 +272,40 @@ class ExperimentData:
                 not_installed.append(pkg)
                 continue
             if version.parse(installed_version) == version.parse(required_version):
-                print(f'{pkg}: installed {installed_version} matches manifest')
+                print(f"{pkg}: installed {installed_version} matches manifest")
             elif version.parse(installed_version) != version.parse(required_version):
-                print(f"{pkg}: installed {installed_version}, but manifest requires {required_version}")
+                print(
+                    f"{pkg}: installed {installed_version}, but manifest requires {required_version}"
+                )
                 not_matching.append(pkg)
         if not_installed or not_matching:
             return False
         return True
 
-    def read_predictions(self, layer_id: int, path: Optional[Path] = None) -> Tuple[np.ndarray, np.ndarray]:
-        '''Read the predictions and true labels from the files for a specific layer.
+    def read_predictions(
+        self, layer_id: int, path: Path | None = None
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Read the predictions and true labels from the files for a specific layer.
         Args:
             layer_id (int): The layer number to read predictions for.
             path (Path, optional): The base path to the experiment data. If None, uses the default base path.
         Returns:
             tuple: A tuple containing two numpy arrays: (y_hat, y_true).
-        '''
+        """
         y_hat = self._load_npy_if_exists(f"y_hat_{layer_id}.npy", path)
         y_true = self._load_npy_if_exists("y_true.npy", path)
         if y_true is None:
             y_true = self._load_npy_if_exists(f"y_true_{layer_id}.npy", path)
         return y_hat, y_true
-    
-    def _load_npy_if_exists(self, name: str, path: Optional[Path] = None) -> Optional[np.ndarray]:
+
+    def _load_npy_if_exists(
+        self, name: str, path: Path | None = None
+    ) -> np.ndarray | None:
         if path is not None:
             assert path.exists(), f"The provided path {str(path)} does not exist."
-            path = Path(path) 
+            path = Path(path)
         else:
-            path = self.base_path  
+            path = self.base_path
         file_path = path / name
         if file_path.exists():
             return np.load(file_path)
@@ -276,6 +313,7 @@ class ExperimentData:
 
 
 #### Old code below for backward compatibility ####
+
 
 class ProbeData:
     """
@@ -303,26 +341,30 @@ class ProbeData:
 
     # ---------- public API ----------
 
-    def available_layers(self) -> List[int]:
+    def available_layers(self) -> list[int]:
         """Return sorted list of layer ids discovered in this directory."""
         # Prefer model_*.pkl if present (multiclass). Fall back to metrics_*.json.
         layers = set()
         for f in self.probe_dir.glob("model_*.pkl"):
             m = re.search(r"model_(\d+)", f.name)
-            if m: layers.add(int(m.group(1)))
+            if m:
+                layers.add(int(m.group(1)))
         for f in self.probe_dir.glob("metrics_*.json"):
             m = re.search(r"metrics_(\d+)", f.name)
-            if m: layers.add(int(m.group(1)))
+            if m:
+                layers.add(int(m.group(1)))
         # Also allow coef_/direction_ as a last resort:
         for f in self.probe_dir.glob("coef_*.npy"):
             m = re.search(r"coef_(\d+)", f.name)
-            if m: layers.add(int(m.group(1)))
+            if m:
+                layers.add(int(m.group(1)))
         for f in self.probe_dir.glob("direction_*.npy"):
             m = re.search(r"direction_(\d+)", f.name)
-            if m: layers.add(int(m.group(1)))
+            if m:
+                layers.add(int(m.group(1)))
         return sorted(layers)
 
-    @lru_cache(maxsize=None)
+    @cache
     def load_layer(self, layer_id: int) -> LayerParams:
         """
         Load (and cache) all available artifacts for a layer.
@@ -334,10 +376,9 @@ class ProbeData:
 
         # optional bits
         scaler = self._load_pickle_if_exists(f"scaler_{layer_id}.pkl")
-        calibrator = (
-            self._load_pickle_if_exists(f"calibrator_{layer_id}.pkl")
-            or self._load_pickle_if_exists(f"cp_{layer_id}.pkl")
-        )
+        calibrator = self._load_pickle_if_exists(
+            f"calibrator_{layer_id}.pkl"
+        ) or self._load_pickle_if_exists(f"cp_{layer_id}.pkl")
         model = self._load_pickle_if_exists(f"model_{layer_id}.pkl")
 
         metrics_default, metrics_conformal = self._load_metrics(layer_id)
@@ -367,13 +408,13 @@ class ProbeData:
         s = str(p)
         m = re.search(r"(^|/)(outputs)(/|$)", s)
         if m:
-            tail = s[m.start(2):]  # keep from 'outputs' onward
+            tail = s[m.start(2) :]  # keep from 'outputs' onward
             q = Path(tail)
             if q.exists():
                 return q
         return p  # will error in __init__ if still missing
 
-    def _load_direction(self, layer_id: int) -> Optional[np.ndarray]:
+    def _load_direction(self, layer_id: int) -> np.ndarray | None:
         for name in (f"coef_{layer_id}.npy", f"direction_{layer_id}.npy"):
             path = self.probe_dir / name
             if path.exists():
@@ -381,14 +422,14 @@ class ProbeData:
         # direction is optional for pure multiclass saved-model case
         return None
 
-    def _load_bias(self, layer_id: int) -> Optional[float]:
+    def _load_bias(self, layer_id: int) -> float | None:
         path = self.probe_dir / f"bias_{layer_id}.npy"
         if path.exists():
             return float(np.load(path))
         # bias is optional for pure multiclass saved-model case
         return None
 
-    def _load_metrics(self, layer_id: int) -> tuple[Optional[Dict], Optional[Dict]]:
+    def _load_metrics(self, layer_id: int) -> tuple[dict | None, dict | None]:
         path = self.probe_dir / f"metrics_{layer_id}.json"
         if not path.exists():
             return None, None
@@ -396,18 +437,19 @@ class ProbeData:
             m = json.load(f)
         return m.get("default"), m.get("conformal")
 
-    def _load_pickle_if_exists(self, name: str) -> Optional[Any]:
+    def _load_pickle_if_exists(self, name: str) -> Any | None:
         path = self.probe_dir / name
         if not path.exists():
             return None
         with open(path, "rb") as f:
             return pkl.load(f)
 
-    def _load_npy_if_exists(self, name: str) -> Optional[np.ndarray]:
+    def _load_npy_if_exists(self, name: str) -> np.ndarray | None:
         path = self.probe_dir / name
         if path.exists():
             return np.load(path)
         return None
+
 
 class MulticlassProbeData:
     """
@@ -427,19 +469,21 @@ class MulticlassProbeData:
 
     # ------------------------ public API ------------------------
 
-    def available_layers(self) -> List[int]:
+    def available_layers(self) -> list[int]:
         """Discover layers via cls_{L}.pkl (preferred), else metrics_{L}.json."""
         layers = []
         for f in self.probe_dir.glob("cls_*.pkl"):
             m = re.search(r"cls_(\d+)", f.name)
-            if m: layers.append(int(m.group(1)))
+            if m:
+                layers.append(int(m.group(1)))
         if not layers:
             for f in self.probe_dir.glob("metrics_*.json"):
                 m = re.search(r"metrics_(\d+)", f.name)
-                if m: layers.append(int(m.group(1)))
+                if m:
+                    layers.append(int(m.group(1)))
         return sorted(set(layers))
 
-    def metadata(self, layer_id: int) -> Dict[str, Any]:
+    def metadata(self, layer_id: int) -> dict[str, Any]:
         """Backward-compatible accessor (matches your old class)."""
         art = self.load_layer(layer_id)
         return {
@@ -451,13 +495,12 @@ class MulticlassProbeData:
             "metrics_conformal": art.metrics_conformal,
         }
 
-    @lru_cache(maxsize=None)
+    @cache
     def load_layer(self, layer_id: int) -> MulticlassLayerParams:
         cls = self._load_pickle(f"cls_{layer_id}.pkl", required=False)
-        calibrator = (
-            self._load_pickle(f"cp_{layer_id}.pkl", required=False)
-            or self._load_pickle(f"calibrator_{layer_id}.pkl", required=False)
-        )
+        calibrator = self._load_pickle(
+            f"cp_{layer_id}.pkl", required=False
+        ) or self._load_pickle(f"calibrator_{layer_id}.pkl", required=False)
         md, mc = self._load_metrics(layer_id)
         y_hat = self._load_npy(f"y_hat_{layer_id}.npy", required=False)
         y_true = self._load_npy("y_true.npy", required=False)
@@ -479,19 +522,19 @@ class MulticlassProbeData:
     def calibrator(self, layer_id: int):
         return self.load_layer(layer_id).calibrator
 
-    def predict_proba(self, layer_id: int, bags: List[np.ndarray]) -> np.ndarray:
+    def predict_proba(self, layer_id: int, bags: list[np.ndarray]) -> np.ndarray:
         art = self.load_layer(layer_id)
         if art.cls is None:
             raise RuntimeError(f"cls_{layer_id}.pkl not found in {self.probe_dir}")
         return art.cls.predict_proba(bags)
 
-    def predict(self, layer_id: int, bags: List[np.ndarray]) -> np.ndarray:
+    def predict(self, layer_id: int, bags: list[np.ndarray]) -> np.ndarray:
         art = self.load_layer(layer_id)
         if art.cls is None:
             raise RuntimeError(f"cls_{layer_id}.pkl not found in {self.probe_dir}")
         return art.cls.predict(bags)
 
-    def predict_sets(self, layer_id: int, bags: List[np.ndarray]) -> np.ndarray:
+    def predict_sets(self, layer_id: int, bags: list[np.ndarray]) -> np.ndarray:
         """
         If a calibrator exists, return set-valued predictions; otherwise singleton sets via argmax.
         """
@@ -506,23 +549,25 @@ class MulticlassProbeData:
 
     # ----- compatibility helpers (names from your old class) -----
 
-    def return_true(self, layer_id: int) -> Optional[np.ndarray]:
+    def return_true(self, layer_id: int) -> np.ndarray | None:
         return self.load_layer(layer_id).y_true
 
-    def return_pred(self, layer_id: int) -> Optional[np.ndarray]:
+    def return_pred(self, layer_id: int) -> np.ndarray | None:
         return self.load_layer(layer_id).y_hat
 
-    def return_preds(self, layer_id: int) -> Tuple[Optional[np.ndarray], Optional[np.ndarray]]:
+    def return_preds(
+        self, layer_id: int
+    ) -> tuple[np.ndarray | None, np.ndarray | None]:
         art = self.load_layer(layer_id)
         return art.y_hat, art.y_true
 
-    def metrics_conformal(self, layer_id: int) -> Optional[Dict]:
+    def metrics_conformal(self, layer_id: int) -> dict | None:
         return self.load_layer(layer_id).metrics_conformal
 
-    def metrics_default(self, layer_id: int) -> Optional[Dict]:
+    def metrics_default(self, layer_id: int) -> dict | None:
         return self.load_layer(layer_id).metrics_default
 
-    def best_layer(self, metric: str = "map", per_bag: bool = False) -> Optional[int]:
+    def best_layer(self, metric: str = "map", per_bag: bool = False) -> int | None:
         """
         Select best layer by metric name.
         For legacy compat:
@@ -545,9 +590,9 @@ class MulticlassProbeData:
                 best_layer = L
         return best_layer
 
-    def top_k_layers(self, metric: str = "map", k: int = 5) -> List[int]:
+    def top_k_layers(self, metric: str = "map", k: int = 5) -> list[int]:
         layers = self.available_layers()
-        scored: List[Tuple[int, float]] = []
+        scored: list[tuple[int, float]] = []
         for L in layers:
             m = self.metrics_conformal(L) or {}
             val = m.get(metric)
@@ -558,7 +603,9 @@ class MulticlassProbeData:
         scored.sort(key=lambda t: t[1], reverse=True)
         return [L for (L, _) in scored[:k]]
 
-    def return_general_metric(self, layer_id: int, datapack_name: str) -> Dict[str, Dict]:
+    def return_general_metric(
+        self, layer_id: int, datapack_name: str
+    ) -> dict[str, dict]:
         """
         Reads generalization metrics from:
           <probe_dir_prefix>-to-{datapack_name}/metrics_{L}.json
@@ -574,14 +621,17 @@ class MulticlassProbeData:
             raise FileNotFoundError(f"Missing generalization metrics: {path}")
         with open(path, "rb") as f:
             m = json.load(f)
-        return {"metrics_default": m.get("default"), "metrics_conformal": m.get("conformal")}
+        return {
+            "metrics_default": m.get("default"),
+            "metrics_conformal": m.get("conformal"),
+        }
 
     def best_layer_generalization(
         self,
         datapack_name: str,
         metric: str = "map",
         metric_type: str = "conformal",
-    ) -> Optional[int]:
+    ) -> int | None:
         layers = self.available_layers()
         best_layer, best_score = None, -float("inf")
         for L in layers:
@@ -596,8 +646,7 @@ class MulticlassProbeData:
         return best_layer
 
     # ------------------------ private helpers ------------------------
-    
-    
+
     def _normalize_probe_dir(self, p: Path) -> Path:
         """Handle paths that accidentally include prefixes before 'outputs/'."""
         print(p)
@@ -607,7 +656,7 @@ class MulticlassProbeData:
         s = str(p)
         m = re.search(r"(^|/)(outputs)(/|$)", s)
         if m:
-            tail = s[m.start(2):]  # keep from 'outputs' onward
+            tail = s[m.start(2) :]  # keep from 'outputs' onward
             q = Path(tail)
             if q.exists():
                 return q
@@ -622,7 +671,7 @@ class MulticlassProbeData:
         with open(path, "rb") as f:
             return pkl.load(f)
 
-    def _load_npy(self, name: str, required: bool) -> Optional[np.ndarray]:
+    def _load_npy(self, name: str, required: bool) -> np.ndarray | None:
         path = self.probe_dir / name
         if not path.exists():
             if required:
@@ -630,7 +679,7 @@ class MulticlassProbeData:
             return None
         return np.load(path)
 
-    def _load_metrics(self, layer_id: int) -> Tuple[Optional[Dict], Optional[Dict]]:
+    def _load_metrics(self, layer_id: int) -> tuple[dict | None, dict | None]:
         path = self.probe_dir / f"metrics_{layer_id}.json"
         if not path.exists():
             return None, None

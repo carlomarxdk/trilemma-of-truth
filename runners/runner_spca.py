@@ -1,16 +1,20 @@
-from runners.base import BaseProbeRunner
-from probes.spca import SupervisedPCA
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import KFold, GridSearchCV
-from sklearn.pipeline import Pipeline
-from probes.conformal import InductiveConformalPredictor, symmetric_nonconformity
-import joblib
+from __future__ import annotations
+
 import json
-from pathlib import Path
-import numpy as np
 import logging
-from typing import List, Sequence, Dict, Tuple
+from collections.abc import Sequence
 from copy import deepcopy
+from pathlib import Path
+
+import joblib
+import numpy as np
+from sklearn.model_selection import GridSearchCV, KFold
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+
+from probes.conformal import InductiveConformalPredictor, symmetric_nonconformity
+from probes.spca import SupervisedPCA
+from runners.base import BaseProbeRunner
 
 log = logging.getLogger("SILRunner-SPCA")
 
@@ -24,18 +28,20 @@ class SPCA_Runner(BaseProbeRunner):
         super().__init__(cfg)
         self.cfg = cfg
         # set random seed
-        np.random.seed(getattr(cfg.probe, 'seed', None))
+        np.random.seed(getattr(cfg.probe, "seed", None))
         self.scaler = StandardScaler()
         self.calibrator = None
         self.separator = None
         self.transformer = None
 
-    def single_training(self, X: Sequence[np.ndarray], y: np.ndarray, mask: np.ndarray, **kwargs) -> Dict:
+    def single_training(
+        self, X: Sequence[np.ndarray], y: np.ndarray, mask: np.ndarray, **kwargs
+    ) -> dict:
         """
         Train transformer and separator on the masked subset of bags.
         Returns dict with 'separator' and fitted 'transformer'.
         Args:
-            - X: an list of bags 
+            - X: an list of bags
             - y: bag_abels
             - mask: mask for the task
         """
@@ -43,43 +49,46 @@ class SPCA_Runner(BaseProbeRunner):
         f_mask = np.array(mask, dtype=bool)
         f_y = deepcopy(y)
         f_X = deepcopy(X)
-        assert len(f_X) == len(f_y) == len(
-            f_mask), "X, y and mask must have the same length"
+        assert (
+            len(f_X) == len(f_y) == len(f_mask)
+        ), "X, y and mask must have the same length"
         assert np.unique(f_y).size == 2, "y must be binary"
 
         ym = self.return_target(f_y, f_mask)
         # 1) Fit transformer on concatenated instances
-        if self.cfg.probe.get('normalize_data', True):
+        if self.cfg.probe.get("normalize_data", True):
             log.warning("\t\tNormalizing the data...")
             Xm = np.vstack([bag[-1] for bag, m in zip(f_X, f_mask) if m])
             self.scaler.fit(Xm)
         else:
             raise NotImplementedError(
-                "Only a pipeline with the normalization is implemented")
+                "Only a pipeline with the normalization is implemented"
+            )
 
-        Xm = np.vstack([self.scaler.transform(bag)[-1]
-                        for bag, m in zip(f_X, f_mask) if m])
+        Xm = np.vstack(
+            [self.scaler.transform(bag)[-1] for bag, m in zip(f_X, f_mask) if m]
+        )
 
         # 2) Transform each bag (take only the last element)
         cfg = self.cfg.probe
-        limit = cfg.get('train_sample_limit', Xm.shape[0])
+        limit = cfg.get("train_sample_limit", Xm.shape[0])
         log.warning("\t\tFit the data...")
 
-        self.separator = SupervisedPCA(n_components=cfg.init_params['n_components'],
-                                       cov_type=cfg.init_params.get(
-                                           'cov_type', 'oas'),
-                                       cov_fallback_scale=cfg.init_params.get(
-                                           'cov_fallback_scale', 1.0),
-                                       verbose=cfg.init_params.get(
-                                           'verbose', False),
-                                       random_seed=cfg.init_params.get('random_seed', 42))
+        self.separator = SupervisedPCA(
+            n_components=cfg.init_params["n_components"],
+            cov_type=cfg.init_params.get("cov_type", "oas"),
+            cov_fallback_scale=cfg.init_params.get("cov_fallback_scale", 1.0),
+            verbose=cfg.init_params.get("verbose", False),
+            random_seed=cfg.init_params.get("random_seed", 42),
+        )
 
-        self.separator.fit(
-            Xm[:limit], ym[:limit])
+        self.separator.fit(Xm[:limit], ym[:limit])
 
-        return {'separator': self.separator,
-                'scaler': self.scaler,
-                'transformer': np.nan}
+        return {
+            "separator": self.separator,
+            "scaler": self.scaler,
+            "transformer": np.nan,
+        }
 
     def return_target(self, y, mask=None):
         yy = deepcopy(y)
@@ -87,7 +96,9 @@ class SPCA_Runner(BaseProbeRunner):
             return yy[mask]
         return yy
 
-    def parameter_search(self, X: Sequence[np.ndarray], y: np.ndarray, mask: np.ndarray, **kwargs) -> Dict:
+    def parameter_search(
+        self, X: Sequence[np.ndarray], y: np.ndarray, mask: np.ndarray, **kwargs
+    ) -> dict:
         """
         Training with hyperparameter search
         Args:
@@ -96,42 +107,41 @@ class SPCA_Runner(BaseProbeRunner):
             - mask: mask for the data
         """
         params = self.cfg.probe.param_grid
-        param_grid = {f'clf__{k}': v for k,
-                      v in params.items() if v is not None}
+        param_grid = {f"clf__{k}": v for k, v in params.items() if v is not None}
         f_mask = np.array(mask, dtype=bool)
         f_y = deepcopy(y)
         f_X = deepcopy(X)
-        assert len(f_X) == len(f_y) == len(
-            f_mask), "X, y and mask must have the same length"
+        assert (
+            len(f_X) == len(f_y) == len(f_mask)
+        ), "X, y and mask must have the same length"
         assert np.unique(f_y).size == 2, "y must be binary"
 
         Xm = np.vstack([x[-1] for x, m in zip(f_X, f_mask) if m])
         ym = self.return_target(f_y, f_mask)
 
-        pipeline = Pipeline([("scaler", StandardScaler()),
-                             ("clf", SupervisedPCA())])
+        pipeline = Pipeline([("scaler", StandardScaler()), ("clf", SupervisedPCA())])
 
         grid = GridSearchCV(
             estimator=pipeline,
             param_grid=param_grid,
             cv=KFold(n_splits=3, shuffle=True, random_state=42),
             refit=False,
-            scoring='average_precision',
+            scoring="average_precision",
             n_jobs=-1,
             verbose=1,
-            error_score=0.0
+            error_score=0.0,
         )
 
         grid.fit(Xm, ym)
         best_params, _ = self._apply_se_rule(grid.cv_results_, n_folds=3)
-        self.cfg.probe.init_params['n_components'] = best_params['clf__n_components']
+        self.cfg.probe.init_params["n_components"] = best_params["clf__n_components"]
         # self.cfg.probe.init_params['cov_reg'] = best_params['clf__cov_reg']
         return self.single_training(X, y, mask, **kwargs)
 
-    def _apply_se_rule(self, results: Dict, n_folds: int = 3) -> Tuple[Dict, float]:
-        means = results['mean_test_score']
-        stds = results['std_test_score']
-        params = results['params']
+    def _apply_se_rule(self, results: dict, n_folds: int = 3) -> tuple[dict, float]:
+        means = results["mean_test_score"]
+        stds = results["std_test_score"]
+        params = results["params"]
 
         best_idx = int(np.argmax(means))
         best_score = float(means[best_idx])
@@ -148,11 +158,14 @@ class SPCA_Runner(BaseProbeRunner):
 
         selected_score = float(means[selected_idx])
         log.warning(
-            f"\tSelected via 1-SE: n_components={params[selected_idx]['clf__n_components']} (mean AP={selected_score:.4f})")
+            f"\tSelected via 1-SE: n_components={params[selected_idx]['clf__n_components']} (mean AP={selected_score:.4f})"
+        )
         return params[selected_idx], selected_score
 
-    def conformal_training(self, X_cal: Sequence[np.ndarray], y_cal: np.ndarray, mask_cal: np.ndarray) -> InductiveConformalPredictor:
-        '''
+    def conformal_training(
+        self, X_cal: Sequence[np.ndarray], y_cal: np.ndarray, mask_cal: np.ndarray
+    ) -> InductiveConformalPredictor:
+        """
         Train the conformal predictor on the calibration set.
         Args:
             X_cal: array-like, shape (n_samples, n_features)
@@ -161,20 +174,21 @@ class SPCA_Runner(BaseProbeRunner):
                 The calibration set true labels.
             mask_cal: array-like, shape (n_samples,)
                 The mask for the calibration set.
-        '''
+        """
         f_X = deepcopy(X_cal)
         f_y = deepcopy(y_cal)
         f_mask = np.array(mask_cal, dtype=bool).copy()
         cfg = self.cfg.conformal_params
 
-        if cfg['nc'] == 'binary':
+        if cfg["nc"] == "binary":
             nc = symmetric_nonconformity
         else:
             raise NotImplementedError(
-                f"Nonconformity function {cfg['nc']} is not implemented.")
-        self.calibrator = InductiveConformalPredictor(nonconformity_func=nc,
-                                                      alpha=cfg["alpha"],
-                                                      tie_breaking=cfg["tie_breaking"])
+                f"Nonconformity function {cfg['nc']} is not implemented."
+            )
+        self.calibrator = InductiveConformalPredictor(
+            nonconformity_func=nc, alpha=cfg["alpha"], tie_breaking=cfg["tie_breaking"]
+        )
         yh_cal = self.decision_function(f_X)
         self.calibrator.fit(y=f_y[f_mask], scores=yh_cal[f_mask])
         return self.calibrator
@@ -229,7 +243,7 @@ class SPCA_Runner(BaseProbeRunner):
         """
         return self.process_input(X)
 
-    def update_metric(self, metric_dict: Dict) -> Dict:
+    def update_metric(self, metric_dict: dict) -> dict:
         """
         Add the metric items to the metric dictionary.
         """
@@ -250,7 +264,7 @@ class SPCA_Runner(BaseProbeRunner):
         return None
 
     @property
-    def direction_bias(self) -> Tuple[np.ndarray | None, float | None]:
+    def direction_bias(self) -> tuple[np.ndarray | None, float | None]:
         """
         Return, BOTH, the direction and bias of the separator.
         """
@@ -273,7 +287,9 @@ class SPCA_Runner(BaseProbeRunner):
         """
         return self.scaler.transform(bag)
 
-    def bag_decision_function(self, bags: Sequence[np.ndarray], agg: str = 'max') -> np.ndarray:
+    def bag_decision_function(
+        self, bags: Sequence[np.ndarray], agg: str = "max"
+    ) -> np.ndarray:
         """
         Compute the decision function for the given bags.
         """
@@ -282,16 +298,18 @@ class SPCA_Runner(BaseProbeRunner):
         for bag in bags:
             bp = self.process_bag(bag)
             preds = self.separator.decision_function(bp)
-            if agg == 'max':
+            if agg == "max":
                 yhat.append(np.max(preds))
-            elif agg == 'mean':
+            elif agg == "mean":
                 yhat.append(np.mean(preds))
             else:
                 raise ValueError(f"Unknown aggregation method: {agg}")
 
         return np.array(yhat).flatten()
 
-    def bag_predict_proba(self, bags: Sequence[np.ndarray], agg: str = 'max') -> np.ndarray:
+    def bag_predict_proba(
+        self, bags: Sequence[np.ndarray], agg: str = "max"
+    ) -> np.ndarray:
         """
         Compute the predicted probabilities for the given bags.
         """
@@ -300,23 +318,27 @@ class SPCA_Runner(BaseProbeRunner):
         for bag in bags:
             bp = self.process_bag(bag)
             preds = self.separator.predict_proba(bp)
-            if agg == 'max':
+            if agg == "max":
                 # Probability of positive class
                 proba.append(np.max(preds[1:]))
-            elif agg == 'mean':
+            elif agg == "mean":
                 proba.append(np.mean(preds[1:]))
             else:
                 raise ValueError(f"Unknown aggregation method: {agg}")
         return np.array(proba).flatten()
 
-    def bag_predict(self, bags: Sequence[np.ndarray], agg: str = 'max', threshold: float = 0.5) -> np.ndarray:
+    def bag_predict(
+        self, bags: Sequence[np.ndarray], agg: str = "max", threshold: float = 0.5
+    ) -> np.ndarray:
         """
         Predict the class labels for the given bags.
         """
         proba = self.bag_predict_proba(bags, agg=agg)
         return np.array(proba > threshold)
 
-    def bag_conformal_prediction(self, bags: Sequence[np.ndarray], agg: str = 'max') -> List[set]:
+    def bag_conformal_prediction(
+        self, bags: Sequence[np.ndarray], agg: str = "max"
+    ) -> list[set]:
         """
         Compute the conformal prediction for the given bags.
         """
@@ -325,25 +347,25 @@ class SPCA_Runner(BaseProbeRunner):
         yh = self.bag_decision_function(bags, agg=agg)
         # Compute the conformal prediction
         return self.calibrator.predict(yh)
-    
+
     def inst_decision_function(self, X: Sequence[np.ndarray]) -> np.ndarray:
         """
         Predict raw scores for the LAST INSTANCE of each bag.
         """
         return self.decision_function(X)
-    
+
     def inst_predict_proba(self, X: Sequence[np.ndarray]) -> np.ndarray:
         """
         Predict logits for the LAST INSTANCE of each bag.
         """
         return self.predict_proba(X)
-    
+
     def inst_predict(self, X: Sequence[np.ndarray]) -> np.ndarray:
         """
         Predict classes for the LAST INSTANCE of each bag.
         """
         return self.predict(X)
-    
+
     def inst_conformal_prediction(self, X: Sequence[np.ndarray]) -> np.ndarray:
         """
         Predict conformal classes for the LAST INSTANCE of each bag.

@@ -1,17 +1,18 @@
 from __future__ import annotations
-from runners.base import BaseProbeRunner
-from probes.mean_difference import MeanDifferenceClassifier
-from sklearn.preprocessing import StandardScaler
-from probes.conformal import InductiveConformalPredictor, symmetric_nonconformity
-import joblib
+
 import json
-from pathlib import Path
-import numpy as np
 import logging
-import numpy as np
-import logging
-from typing import List, Sequence, Dict, Set
+from collections.abc import Sequence
 from copy import deepcopy
+from pathlib import Path
+
+import joblib
+import numpy as np
+from sklearn.preprocessing import StandardScaler
+
+from probes.conformal import InductiveConformalPredictor, symmetric_nonconformity
+from probes.mean_difference import MeanDifferenceClassifier
+from runners.base import BaseProbeRunner
 
 log = logging.getLogger("SILRunner-MD")
 
@@ -25,7 +26,7 @@ class MDProbeRunner(BaseProbeRunner):
         super().__init__(cfg)
         self.cfg = cfg
         # set random seed
-        np.random.seed(getattr(cfg.probe, 'seed', None))
+        np.random.seed(getattr(cfg.probe, "seed", None))
         self.separator = None
         self.scaler = StandardScaler()
         self.calibrator = None
@@ -45,12 +46,18 @@ class MDProbeRunner(BaseProbeRunner):
             return yy[mask]
         return yy
 
-    def single_training(self, X: Sequence[np.ndarray], y: np.ndarray, mask: np.ndarray, neg: np.ndarray = None) -> Dict:
+    def single_training(
+        self,
+        X: Sequence[np.ndarray],
+        y: np.ndarray,
+        mask: np.ndarray,
+        neg: np.ndarray = None,
+    ) -> dict:
         """
         Train transformer and separator on the masked subset of bags.
         Returns dict with 'separator' and fitted 'transformer'.
         Args:
-            X: an list of bags 
+            X: an list of bags
             y: bag_labels
             mask: boolean mask array of length len(X) indicating which bags to train on
         Returns a dict with keys:
@@ -60,39 +67,51 @@ class MDProbeRunner(BaseProbeRunner):
         f_y = deepcopy(y)
         f_X = deepcopy(X)
         f_mask = np.array(mask, dtype=bool)
-        assert len(f_X) == len(f_y) == len(
-            f_mask),  "X, y and mask must have the same length"
+        assert (
+            len(f_X) == len(f_y) == len(f_mask)
+        ), "X, y and mask must have the same length"
         assert np.unique(f_y).size == 2, "y must be binary"
 
         ym = self.return_target(f_y, f_mask)
-        
+
         # 1) Fit transformer on concatenated instances
-        if self.cfg.probe.get('normalize_data', True):
+        if self.cfg.probe.get("normalize_data", True):
             log.warning("\t\tNormalizing the data...")
             Xf = np.vstack([x[-1] for x, m in zip(f_X, f_mask) if m])
             self.scaler.fit(Xf)
         else:
             raise NotImplementedError(
-                "Only a pipeline with the normalization is implemented")
+                "Only a pipeline with the normalization is implemented"
+            )
 
-        Xm = np.vstack([self.scaler.transform(bag)[-1]
-                for bag, m in zip(f_X, f_mask) if m])
+        Xm = np.vstack(
+            [self.scaler.transform(bag)[-1] for bag, m in zip(f_X, f_mask) if m]
+        )
 
         # 2) Transform each bag (take only the last element)
         cfg = self.cfg.probe
-        limit = cfg.get('train_sample_limit', Xm.shape[0])
-        self.separator = MeanDifferenceClassifier(with_covariance=cfg.init_params['with_covariance'],
-                                                  fit_intercept=cfg.init_params['fit_intercept'],
-                                                   verbose=cfg.init_params.get('verbose', True))
-                                     
-        self.separator.fit(
-            Xm[:limit], ym[:limit])
+        limit = cfg.get("train_sample_limit", Xm.shape[0])
+        self.separator = MeanDifferenceClassifier(
+            with_covariance=cfg.init_params["with_covariance"],
+            fit_intercept=cfg.init_params["fit_intercept"],
+            verbose=cfg.init_params.get("verbose", True),
+        )
 
-        return {'separator': self.separator,
-                'scaler': self.scaler,
-                'transformer': np.nan}
+        self.separator.fit(Xm[:limit], ym[:limit])
 
-    def parameter_search(self, X: Sequence[np.ndarray], y: np.ndarray, mask: np.ndarray, neg: np.ndarray = None) -> Dict:
+        return {
+            "separator": self.separator,
+            "scaler": self.scaler,
+            "transformer": np.nan,
+        }
+
+    def parameter_search(
+        self,
+        X: Sequence[np.ndarray],
+        y: np.ndarray,
+        mask: np.ndarray,
+        neg: np.ndarray = None,
+    ) -> dict:
         """
         Training with hyperparameter search
         Args:
@@ -100,11 +119,15 @@ class MDProbeRunner(BaseProbeRunner):
             - y: labels
             - mask: mask for the data
         """
-        log.warning("Running the hyperparameter search... (For MD Probe parameter_search == sigle_training)")
+        log.warning(
+            "Running the hyperparameter search... (For MD Probe parameter_search == sigle_training)"
+        )
         return self.single_training(X, y, mask)
 
-    def conformal_training(self, X_cal: Sequence[np.ndarray], y_cal: np.ndarray, mask_cal: np.ndarray) -> InductiveConformalPredictor:
-        '''
+    def conformal_training(
+        self, X_cal: Sequence[np.ndarray], y_cal: np.ndarray, mask_cal: np.ndarray
+    ) -> InductiveConformalPredictor:
+        """
         Train the conformal predictor on the calibration set.
         Args:
             X_cal: array-like, shape (n_samples, n_features)
@@ -113,24 +136,25 @@ class MDProbeRunner(BaseProbeRunner):
                 The calibration set true labels.
             mask_cal: array-like, shape (n_samples,)
                 The mask for the calibration set.
-        '''
+        """
         f_X = deepcopy(X_cal)
         f_y = deepcopy(y_cal)
         f_mask = np.array(mask_cal, dtype=bool).copy()
         cfg = self.cfg.conformal_params
 
-        if cfg['nc'] == 'binary':
+        if cfg["nc"] == "binary":
             nc = symmetric_nonconformity
         else:
             raise NotImplementedError(
-                f"Nonconformity function {cfg['nc']} is not implemented.")
-        self.calibrator = InductiveConformalPredictor(nonconformity_func=nc,
-                                                      alpha=cfg["alpha"],
-                                                      tie_breaking=cfg["tie_breaking"])
+                f"Nonconformity function {cfg['nc']} is not implemented."
+            )
+        self.calibrator = InductiveConformalPredictor(
+            nonconformity_func=nc, alpha=cfg["alpha"], tie_breaking=cfg["tie_breaking"]
+        )
         yh_cal = self.decision_function(f_X)
         self.calibrator.fit(y=f_y[f_mask], scores=yh_cal[f_mask])
         return self.calibrator
-    
+
     def conformal_prediction(self, X: Sequence[np.ndarray]) -> np.ndarray:
         """
         Compute the conformal prediction for the given bags.
@@ -149,16 +173,16 @@ class MDProbeRunner(BaseProbeRunner):
         # Transform the bags using the fitted scaler
         Xt = self.process_input(X)
         yhat = self.separator.decision_function(Xt)
-        return yhat.flatten() 
-    
+        return yhat.flatten()
+
     def predict_proba(self, X: Sequence[np.ndarray]) -> np.ndarray:
         Xt = self.process_input(X)
         return self.separator.predict_proba(Xt).flatten()
-    
+
     def predict(self, X):
         proba = self.predict_proba(X)
-        return np.array(proba > 0.5)    
-    
+        return np.array(proba > 0.5)
+
     def _bags_to_instance(self, bags: Sequence[np.ndarray]) -> np.ndarray:
         """
         Convert bags to instances by taking the last instance of each bag.
@@ -168,7 +192,7 @@ class MDProbeRunner(BaseProbeRunner):
             instances: array-like of shape [ #bags × hidden_size ]
         """
         return np.vstack([bag[-1] for bag in bags])
-    
+
     def process_input(self, X: Sequence[np.ndarray] | np.ndarray) -> np.ndarray:
         if type(X) is np.ndarray:
             X = [X]
@@ -192,7 +216,9 @@ class MDProbeRunner(BaseProbeRunner):
         """
         Return the bias of the separator.
         """
-        return np.asarray(self.separator.intercept_ if self.separator.fit_intercept else 0.0)
+        return np.asarray(
+            self.separator.intercept_ if self.separator.fit_intercept else 0.0
+        )
 
     @property
     def direction_bias(self):
@@ -200,7 +226,7 @@ class MDProbeRunner(BaseProbeRunner):
         Return, BOTH, the direction and bias of the separator.
         """
         return self.direction, self.bias
-    
+
     @property
     def estimator(self):
         """
@@ -218,7 +244,9 @@ class MDProbeRunner(BaseProbeRunner):
         """
         return self.scaler.transform(bag)
 
-    def bag_decision_function(self, bags: Sequence[np.ndarray], agg: str = 'max') -> np.ndarray:
+    def bag_decision_function(
+        self, bags: Sequence[np.ndarray], agg: str = "max"
+    ) -> np.ndarray:
         """
         Compute the decision function for the given bags.
         """
@@ -227,16 +255,18 @@ class MDProbeRunner(BaseProbeRunner):
         for bag in bags:
             bp = self.process_bag(bag)
             preds = self.separator.decision_function(bp)
-            if agg == 'max':
+            if agg == "max":
                 yhat.append(np.max(preds))
-            elif agg == 'mean':
+            elif agg == "mean":
                 yhat.append(np.mean(preds))
             else:
                 raise ValueError(f"Unknown aggregation method: {agg}")
 
         return np.array(yhat).flatten()
 
-    def bag_predict_proba(self, bags: Sequence[np.ndarray], agg: str = 'max') -> np.ndarray:
+    def bag_predict_proba(
+        self, bags: Sequence[np.ndarray], agg: str = "max"
+    ) -> np.ndarray:
         """
         Compute the predicted probabilities for the given bags.
         """
@@ -245,23 +275,27 @@ class MDProbeRunner(BaseProbeRunner):
         for bag in bags:
             bp = self.process_bag(bag)
             preds = self.separator.predict_proba(bp)
-            if agg == 'max':
+            if agg == "max":
                 # Probability of positive class
                 proba.append(np.max(preds[1:]))
-            elif agg == 'mean':
+            elif agg == "mean":
                 proba.append(np.mean(preds[1:]))
             else:
                 raise ValueError(f"Unknown aggregation method: {agg}")
         return np.array(proba).flatten()
 
-    def bag_predict(self, bags: Sequence[np.ndarray], agg: str = 'max', threshold: float = 0.5) -> np.ndarray:
+    def bag_predict(
+        self, bags: Sequence[np.ndarray], agg: str = "max", threshold: float = 0.5
+    ) -> np.ndarray:
         """
         Predict the class labels for the given bags.
         """
         proba = self.bag_predict_proba(bags, agg=agg)
         return np.array(proba > threshold)
 
-    def bag_conformal_prediction(self, bags: Sequence[np.ndarray], agg: str = 'max') -> List:
+    def bag_conformal_prediction(
+        self, bags: Sequence[np.ndarray], agg: str = "max"
+    ) -> list:
         """
         Compute the conformal prediction for the given bags.
         """
@@ -270,26 +304,26 @@ class MDProbeRunner(BaseProbeRunner):
         yh = self.bag_decision_function(bags, agg=agg)
         # Compute the conformal prediction
         return self.calibrator.predict(yh)
-    
-    def inst_decision_function(self, X:  Sequence[np.ndarray]) -> np.ndarray:
+
+    def inst_decision_function(self, X: Sequence[np.ndarray]) -> np.ndarray:
         """
         Predict raw scores for the LAST INSTANCE of each bag.
         """
         return self.decision_function(X)
-    
+
     def inst_predict_proba(self, X: Sequence[np.ndarray]) -> np.ndarray:
         """
         Predict logits for the LAST INSTANCE of each bag.
         """
         return self.predict_proba(X)
-    
+
     def inst_predict(self, X: Sequence[np.ndarray]) -> np.ndarray:
         """
         Predict classes for the LAST INSTANCE of each bag.
         """
         return self.predict(X)
-    
-    def inst_conformal_prediction(self, X: Sequence[np.ndarray]) -> List[set]:
+
+    def inst_conformal_prediction(self, X: Sequence[np.ndarray]) -> list[set]:
         """
         Predict conformal classes for the LAST INSTANCE of each bag.
         """

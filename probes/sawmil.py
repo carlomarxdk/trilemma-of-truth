@@ -1,20 +1,20 @@
-# monkey patchin the miSVM package
-# to use the sparse binary SVM
-from __future__ import print_function, division
-from probes.utils import BagSplitter_pathced
-from misvm.sil import SIL
-from misvm.smil import sMIL
-from misvm.sbmil import sbMIL
-from misvm.svm import SVM, _smart_kernel
+from __future__ import annotations
+
+import logging
 
 import numpy as np
 from misvm.kernel import by_name as kernel_by_name
-from misvm.util import spdiag
-from misvm.util import BagSplitter
+from misvm.sbmil import sbMIL
+from misvm.sil import SIL
+from misvm.smil import sMIL
+from misvm.svm import SVM, _smart_kernel
+from misvm.util import BagSplitter, spdiag
 
-import numpy as np
+from probes.utils import BagSplitter_pathced
 
-import logging
+# monkey patchin the miSVM package
+# to use the sparse binary SVM
+
 
 log = logging.getLogger("sAwMIL")
 
@@ -22,8 +22,17 @@ log = logging.getLogger("sAwMIL")
 BagSplitter = BagSplitter_pathced
 
 
-def __init__(self, kernel='linear', C=1.0, p=3, gamma=1e0, scale_C=True,
-             verbose=True, sv_cutoff=1e-7, penalty=-0.1):
+def __init__(
+    self,
+    kernel="linear",
+    C=1.0,
+    p=3,
+    gamma=1e0,
+    scale_C=True,
+    verbose=True,
+    sv_cutoff=1e-7,
+    penalty=-0.1,
+):
     """
     @param kernel : the desired kernel function; can be linear, quadratic,
                     polynomial, or rbf [default: linear]
@@ -110,44 +119,51 @@ def fit(self, bags, y, in_bag_labels=None):
     bs = self.bs
 
     if self.verbose:
-        log.warning('Training initial sMIL classifier for sbMIL...')
+        log.warning("Training initial sMIL classifier for sbMIL...")
     # STAGE 1
-    init_classifier = sMIL(kernel=self.kernel, C=self.C, p=self.p, gamma=self.gamma,
-                           scale_C=self.scale_C, verbose=self.verbose,
-                           sv_cutoff=self.sv_cutoff, penalty=self.penalty)
+    init_classifier = sMIL(
+        kernel=self.kernel,
+        C=self.C,
+        p=self.p,
+        gamma=self.gamma,
+        scale_C=self.scale_C,
+        verbose=self.verbose,
+        sv_cutoff=self.sv_cutoff,
+        penalty=self.penalty,
+    )
     init_classifier.fit(bags, y)
     # STAGE 2
     if self.verbose:
-        log.warning('Training SIL classifier for sbMIL...')
+        log.warning("Training SIL classifier for sbMIL...")
     f_pos = init_classifier.predict(bs.pos_inst_as_bags)
     # Select nth largest value as cutoff for positive instances
     pos_labels, f_cutoff, _ = sort_and_label(self, bs, f_pos)
     # If less than 5% of positives chosen, ignore the intra-bag-labels
     if (pos_labels == 1).sum() < 0.05 * bs.L_p:
         log.warning(
-            f'Less than 5% of positives chosen {(pos_labels == 1).sum()}; ignoring the intra-bag labels.')
+            f"Less than 5% of positives chosen {(pos_labels == 1).sum()}; ignoring the intra-bag labels."
+        )
         pos_labels = -np.matrix(np.ones((bs.L_p, 1)))
         pos_labels[np.nonzero(f_pos >= f_cutoff)] = 1.0
     # Train on all instances
     if self.verbose:
-        log.warning('Retraining with top %d%% as positive...' %
-                    int(100 * self.eta))
+        log.warning("Retraining with top %d%% as positive..." % int(100 * self.eta))
     # Construct the final labels
     labels = np.vstack([-np.ones((bs.L_n, 1)), pos_labels])
     self._labels = labels
 
     if self.verbose:
         log.warning(
-            f"Number of positive instances: {np.sum(pos_labels == 1)} out of {labels.shape[0]}")
-    super(SIL, self).fit(
-        bs.instances, labels)
+            f"Number of positive instances: {np.sum(pos_labels == 1)} out of {labels.shape[0]}"
+        )
+    super(SIL, self).fit(bs.instances, labels)
 
 
 def sort_and_label(self, bs, f_pos):
-    '''Sort the positive instances and label them
+    """Sort the positive instances and label them
     Return:
         labels: a column vector of labels for positive instances (labeled based on the ranking and intrabag labels)
-    '''
+    """
     # Select nth largest value as cutoff for positive instances
     n = int(round(bs.L_p * self.eta))
     # Double check the number
@@ -174,15 +190,14 @@ def linearize(self, normalize: bool = True):
         w /= np.linalg.norm(w)
     # 2. Compute the bias
     non_bound_mask = (alphas > self.sv_cutoff).flatten() & (
-        alphas < self.C - self.sv_cutoff).flatten()
+        alphas < self.C - self.sv_cutoff
+    ).flatten()
 
     mask_pos = non_bound_mask & (y > 0).flatten()
     mask_neg = non_bound_mask & (y < 0).flatten()
-    bias_pos = np.mean(y.flatten()[mask_pos] -
-                       np.dot(X, w).flatten()[mask_pos])
-    bias_neg = np.mean(y.flatten()[mask_neg] -
-                       np.dot(X, w).flatten()[mask_neg])
-    bias = (bias_pos + bias_neg) / 2.
+    bias_pos = np.mean(y.flatten()[mask_pos] - np.dot(X, w).flatten()[mask_pos])
+    bias_neg = np.mean(y.flatten()[mask_neg] - np.dot(X, w).flatten()[mask_neg])
+    bias = (bias_pos + bias_neg) / 2.0
     return w, bias
 
 

@@ -1,9 +1,11 @@
-import numpy as np
-import pytest
-from numpy.testing import assert_allclose
-import probes.mean_difference as mdc
+from __future__ import annotations
 
+import numpy as np
+from numpy.testing import assert_allclose
+
+import probes.mean_difference as mdc
 from probes.mean_difference import robust_covariance
+
 
 def test_nan_input_triggers_fallback(caplog):
     rng = np.random.default_rng(0)
@@ -14,6 +16,7 @@ def test_nan_input_triggers_fallback(caplog):
     assert_allclose(S, 3.0 * np.eye(5), atol=1e-12)
     assert any("using scaled identity" in rec.message.lower() for rec in caplog.records)
 
+
 def test_inf_input_triggers_fallback(caplog):
     X = np.zeros((10, 4))
     X[1, 2] = np.inf  # inject Inf
@@ -21,6 +24,7 @@ def test_inf_input_triggers_fallback(caplog):
     S = robust_covariance(X, method="oas", fallback_scale=2.0)
     assert_allclose(S, 2.0 * np.eye(4), atol=1e-12)
     assert any("using scaled identity" in rec.message.lower() for rec in caplog.records)
+
 
 def test_estimator_exception_triggers_fallback(monkeypatch, caplog):
     def boom(*args, **kwargs):
@@ -34,6 +38,7 @@ def test_estimator_exception_triggers_fallback(monkeypatch, caplog):
     S = mdc.robust_covariance(X, method="oas", fallback_scale=5.0)
     assert np.allclose(S, 5.0 * np.eye(6))
     assert any("using scaled identity" in rec.message.lower() for rec in caplog.records)
+
 
 def test_happy_path_symmetry_and_finiteness():
     rng = np.random.default_rng(1)
@@ -49,12 +54,14 @@ def test_happy_path_symmetry_and_finiteness():
         # shape
         assert S.shape == (8, 8)
 
+
 def test_diagonal_is_diagonal():
     rng = np.random.default_rng(2)
     X = rng.standard_normal((30, 7))
     S = robust_covariance(X, method="diagonal")
     offdiag = S - np.diag(np.diag(S))
     assert_allclose(offdiag, np.zeros_like(S), atol=1e-12)
+
 
 def test_shrunk_is_between_empirical_and_identity():
     rng = np.random.default_rng(3)

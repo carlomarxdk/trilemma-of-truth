@@ -1,17 +1,17 @@
-from runners.base import BaseProbeRunner
-from probes.ttpd import TTPD
-from sklearn.preprocessing import StandardScaler
-from probes.conformal import InductiveConformalPredictor, symmetric_nonconformity
-import joblib
+from __future__ import annotations
+
 import json
-from pathlib import Path
-import numpy as np
 import logging
-from typing import List
-import numpy as np
-import logging
-from typing import List
 from copy import deepcopy
+from pathlib import Path
+
+import joblib
+import numpy as np
+from sklearn.preprocessing import StandardScaler
+
+from probes.conformal import InductiveConformalPredictor, symmetric_nonconformity
+from probes.ttpd import TTPD
+from runners.base import BaseProbeRunner
 
 log = logging.getLogger("SILRunner-TTPD")
 
@@ -25,7 +25,7 @@ class TTPD_Runner(BaseProbeRunner):
         super().__init__(cfg)
         self.cfg = cfg
         # set random seed
-        np.random.seed(getattr(cfg.probe, 'seed', None))
+        np.random.seed(getattr(cfg.probe, "seed", None))
         self.separator = None
         self.scaler = StandardScaler()
         self.calibrator = None
@@ -45,12 +45,18 @@ class TTPD_Runner(BaseProbeRunner):
             return yy[mask]
         return yy
 
-    def single_training(self, X: List[np.ndarray], y: np.ndarray, mask: np.ndarray, neg: np.ndarray = None):
+    def single_training(
+        self,
+        X: list[np.ndarray],
+        y: np.ndarray,
+        mask: np.ndarray,
+        neg: np.ndarray = None,
+    ):
         """
         Train transformer and separator on the masked subset of bags.
         Returns dict with 'separator' and fitted 'transformer'.
         Args:
-            X: an list of bags 
+            X: an list of bags
             y: bag_labels
             mask: boolean mask array of length len(X) indicating which bags to train on
             neg: affirmative vs negated labels (if statement is negated = 1)
@@ -63,44 +69,53 @@ class TTPD_Runner(BaseProbeRunner):
         f_X = deepcopy(X)
         f_mask = np.array(mask, dtype=bool)
 
-        assert len(f_X) == len(f_y) == len(
-            f_mask) == len(f_neg), "X, y and mask must have the same length"
+        assert (
+            len(f_X) == len(f_y) == len(f_mask) == len(f_neg)
+        ), "X, y and mask must have the same length"
         assert np.unique(f_y).size == 2, "y must be binary"
 
         ym = self.return_target(f_y, f_mask)
-        negm = self.return_target(
-            1 - f_neg, f_mask) if f_neg is not None else None
+        negm = self.return_target(1 - f_neg, f_mask) if f_neg is not None else None
         # 1) Fit transformer on concatenated instances
-        if self.cfg.probe.get('normalize_data', True):
+        if self.cfg.probe.get("normalize_data", True):
             log.warning("\t\tNormalizing the data...")
             Xm = np.vstack([bag[-1] for bag, m in zip(f_X, f_mask) if m])
             self.scaler.fit(Xm)
         else:
             raise NotImplementedError(
-                "Only a pipeline with the normalization is implemented")
+                "Only a pipeline with the normalization is implemented"
+            )
 
-        Xm = np.vstack([self.scaler.transform(bag)[-1]
-                        for bag, m in zip(f_X, f_mask) if m])
+        Xm = np.vstack(
+            [self.scaler.transform(bag)[-1] for bag, m in zip(f_X, f_mask) if m]
+        )
 
         # 2) Transform each bag (take only the last element)
         cfg = self.cfg.probe
-        limit = cfg.get('train_sample_limit', Xm.shape[0])
+        limit = cfg.get("train_sample_limit", Xm.shape[0])
         log.warning("\t\tFit the data...")
 
         # 3) Fit the model
         self.separator = TTPD(
-            verbose=cfg.init_params.get('verbose', False),
-            random_seed=cfg.init_params.get('random_seed', 42)
+            verbose=cfg.init_params.get("verbose", False),
+            random_seed=cfg.init_params.get("random_seed", 42),
         )
 
-        self.separator.fit(
-            Xm[:limit], t_labels=ym[:limit], p_labels=negm[:limit])
+        self.separator.fit(Xm[:limit], t_labels=ym[:limit], p_labels=negm[:limit])
 
-        return {'separator': self.separator,
-                'scaler': self.scaler,
-                'transformer': np.nan}
+        return {
+            "separator": self.separator,
+            "scaler": self.scaler,
+            "transformer": np.nan,
+        }
 
-    def parameter_search(self, X: List[np.ndarray], y: np.ndarray, mask: np.ndarray, neg: np.ndarray = None):
+    def parameter_search(
+        self,
+        X: list[np.ndarray],
+        y: np.ndarray,
+        mask: np.ndarray,
+        neg: np.ndarray = None,
+    ):
         """
         Training with hyperparameter search
         Args:
@@ -109,11 +124,12 @@ class TTPD_Runner(BaseProbeRunner):
             mask: mask for the data
         """
         log.warning(
-            "Running the hyperparameter search... (For SPCA Probe parameter_search == sigle_training)")
+            "Running the hyperparameter search... (For SPCA Probe parameter_search == sigle_training)"
+        )
         return self.single_training(X, y, mask, neg)
 
     def conformal_training(self, X_cal, y_cal, mask_cal):
-        '''
+        """
         Train the conformal predictor on the calibration set.
         Args:
             X_cal: array-like, shape (n_samples, n_features)
@@ -122,25 +138,26 @@ class TTPD_Runner(BaseProbeRunner):
                 The calibration set true labels.
             mask_cal: array-like, shape (n_samples,)
                 The mask for the calibration set.
-        '''
+        """
         f_X = deepcopy(X_cal)
         f_y = deepcopy(y_cal)
         f_mask = np.array(mask_cal, dtype=bool).copy()
         cfg = self.cfg.conformal_params
 
-        if cfg['nc'] == 'binary':
+        if cfg["nc"] == "binary":
             nc = symmetric_nonconformity
         else:
             raise NotImplementedError(
-                f"Nonconformity function {cfg['nc']} is not implemented.")
-        self.calibrator = InductiveConformalPredictor(nonconformity_func=nc,
-                                                      alpha=cfg["alpha"],
-                                                      tie_breaking=cfg["tie_breaking"])
+                f"Nonconformity function {cfg['nc']} is not implemented."
+            )
+        self.calibrator = InductiveConformalPredictor(
+            nonconformity_func=nc, alpha=cfg["alpha"], tie_breaking=cfg["tie_breaking"]
+        )
         yh_cal = self.decision_function(f_X)
         self.calibrator.fit(y=f_y[f_mask], scores=yh_cal[f_mask])
         return self.calibrator
 
-    def conformal_prediction(self, X: List[np.ndarray]) -> np.ndarray:
+    def conformal_prediction(self, X: list[np.ndarray]) -> np.ndarray:
         """
         Compute the conformal prediction for the given bags.
         """
@@ -171,7 +188,7 @@ class TTPD_Runner(BaseProbeRunner):
         proba = self.predict_proba(X)
         return np.array(proba > 0.5)
 
-    def _bags_to_instance(self, bags: List[np.ndarray]) -> np.ndarray:
+    def _bags_to_instance(self, bags: list[np.ndarray]) -> np.ndarray:
         """
         Convert bags to instances by taking the last instance of each bag.
         Args:
@@ -180,8 +197,8 @@ class TTPD_Runner(BaseProbeRunner):
             instances: array-like of shape [ #bags × hidden_size ]
         """
         return np.vstack([bag[-1] for bag in bags])
-    
-    def process_input(self, X: List[np.ndarray] | np.ndarray) -> np.ndarray:
+
+    def process_input(self, X: list[np.ndarray] | np.ndarray) -> np.ndarray:
         if type(X) is np.ndarray:
             X = [X]
         return self.scaler.transform(self._bags_to_instance(X))
@@ -230,7 +247,9 @@ class TTPD_Runner(BaseProbeRunner):
         """
         return self.scaler.transform(bag)
 
-    def bag_decision_function(self, bags: List[np.ndarray], agg: str = 'max') -> np.ndarray:
+    def bag_decision_function(
+        self, bags: list[np.ndarray], agg: str = "max"
+    ) -> np.ndarray:
         """
         Compute the decision function for the given bags.
         """
@@ -239,16 +258,16 @@ class TTPD_Runner(BaseProbeRunner):
         for bag in bags:
             bp = self.process_bag(bag)
             preds = self.separator.decision_function(bp)
-            if agg == 'max':
+            if agg == "max":
                 yhat.append(np.max(preds))
-            elif agg == 'mean':
+            elif agg == "mean":
                 yhat.append(np.mean(preds))
             else:
                 raise ValueError(f"Unknown aggregation method: {agg}")
 
         return np.array(yhat).flatten()
 
-    def bag_predict_proba(self, bags: List[np.ndarray], agg: str = 'max') -> np.ndarray:
+    def bag_predict_proba(self, bags: list[np.ndarray], agg: str = "max") -> np.ndarray:
         """
         Compute the predicted probabilities for the given bags.
         """
@@ -257,23 +276,27 @@ class TTPD_Runner(BaseProbeRunner):
         for bag in bags:
             bp = self.process_bag(bag)
             preds = self.separator.predict_proba(bp)
-            if agg == 'max':
+            if agg == "max":
                 # Probability of positive class
                 proba.append(np.max(preds[1:]))
-            elif agg == 'mean':
+            elif agg == "mean":
                 proba.append(np.mean(preds[1:]))
             else:
                 raise ValueError(f"Unknown aggregation method: {agg}")
         return np.array(proba).flatten()
 
-    def bag_predict(self, bags: List[np.ndarray], agg: str = 'max', threshold: float = 0.5) -> np.ndarray:
+    def bag_predict(
+        self, bags: list[np.ndarray], agg: str = "max", threshold: float = 0.5
+    ) -> np.ndarray:
         """
         Predict the class labels for the given bags.
         """
         proba = self.bag_predict_proba(bags, agg=agg)
         return np.array(proba > threshold)
 
-    def bag_conformal_prediction(self, bags: List[np.ndarray], agg: str = 'max') -> List[set]:
+    def bag_conformal_prediction(
+        self, bags: list[np.ndarray], agg: str = "max"
+    ) -> list[set]:
         """
         Compute the conformal prediction for the given bags.
         """
@@ -282,32 +305,32 @@ class TTPD_Runner(BaseProbeRunner):
         yh = self.bag_decision_function(bags, agg=agg)
         # Compute the conformal prediction
         return self.calibrator.predict(yh)
-    
+
     def inst_decision_function(self, X):
         """
         Predict raw scores for the LAST INSTANCE of each bag.
         """
         return self.decision_function(X)
-    
+
     def inst_predict_proba(self, X):
         """
         Predict logits for the LAST INSTANCE of each bag.
         """
         return self.predict_proba(X)
-    
+
     def inst_predict(self, X):
         """
         Predict classes for the LAST INSTANCE of each bag.
         """
         return self.predict(X)
-    
+
     def inst_conformal_prediction(self, X):
         """
         Predict conformal classes for the LAST INSTANCE of each bag.
         """
         return self.conformal_prediction(X)
 
-    def load(self, output_dir: str | Path, layer_id: int) -> 'TTPD_Runner':
+    def load(self, output_dir: str | Path, layer_id: int) -> "TTPD_Runner":
         """
         Reload saved artifacts into this runner.
         Args:

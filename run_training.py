@@ -1,49 +1,58 @@
+from __future__ import annotations
+
+import logging
+import os
+import pprint
+import re
+import sys
+import time
+from collections.abc import Sequence
+from glob import glob
+from pathlib import Path
+
+import hydra
+import joblib
+import numpy as np
+from omegaconf import DictConfig, OmegaConf
+from sklearn.base import BaseEstimator, TransformerMixin
+
+from misc.db import LogDataBase
+from misc.task import Task
+from runners import (
+    MDProbeRunner,
+    MulticlassMILRunner,
+    MulticlassSVMRunner,
+    SawmilProbeRunner,
+    SPCA_Runner,
+    SVMProbeRunner,
+    TTPD_Runner,
+)
+from utils import _atomic_joblib_dump, _atomic_write_json
+from utils import log_metric_binary as log_metric
+from utils import log_metric_multiclass as log_metric_mc
+from utils import should_process_layer
+from utils_hydra import load_data, return_label
+
 # Code for ONE-vs-ALL probes, works both for SIL (MD+CP and SVM) and MIL (Sawmil) probes.
 # CODE for MULTICLASS probes, works both for SI-SVM and MIL (Sawmil) probes.
 
-import logging
-import hydra
-from utils_hydra import load_data, return_label
-from misc.task import Task
-from omegaconf import DictConfig, OmegaConf
-import numpy as np
-import os
-import time
-from glob import glob
-from misc.db import LogDataBase
-import joblib
-import sys
-import re
-import pprint
-from pathlib import Path
-from utils import (
-    should_process_layer,
-    _atomic_joblib_dump,
-    _atomic_write_json,
-    log_metric_binary as log_metric,
-    log_metric_multiclass as log_metric_mc
-)
-
-from typing import Optional, Dict, List, Sequence
-from sklearn.base import TransformerMixin, BaseEstimator
-
-from runners import SVMProbeRunner, MDProbeRunner, SawmilProbeRunner, SPCA_Runner, TTPD_Runner, MulticlassMILRunner, MulticlassSVMRunner
 
 log = logging.getLogger("Training")
 
 PROBES = {
-    'svm': SVMProbeRunner,
-    'mean_diff': MDProbeRunner,
-    'sawmil': SawmilProbeRunner,
-    'sawmil_mc': MulticlassMILRunner,
-    'svm_mc': MulticlassSVMRunner,
-    'spca': SPCA_Runner,
-    'ttpd': TTPD_Runner,
+    "svm": SVMProbeRunner,
+    "mean_diff": MDProbeRunner,
+    "sawmil": SawmilProbeRunner,
+    "sawmil_mc": MulticlassMILRunner,
+    "svm_mc": MulticlassSVMRunner,
+    "spca": SPCA_Runner,
+    "ttpd": TTPD_Runner,
 }
 
 
 try:
     from sklearnex import patch_sklearn
+
     patch_sklearn()
     log.warning("Patched sklearn is running...")
 except:
@@ -51,15 +60,16 @@ except:
 
 
 def validate_config(cfg: DictConfig):
-    assert type(
-        cfg.datapack['datasets']) == list or type(cfg.datapack['datasets']).__name__ == "ListConfig", f"Datasets must be a list. Not {type(cfg.datapack['datasets'])}"
-    assert len(cfg.datapack['datasets']
-               ) > 0, "At least one dataset must be selected."
+    assert (
+        type(cfg.datapack["datasets"]) == list
+        or type(cfg.datapack["datasets"]).__name__ == "ListConfig"
+    ), f"Datasets must be a list. Not {type(cfg.datapack['datasets'])}"
+    assert len(cfg.datapack["datasets"]) > 0, "At least one dataset must be selected."
     OmegaConf.set_struct(cfg, False)  # Allow overriding
     trial_name = cfg.trial_name
     if cfg.search:
         trial_name += "_search"
-    trial_name += f'_task-{cfg.task}'
+    trial_name += f"_task-{cfg.task}"
     cfg["trial_name"] = trial_name
     # if cfg["task"] == 2:
     #     cfg["probe"]["assume_known_positives"] = False
@@ -71,27 +81,33 @@ def validate_config(cfg: DictConfig):
 
 
 def log_stats(cfg):
-    datasets_test = cfg.datapack["datasets_test"] if len(
-        cfg.datapack["datasets_test"]) > 0 else cfg.datapack["datasets"]
+    datasets_test = (
+        cfg.datapack["datasets_test"]
+        if len(cfg.datapack["datasets_test"]) > 0
+        else cfg.datapack["datasets"]
+    )
     log.warning(
-        f"Training {cfg.probe['name'].upper()}-based probe for {cfg.model['name']} activations [task: {cfg.task}]")
-    log.warning(
-        f"\t\tTrain datasets: {cfg.datapack['datasets']}")
+        f"Training {cfg.probe['name'].upper()}-based probe for {cfg.model['name']} activations [task: {cfg.task}]"
+    )
+    log.warning(f"\t\tTrain datasets: {cfg.datapack['datasets']}")
     log.warning(f"\t\tTest datasets: {datasets_test})")
     log.warning(f"\t\tOutput directory: {cfg.output_dir}")
 
 
-def save(concept_direction: np.ndarray,
-         concept_bias: np.ndarray,
-         metric_dict: Dict,
-         layer_id: int,
-         cfg: DictConfig,
-         estimator: Optional[BaseEstimator] = None,
-         conf_calibrator: Optional[BaseEstimator] = None,
-         scaler: Optional[TransformerMixin] = None,
-         transformer: Optional[TransformerMixin] = None,
-         y_hat: np.ndarray = None, y_true: np.ndarray = None):
-    '''
+def save(
+    concept_direction: np.ndarray,
+    concept_bias: np.ndarray,
+    metric_dict: dict,
+    layer_id: int,
+    cfg: DictConfig,
+    estimator: BaseEstimator | None = None,
+    conf_calibrator: BaseEstimator | None = None,
+    scaler: TransformerMixin | None = None,
+    transformer: TransformerMixin | None = None,
+    y_hat: np.ndarray = None,
+    y_true: np.ndarray = None,
+):
+    """
     Save the artifacts of the run.
     Args:
         concept_direction: The direction of the concept (coef_).
@@ -106,7 +122,7 @@ def save(concept_direction: np.ndarray,
         y_true: The true labels.
         estimator: The object of the classifier/regressor.
 
-    '''
+    """
     output_dir = Path(str(cfg.output_dir))
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -117,41 +133,48 @@ def save(concept_direction: np.ndarray,
     metrics_path = output_dir / f"metrics_{layer_id}.json"
     _atomic_write_json(metrics_path, metric_dict)
     # 3. Objects
-    est_path = output_dir / \
-        f"estimator_{layer_id}.joblib" if estimator is not None else None
-    if (estimator is not None):
+    est_path = (
+        output_dir / f"estimator_{layer_id}.joblib" if estimator is not None else None
+    )
+    if estimator is not None:
         _atomic_joblib_dump(est_path, estimator)
-    scl_path = output_dir / \
-        f"scaler_{layer_id}.joblib" if scaler is not None else None
-    if (scaler is not None):
+    scl_path = output_dir / f"scaler_{layer_id}.joblib" if scaler is not None else None
+    if scaler is not None:
         _atomic_joblib_dump(scl_path, scaler)
-    trn_path = output_dir / \
-        f"transformer_{layer_id}.joblib" if transformer is not None else None
-    if (transformer is not None):
+    trn_path = (
+        output_dir / f"transformer_{layer_id}.joblib"
+        if transformer is not None
+        else None
+    )
+    if transformer is not None:
         _atomic_joblib_dump(trn_path, transformer)
-    clb_path = output_dir / \
-        f"calibrator_{layer_id}.joblib" if conf_calibrator is not None else None
-    if (conf_calibrator is not None):
+    clb_path = (
+        output_dir / f"calibrator_{layer_id}.joblib"
+        if conf_calibrator is not None
+        else None
+    )
+    if conf_calibrator is not None:
         _atomic_joblib_dump(clb_path, conf_calibrator)
 
-    coef_path = output_dir / \
-        f"coef_{layer_id}.npy" if concept_direction is not None else None
-    bias_path = output_dir / \
-        f"bias_{layer_id}.npy" if concept_bias is not None else None
+    coef_path = (
+        output_dir / f"coef_{layer_id}.npy" if concept_direction is not None else None
+    )
+    bias_path = (
+        output_dir / f"bias_{layer_id}.npy" if concept_bias is not None else None
+    )
     # 4. Numpy arrays
     if concept_direction is not None:
         np.save(coef_path, concept_direction)
     if concept_bias is not None:
         np.save(bias_path, concept_bias)
 
-    yh_path = output_dir / \
-        f"y_hat_{layer_id}.npy" if y_hat is not None else None
-    if (y_hat is not None):
+    yh_path = output_dir / f"y_hat_{layer_id}.npy" if y_hat is not None else None
+    if y_hat is not None:
         np.save(yh_path, y_hat)
     else:
         log.warning("y_hat is None")
-    yt_path = output_dir / f"y_true.npy" if y_true is not None else None
-    if (y_true is not None):
+    yt_path = output_dir / "y_true.npy" if y_true is not None else None
+    if y_true is not None:
         np.save(yt_path, y_true)
 
         # 6) Manifest (quick glance + reproducibility bits)
@@ -162,21 +185,35 @@ def save(concept_direction: np.ndarray,
             "metrics": str(metrics_path),
             "coef": str(coef_path) if coef_path else None,
             "bias": str(bias_path) if bias_path else None,
-            "preds": str(yh_path) if (y_hat is not None or y_true is not None) else None,
+            "preds": (
+                str(yh_path) if (y_hat is not None or y_true is not None) else None
+            ),
             "estimator": str(est_path) if est_path else None,
             "scaler": str(scl_path) if scl_path else None,
             "transformer": str(trn_path) if trn_path else None,
             "calibrator": str(clb_path) if clb_path else None,
         },
         "shapes": {
-            "coef": None if concept_direction is None else tuple(np.shape(concept_direction)),
+            "coef": (
+                None
+                if concept_direction is None
+                else tuple(np.shape(concept_direction))
+            ),
             "bias": None if concept_bias is None else tuple(np.shape(concept_bias)),
             "y_hat": None if y_hat is None else tuple(np.shape(y_hat)),
             "y_true": None if y_true is None else tuple(np.shape(y_true)),
         },
         "dtypes": {
-            "coef": None if concept_direction is None else str(getattr(concept_direction, "dtype", "")),
-            "bias": None if concept_bias is None else str(getattr(concept_bias, "dtype", "")),
+            "coef": (
+                None
+                if concept_direction is None
+                else str(getattr(concept_direction, "dtype", ""))
+            ),
+            "bias": (
+                None
+                if concept_bias is None
+                else str(getattr(concept_bias, "dtype", ""))
+            ),
             "y_hat": None if y_hat is None else str(getattr(y_hat, "dtype", "")),
             "y_true": None if y_true is None else str(getattr(y_true, "dtype", "")),
         },
@@ -185,11 +222,15 @@ def save(concept_direction: np.ndarray,
             "numpy": np.__version__,
             "joblib": joblib.__version__,
             "hydra": hydra.__version__,
-            "sklearn": sys.modules['sklearn'].__version__,
-            "scipy": sys.modules['scipy'].__version__,
-            "polars": sys.modules['polars'].__version__ if 'polars' in sys.modules else "",
-            "pandas": sys.modules['pandas'].__version__ if 'pandas' in sys.modules else "",
-            "torch": sys.modules['torch'].__version__ if 'torch' in sys.modules else "",
+            "sklearn": sys.modules["sklearn"].__version__,
+            "scipy": sys.modules["scipy"].__version__,
+            "polars": (
+                sys.modules["polars"].__version__ if "polars" in sys.modules else ""
+            ),
+            "pandas": (
+                sys.modules["pandas"].__version__ if "pandas" in sys.modules else ""
+            ),
+            "torch": sys.modules["torch"].__version__ if "torch" in sys.modules else "",
         },
     }
     manifest_path = output_dir / "manifests"
@@ -199,7 +240,7 @@ def save(concept_direction: np.ndarray,
     return manifest
 
 
-def checkpointing(cfg, layer_range: Sequence[int]) -> List[int]:
+def checkpointing(cfg, layer_range: Sequence[int]) -> list[int]:
     """
     Check which layers are missing from the output directory and return them.
     If a layer is missing, also include the previous layer (to avoid missing values).
@@ -209,7 +250,7 @@ def checkpointing(cfg, layer_range: Sequence[int]) -> List[int]:
     recorded_coefs = glob(f"{cfg.output_dir}/coef_*")
     completed_layers = []
     for file in recorded_coefs:
-        match = re.search(r'coef_(\d+)', file)
+        match = re.search(r"coef_(\d+)", file)
         if match:
             completed_layers.append(int(match.group(1)))
     model_layers = cfg.model["layers"]
@@ -235,42 +276,50 @@ def main(cfg: DictConfig):
 
     dh = load_data(cfg)
     dh_test = dh
-    assert dh.datasets == dh_test.datasets, "The test and train dataset sources must be the same."
+    assert (
+        dh.datasets == dh_test.datasets
+    ), "The test and train dataset sources must be the same."
     layer_range = np.quantile(
-        cfg.model['layers'], cfg.layer_range, method="closest_observation")
+        cfg.model["layers"], cfg.layer_range, method="closest_observation"
+    )
     log.warning(f"Layer range: {layer_range[0]} - {layer_range[1]}")
 
     # Checkpointing
     if cfg.start_from_checkpoint:
         missing_layers = checkpointing(cfg, layer_range)
         if len(missing_layers) == 0:
-            log.warning(
-                "All layers are already processed...")
+            log.warning("All layers are already processed...")
             layers = []
             # raise Exception("All layers are already processed.")
         else:
             log.warning(
-                f"Checkpointing: Processing the missing layers: {missing_layers}")
+                f"Checkpointing: Processing the missing layers: {missing_layers}"
+            )
             layers = missing_layers
     else:
         layers = cfg["layers"]
 
     task = Task(cfg.task)
-    db = LogDataBase(
-        tab_name=f"{cfg.probe['name']}_fit", db_name="experiments")
-    db.write(trial_id=f"{cfg.model.name}-{cfg.trial_name}",
-             model=cfg.model.name,
-             datapack=cfg.datapack.name,
-             task=cfg.task,
-             parameters=f"STARTED",
-             progress=0,
-             status=0)
+    db = LogDataBase(tab_name=f"{cfg.probe['name']}_fit", db_name="experiments")
+    db.write(
+        trial_id=f"{cfg.model.name}-{cfg.trial_name}",
+        model=cfg.model.name,
+        datapack=cfg.datapack.name,
+        task=cfg.task,
+        parameters="STARTED",
+        progress=0,
+        status=0,
+    )
 
     # PER LAYER
     if cfg.run_debugging:
         layers = [13]
     for layer_id in layers:
-        if cfg.run_debugging == True and layer_id > 6 and should_process_layer(layer_id, cfg):
+        if (
+            cfg.run_debugging == True
+            and layer_id > 6
+            and should_process_layer(layer_id, cfg)
+        ):
             log.warning(f"Processing layer {layer_id} || Debugging mode")
         elif cfg.run_debugging == False and should_process_layer(layer_id, cfg):
             log.warning(f"Processing layer {layer_id}")
@@ -279,8 +328,7 @@ def main(cfg: DictConfig):
             continue
 
         # LOAD THE train DATA
-        X_tr = dh.train_bags(
-            layer_id=layer_id, drop_zeros=True)["embeddings"]
+        X_tr = dh.train_bags(layer_id=layer_id, drop_zeros=True)["embeddings"]
         data_train = dh.get_train_df().reset_index(drop=True)
         _y_train, r_train, neg_tr = return_label(data_train)
 
@@ -294,31 +342,34 @@ def main(cfg: DictConfig):
             _y_cal, r_cal, neg_cal = return_label(data_cal)
 
         train_labels = task.return_labels(_y_train, r_train)
-        y_train, mask = train_labels['targets'], train_labels['mask']
+        y_train, mask = train_labels["targets"], train_labels["mask"]
         test_labels = task.return_labels(_y_test, r_test)
-        y_test, mask_test = test_labels['targets'], test_labels['mask']
+        y_test, mask_test = test_labels["targets"], test_labels["mask"]
         if dh.with_calibration:
             cal_labels = task.return_labels(_y_cal, r_cal)
-            y_cal, mask_cal = cal_labels['targets'], cal_labels['mask']
+            y_cal, mask_cal = cal_labels["targets"], cal_labels["mask"]
 
         start_time = time.time()
-        if task.task == -1 and cfg.probe['name'] in ['sawmil', 'svm']: # MULTICLASS PROBE
-            runner = PROBES[cfg.probe['name']+'_mc'](cfg)
+        if task.task == -1 and cfg.probe["name"] in [
+            "sawmil",
+            "svm",
+        ]:  # MULTICLASS PROBE
+            runner = PROBES[cfg.probe["name"] + "_mc"](cfg)
         else:
-            runner = PROBES[cfg.probe['name']](cfg)
+            runner = PROBES[cfg.probe["name"]](cfg)
         if cfg.search:
             result = runner.parameter_search(
-                X=X_tr, y=y_train, mask=mask, neg=neg_tr, layer_id=layer_id)
+                X=X_tr, y=y_train, mask=mask, neg=neg_tr, layer_id=layer_id
+            )
         else:
             # try:
             result = runner.single_training(
-                X=X_tr, y=y_train, mask=mask, neg=neg_tr, layer_id=layer_id)
+                X=X_tr, y=y_train, mask=mask, neg=neg_tr, layer_id=layer_id
+            )
         # CONFORMAL PREDICTION
-        X_te = dh_test.test_bags(
-            layer_id=layer_id, drop_zeros=True)["embeddings"]
+        X_te = dh_test.test_bags(layer_id=layer_id, drop_zeros=True)["embeddings"]
         # LOAD THE CALIBRATION DATA
-        X_cal = dh.cal_bags(
-            layer_id=layer_id, drop_zeros=True)["embeddings"]
+        X_cal = dh.cal_bags(layer_id=layer_id, drop_zeros=True)["embeddings"]
         # CONFORMAL PREDICTION
         calibrator = runner.conformal_training(X_cal, y_cal, mask_cal)
 
@@ -328,94 +379,100 @@ def main(cfg: DictConfig):
         # Assemble Metrics
         metric_dict = {}
         if task.task == -1:
-            metric_dict['default'] = log_metric_mc(preds=preds,
-                                                   scores=yh_te,
-                                                   y_true=y_test,
-                                                   mask=mask_test,
-                                                   cfg=cfg)
-            metric_dict['default']["coverage"] = 1.0
-            metric_dict['default'] = runner.update_metric(
-                metric_dict['default'])
+            metric_dict["default"] = log_metric_mc(
+                preds=preds, scores=yh_te, y_true=y_test, mask=mask_test, cfg=cfg
+            )
+            metric_dict["default"]["coverage"] = 1.0
+            metric_dict["default"] = runner.update_metric(metric_dict["default"])
 
-            metric_dict['conformal'] = log_metric_mc(preds=yc_te,
-                                                     scores=yh_te,
-                                                     y_true=y_test,
-                                                     cfg=cfg)
-            metric_dict['conformal']["coverage"] = calibrator.coverage(
-                scores=yh_te[mask_test], y=y_test[mask_test])
+            metric_dict["conformal"] = log_metric_mc(
+                preds=yc_te, scores=yh_te, y_true=y_test, cfg=cfg
+            )
+            metric_dict["conformal"]["coverage"] = calibrator.coverage(
+                scores=yh_te[mask_test], y=y_test[mask_test]
+            )
             # try:
-            metric_dict['conformal']["acceptance_rate"] = np.sum(
-                yc_te != -1) / max(yc_te.shape[0], 1)
+            metric_dict["conformal"]["acceptance_rate"] = np.sum(yc_te != -1) / max(
+                yc_te.shape[0], 1
+            )
         else:
-            metric_dict['default'] = log_metric(preds=preds,
-                                                scores=yh_te,
-                                                y_true=y_test,
-                                                mask=mask_test,
-                                                cfg=cfg)
-            metric_dict['default']["coverage"] = 1.0
-            metric_dict['default'] = runner.update_metric(
-                metric_dict['default'])
+            metric_dict["default"] = log_metric(
+                preds=preds, scores=yh_te, y_true=y_test, mask=mask_test, cfg=cfg
+            )
+            metric_dict["default"]["coverage"] = 1.0
+            metric_dict["default"] = runner.update_metric(metric_dict["default"])
 
-            metric_dict['conformal'] = log_metric(preds=yc_te,
-                                                  scores=yh_te,
-                                                  y_true=y_test,
-                                                  mask=mask_test,
-                                                  cfg=cfg)
-            metric_dict['conformal']["coverage"] = calibrator.coverage(
-                scores=yh_te[mask_test], y=y_test[mask_test])
+            metric_dict["conformal"] = log_metric(
+                preds=yc_te, scores=yh_te, y_true=y_test, mask=mask_test, cfg=cfg
+            )
+            metric_dict["conformal"]["coverage"] = calibrator.coverage(
+                scores=yh_te[mask_test], y=y_test[mask_test]
+            )
             # try:
-            metric_dict['conformal']["acceptance_rate"] = np.sum(
-                yc_te != -1) / max(yc_te.shape[0], 1)
+            metric_dict["conformal"]["acceptance_rate"] = np.sum(yc_te != -1) / max(
+                yc_te.shape[0], 1
+            )
         # except:
         #     metric_dict['conformal']["acceptance_rate"] = calibrator.acceptance_rate(
         #          yh_te)
 
         if cfg.save_results:
-            save(concept_direction=runner.direction,
-                 concept_bias=runner.bias,
-                 estimator=runner.estimator,
-                 metric_dict=metric_dict,
-                 scaler=runner.scaler,
-                 transformer=runner.transformer,
-                 conf_calibrator=runner.calibrator,
-                 cfg=cfg,
-                 layer_id=layer_id,
-                 y_hat=yh_te,
-                 y_true=y_test)
+            save(
+                concept_direction=runner.direction,
+                concept_bias=runner.bias,
+                estimator=runner.estimator,
+                metric_dict=metric_dict,
+                scaler=runner.scaler,
+                transformer=runner.transformer,
+                conf_calibrator=runner.calibrator,
+                cfg=cfg,
+                layer_id=layer_id,
+                y_hat=yh_te,
+                y_true=y_test,
+            )
         else:
             log.warning(
-                f"Conformal metric: {pprint.pformat(metric_dict['conformal'], indent=2)}")
+                f"Conformal metric: {pprint.pformat(metric_dict['conformal'], indent=2)}"
+            )
             log.warning(
-                f"Default metric: {pprint.pformat(metric_dict['default'], indent=2)}")
+                f"Default metric: {pprint.pformat(metric_dict['default'], indent=2)}"
+            )
         end_time = time.time()
 
         # logging
         first_part = f"\t{cfg.probe.name.capitalize()} probe took"
         log.warning(
-            f" L{layer_id} {first_part:<20} {(end_time - start_time):<4.2f} seconds | MCC (def): {metric_dict['default']['wmcc'][0]:>5.2f} | MCC (conf): {metric_dict['conformal']['wmcc'][0]:>5.2f}")
+            f" L{layer_id} {first_part:<20} {(end_time - start_time):<4.2f} seconds | MCC (def): {metric_dict['default']['wmcc'][0]:>5.2f} | MCC (conf): {metric_dict['conformal']['wmcc'][0]:>5.2f}"
+        )
         log.warning(
-            f"\t\tA-rate (def): {metric_dict['default']['acceptance_rate']:>5.2f} | A-rate (conf): {metric_dict['conformal']['acceptance_rate']:>5.2f}")
+            f"\t\tA-rate (def): {metric_dict['default']['acceptance_rate']:>5.2f} | A-rate (conf): {metric_dict['conformal']['acceptance_rate']:>5.2f}"
+        )
         log.warning(
-            '|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||')
+            "|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
+        )
 
         db_params = f"C:{cfg.probe['init_params']} | Layers: {layer_id}/{layers[-1]}"
         db_trial_id = f"{cfg.model.name}-{cfg.trial_name}"
-        db.write(trial_id=db_trial_id,
-                 model=cfg.model.name,
-                 datapack=cfg.datapack.name,
-                 task=cfg.task,
-                 parameters=db_params,
-                 progress=layer_id/layers[-1],
-                 status=0)
+        db.write(
+            trial_id=db_trial_id,
+            model=cfg.model.name,
+            datapack=cfg.datapack.name,
+            task=cfg.task,
+            parameters=db_params,
+            progress=layer_id / layers[-1],
+            status=0,
+        )
     log.warning(f"Finished running the {cfg.probe.name} probe.")
     db_trial_id = f"{cfg.model.name}-{cfg.trial_name}"
-    db.write(trial_id=db_trial_id,
-             model=cfg.model.name,
-             datapack=cfg.datapack.name,
-             task=cfg.task,
-             parameters='Finished',
-             progress=1,
-             status=1)
+    db.write(
+        trial_id=db_trial_id,
+        model=cfg.model.name,
+        datapack=cfg.datapack.name,
+        task=cfg.task,
+        parameters="Finished",
+        progress=1,
+        status=1,
+    )
 
 
 if __name__ == "__main__":

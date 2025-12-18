@@ -1,11 +1,14 @@
-import torch
+from __future__ import annotations
+
 import logging
-from typing import List, Dict, Union
+from abc import ABC, abstractmethod
 from collections import Counter
 
-from abc import ABC, abstractmethod
-from response.prompt_templates import PromptTemplate
+import torch
 from transformers import AutoTokenizer
+
+from response.prompt_templates import PromptTemplate
+
 log = logging.getLogger("logit_collector")
 
 BINARY_TRUE = ["true", "correct", "1", "yes", "right"]
@@ -18,10 +21,12 @@ LEGAL_QT = ["binary", "binary_true", "multichoice"]
 
 
 class LogitCollectorTemplate(ABC):
-    def __init__(self,
-                 tokenizer: AutoTokenizer,
-                 prompt_template: PromptTemplate,
-                 agg: str = "sum") -> None:
+    def __init__(
+        self,
+        tokenizer: AutoTokenizer,
+        prompt_template: PromptTemplate,
+        agg: str = "sum",
+    ) -> None:
         assert agg in LEGAL_AGG, f"Only {LEGAL_AGG} aggregations are supported"
         self._check_prompt_template(prompt_template)
 
@@ -50,11 +55,13 @@ class LogitCollectorTemplate(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def augment_token_list(self, tokens: List[str]) -> Union[List[str], Dict[str, List[str]]]:
+    def augment_token_list(self, tokens: list[str]) -> list[str] | dict[str, list[str]]:
         raise NotImplementedError()
 
     @abstractmethod
-    def return_token_ids(self, tokens: Union[List[str], Dict[str, List[str]]]) -> Union[List[int], Dict[str, List[int]]]:
+    def return_token_ids(
+        self, tokens: list[str] | dict[str, list[str]]
+    ) -> list[int] | dict[str, list[int]]:
         raise NotImplementedError()
 
     @abstractmethod
@@ -63,29 +70,31 @@ class LogitCollectorTemplate(ABC):
 
     def collect_proba(self, logits: torch.Tensor) -> torch.Tensor:
         output = self.collect_logits(logits)
-        assert output.shape[1] == len(
-            self.ids) + 1, "Output shape is incorrect"
-        assert output.sum(-1).allclose(torch.softmax(logits, dim=-1).sum(-1),
-                                       atol=0.01), "Sum of logits does not match the sum of the collected logits"
+        assert output.shape[1] == len(self.ids) + 1, "Output shape is incorrect"
+        assert output.sum(-1).allclose(
+            torch.softmax(logits, dim=-1).sum(-1), atol=0.01
+        ), "Sum of logits does not match the sum of the collected logits"
         return output
 
-    def collect_topn(self, logits: torch.Tensor, n: int = 1) -> List[str]:
+    def collect_topn(self, logits: torch.Tensor, n: int = 1) -> list[str]:
         output = torch.softmax(logits, dim=-1)
         return [self.decode(t) for t in torch.topk(output, n, dim=-1).indices]
 
 
 class MultichoiceLogitCollector(LogitCollectorTemplate):
     def _check_prompt_template(self, prompt_template):
-        assert prompt_template.question_type == "multichoice", "Prompt template must be for multichoice question type"
+        assert (
+            prompt_template.question_type == "multichoice"
+        ), "Prompt template must be for multichoice question type"
 
-    def augment_token_list(self, tokens: List[str]) -> Dict[str, List[str]]:
+    def augment_token_list(self, tokens: list[str]) -> dict[str, list[str]]:
         result = {}
         for t in tokens:
             _r = [t, f" {t}"]
             result[t] = _r
         return result
 
-    def _check_token_ids(self, tokens: Dict[str, List[Union[str, int]]]):
+    def _check_token_ids(self, tokens: dict[str, list[str | int]]):
         # Step 1: Collect all unique tokens across all lists
         token_counts = Counter()
         for _tokens in tokens.values():
@@ -98,11 +107,10 @@ class MultichoiceLogitCollector(LogitCollectorTemplate):
             token_counts.update(_unique_tokens)
 
         # Step 2: Identify shared tokens (those appearing in more than one list)
-        shared_tokens = {token for token,
-                         count in token_counts.items() if count > 1}
+        shared_tokens = {token for token, count in token_counts.items() if count > 1}
         return shared_tokens
 
-    def return_token_ids(self, tokens: Dict[str, List[int]]):
+    def return_token_ids(self, tokens: dict[str, list[int]]):
         shared_tokens = self._check_token_ids(tokens)  # type: ignore
         # Step 3: Filter out shared tokens from each list
         output = dict()
@@ -112,7 +120,8 @@ class MultichoiceLogitCollector(LogitCollectorTemplate):
                 encoded_tokens = self.encode(t)
                 # Keep only tokens that are not shared
                 _temp.extend(
-                    [tok for tok in encoded_tokens if tok not in shared_tokens])
+                    [tok for tok in encoded_tokens if tok not in shared_tokens]
+                )
             # Remove duplicates within the list
             output[name] = list(set(_temp))
         return output
@@ -131,14 +140,13 @@ class MultichoiceLogitCollector(LogitCollectorTemplate):
                 output.append(_logit)
             output.append(_else)
             output = torch.vstack(output).T
-            assert output.shape[1] == len(
-                self.ids) + 1, "Output shape is incorrect"
+            assert output.shape[1] == len(self.ids) + 1, "Output shape is incorrect"
         return output
 
     def collect_logits_unsafe(self, logits):
-        '''
+        """
         Collect logits for NNSight without any checks
-        '''
+        """
         logits = torch.softmax(logits, dim=-1)
         output = []
         if self.aggregation == "sum":

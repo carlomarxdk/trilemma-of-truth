@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 import numpy as np
-from sklearn.utils.validation import check_is_fitted
 from sklearn.base import BaseEstimator
 
 
@@ -100,7 +101,7 @@ def inverse_probability_nc(y, probs):
     Returns:
     --------
     scores : numpy array of shape (n_samples,)
-        The nonconformity scores, defined as 1 minus the predicted probability 
+        The nonconformity scores, defined as 1 minus the predicted probability
         for the candidate label.
     """
     y = np.asarray(y)
@@ -117,6 +118,7 @@ def inverse_probability_nc(y, probs):
 def create_symmetric_nc_with_threshold(threshold):
     def nc(a, b):
         return symmetric_nonconformity_with_threshold(a, b, threshold=threshold)
+
     return nc
 
 
@@ -205,7 +207,13 @@ def probability_margin_nc(y, probs):
 
 
 class InductiveConformalPredictor(BaseEstimator):
-    def __init__(self, nonconformity_func=margin_nonconformity, alpha: float = 0.1, tie_breaking=True, **nc_kwargs):
+    def __init__(
+        self,
+        nonconformity_func=margin_nonconformity,
+        alpha: float = 0.1,
+        tie_breaking=True,
+        **nc_kwargs,
+    ):
         """
         Args:
             nonconformity_func: a function that takes true labels and scores,
@@ -252,11 +260,13 @@ class InductiveConformalPredictor(BaseEstimator):
             for candidate in [0, 1]:
                 # Compute the candidate's nonconformity score for this sample.
                 candidate_score = self.nc_func(
-                    np.array([candidate]), np.array([scores[i]]), **self.nc_kwargs)[0]
+                    np.array([candidate]), np.array([scores[i]]), **self.nc_kwargs
+                )[0]
                 # Compute the p-value: the proportion of calibration scores
                 # that are greater than or equal to the candidate's score.
-                p_val = (np.sum(self.calibration_scores >= candidate_score) +
-                         1) / (len(self.calibration_scores) + 1)
+                p_val = (np.sum(self.calibration_scores >= candidate_score) + 1) / (
+                    len(self.calibration_scores) + 1
+                )
                 # If the candidate is not too “nonconforming,” include it.
                 if p_val > self.alpha:
                     candidate_set.append(candidate)
@@ -293,9 +303,9 @@ class InductiveConformalPredictor(BaseEstimator):
             else:
                 preds.append(conformal_sets[i][0])
         return {
-            'predictions': np.array(preds),
-            'conformal_sets': conformal_sets,
-            'pvalues': np.array(p_vals)
+            "predictions": np.array(preds),
+            "conformal_sets": conformal_sets,
+            "pvalues": np.array(p_vals),
         }
 
     def acceptance_rate(self, scores):
@@ -306,7 +316,7 @@ class InductiveConformalPredictor(BaseEstimator):
         """
         assert self.calibration_scores is not None, "Fit the model first."
         eval = self.evaluate(scores)
-        abstained = eval['predictions'] == -1
+        abstained = eval["predictions"] == -1
         return 1 - np.mean(abstained)
 
     def coverage(self, scores, y):
@@ -315,7 +325,7 @@ class InductiveConformalPredictor(BaseEstimator):
         """
         assert self.calibration_scores is not None, "Fit the model first."
         eval = self.evaluate(scores)
-        res = [_y in _set for _y, _set in zip(y, eval['conformal_sets'])]
+        res = [_y in _set for _y, _set in zip(y, eval["conformal_sets"])]
         return np.mean(res)
 
     def mask(self, scores):
@@ -324,23 +334,23 @@ class InductiveConformalPredictor(BaseEstimator):
         """
         assert self.calibration_scores is not None, "Fit the model first."
         eval = self.evaluate(scores)
-        return eval['predictions'] != -1
+        return eval["predictions"] != -1
 
     def predict_set(self, scores):
-        return self.evaluate(scores)['conformal_sets']
+        return self.evaluate(scores)["conformal_sets"]
 
     def predict(self, scores):
-        return self.evaluate(scores)['predictions']
+        return self.evaluate(scores)["predictions"]
 
     def get_params(self, deep=False):
         """
         Get the parameters of the model.
         """
         params = {
-            'alpha': self.alpha,
-            'tie_breaking': self.tie_breaking,
-            'nc_kwargs': self.nc_kwargs,
-            'nonconformity_func': self.nc_func.__name__,
+            "alpha": self.alpha,
+            "tie_breaking": self.tie_breaking,
+            "nc_kwargs": self.nc_kwargs,
+            "nonconformity_func": self.nc_func.__name__,
         }
         return params
 
@@ -350,7 +360,14 @@ class MulticlassICP(InductiveConformalPredictor):
     Inductive Conformal Predictor for multiclass classification.
     """
 
-    def __init__(self, nonconformity_func=probability_margin_nc, alpha: float = 0.1, n_classes=3, tie_breaking=True, **nc_kwargs):
+    def __init__(
+        self,
+        nonconformity_func=probability_margin_nc,
+        alpha: float = 0.1,
+        n_classes=3,
+        tie_breaking=True,
+        **nc_kwargs,
+    ):
         """
         Args:
             nonconformity_func: a function that takes true labels and scores,
@@ -385,11 +402,13 @@ class MulticlassICP(InductiveConformalPredictor):
             for candidate in range(self.n_classes):
                 # Compute the candidate's nonconformity score for this sample.
                 candidate_score = self.nc_func(
-                    np.array([candidate]), np.array([scores[i]]), **self.nc_kwargs)[0]
+                    np.array([candidate]), np.array([scores[i]]), **self.nc_kwargs
+                )[0]
                 # Compute the p-value: the proportion of calibration scores
                 # that are greater than or equal to the candidate's score.
-                p_val = (np.sum(self.calibration_scores >= candidate_score) +
-                         1) / (len(self.calibration_scores) + 1)
+                p_val = (np.sum(self.calibration_scores >= candidate_score) + 1) / (
+                    len(self.calibration_scores) + 1
+                )
                 # If the candidate is not too “nonconforming,” include it.
                 p_set[candidate] = p_val
                 if p_val > self.alpha:

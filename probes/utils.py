@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 from copy import deepcopy
+
 import numpy as np
-from typing import List, Union
 
 
 class BagSplitter_pathced:
@@ -18,12 +20,16 @@ class BagSplitter_pathced:
         return self._classes
 
     @property
-    def bag_labels(self) -> np.ndarray | List:
+    def bag_labels(self) -> np.ndarray | list:
         return self._bag_labels
 
     @property
     def pos_bags_with_labels(self):
-        return [(bag, label) for bag, cls, label in zip(self.bags, self.classes, self.bag_labels) if cls > 0.0]
+        return [
+            (bag, label)
+            for bag, cls, label in zip(self.bags, self.classes, self.bag_labels)
+            if cls > 0.0
+        ]
 
     @property
     def pos_bags(self):
@@ -31,7 +37,9 @@ class BagSplitter_pathced:
 
     @property
     def neg_bags(self):
-        return deepcopy([bag for bag, cls in zip(self.bags, self.classes) if cls <= 0.0])
+        return deepcopy(
+            [bag for bag, cls in zip(self.bags, self.classes) if cls <= 0.0]
+        )
 
     @property
     def neg_instances(self):
@@ -63,7 +71,7 @@ class BagSplitter_pathced:
 
     @property
     def L_p(self):
-        '''Number of positive instances'''
+        """Number of positive instances"""
         return len(self.pos_instances)
 
     @property
@@ -76,7 +84,7 @@ class BagSplitter_pathced:
 
     @property
     def X_p(self):
-        '''Number of positive bags'''
+        """Number of positive bags"""
         return len(self.pos_bags)
 
     @property
@@ -93,8 +101,8 @@ class BagSplitter_pathced:
 
     @property
     def instance_intrabag_labels_pos(self):
-        '''Intra-bag labels for positive instances
+        """Intra-bag labels for positive instances
         Return: a flattened array of intra-bag labels for positive instances (collected over all positive bags)
-        '''
+        """
         x = [label for _, label in self.pos_bags_with_labels]
         return np.concatenate(x)
