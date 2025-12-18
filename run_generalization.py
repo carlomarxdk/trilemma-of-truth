@@ -1,39 +1,51 @@
-from utils_hydra import load_data_with_test
-import logging
-import hydra
-from omegaconf import DictConfig, OmegaConf
-import numpy as np
-import os
-from glob import glob
-import json
-import re
-import pprint
-from typing import Dict
-from pathlib import Path
-import sys
-import joblib
-from misc.db import LogDataBase
+from __future__ import annotations
 
+import json
+import logging
+import os
+import pprint
+import re
+import sys
+from glob import glob
+from pathlib import Path
+
+import hydra
+import joblib
+import numpy as np
+from omegaconf import DictConfig, OmegaConf
+
+from misc.db import LogDataBase
+from runners import (
+    MDProbeRunner,
+    MulticlassMILRunner,
+    MulticlassSVMRunner,
+    SawmilProbeRunner,
+    SPCA_Runner,
+    SVMProbeRunner,
+    TTPD_Runner,
+)
 from utils import (
-    should_process_layer,
-    log_metric_multiclass as log_metric,
-    log_metric_binary,
     _atomic_write_json,
     available_layers,
+    log_metric_binary,
 )
-from runners import SVMProbeRunner, MDProbeRunner, SawmilProbeRunner, SPCA_Runner, TTPD_Runner, MulticlassMILRunner, MulticlassSVMRunner
+from utils import log_metric_multiclass as log_metric
+from utils import (
+    should_process_layer,
+)
+from utils_hydra import load_data_with_test
 
 PROBES = {
-    'svm': SVMProbeRunner,
-    'mean_diff': MDProbeRunner,
-    'sawmil': SawmilProbeRunner,
-    'sawmil_mc': MulticlassMILRunner,
-    'svm_mc': MulticlassSVMRunner,
-    'spca': SPCA_Runner,
-    'ttpd': TTPD_Runner,
+    "svm": SVMProbeRunner,
+    "mean_diff": MDProbeRunner,
+    "sawmil": SawmilProbeRunner,
+    "sawmil_mc": MulticlassMILRunner,
+    "svm_mc": MulticlassSVMRunner,
+    "spca": SPCA_Runner,
+    "ttpd": TTPD_Runner,
 }
 
-log = logging.getLogger('Generalization')
+log = logging.getLogger("Generalization")
 
 
 class NpEncoder(json.JSONEncoder):
@@ -48,19 +60,23 @@ class NpEncoder(json.JSONEncoder):
 
 
 def validate_config(cfg: DictConfig):
-    assert type(
-        cfg.datapack['datasets']) == list or type(cfg.datapack['datasets']).__name__ == "ListConfig", f"Datasets must be a list. Not {type(cfg.datapack['datasets'])}"
-    assert type(
-        cfg.datapack_test['datasets']) == list or type(cfg.datapack_test['datasets']).__name__ == "ListConfig", f"Datasets must be a list. Not {type(cfg.datapack_test['datasets'])}"
-    assert len(cfg.datapack['datasets']
-               ) > 0, "At least one dataset must be selected."
-    assert len(cfg.datapack_test['datasets']
-               ) > 0, "At least one test dataset must be selected."
+    assert (
+        type(cfg.datapack["datasets"]) == list
+        or type(cfg.datapack["datasets"]).__name__ == "ListConfig"
+    ), f"Datasets must be a list. Not {type(cfg.datapack['datasets'])}"
+    assert (
+        type(cfg.datapack_test["datasets"]) == list
+        or type(cfg.datapack_test["datasets"]).__name__ == "ListConfig"
+    ), f"Datasets must be a list. Not {type(cfg.datapack_test['datasets'])}"
+    assert len(cfg.datapack["datasets"]) > 0, "At least one dataset must be selected."
+    assert (
+        len(cfg.datapack_test["datasets"]) > 0
+    ), "At least one test dataset must be selected."
     OmegaConf.set_struct(cfg, False)  # Allow overriding
     trial_name = cfg.trial_name
     if cfg.search:
         trial_name += "_search"
-    trial_name += f'_task-{cfg.task}'
+    trial_name += f"_task-{cfg.task}"
     cfg["trial_name"] = trial_name
     cfg["output_dir"] = os.path.join(cfg.output_dir, trial_name)
     OmegaConf.set_struct(cfg, True)
@@ -69,14 +85,15 @@ def validate_config(cfg: DictConfig):
 
 
 def log_stats(cfg):
-    log.warning(f"Running probe generalizability experiment.")
+    log.warning("Running probe generalizability experiment.")
     log.warning(f"Datapack Test: {cfg.datapack_test['name']}")
-    datasets_test = cfg.datapack["datasets_test"] if len(
-        cfg.datapack["datasets_test"]) > 0 else cfg.datapack["datasets"]
-    log.warning(
-        f"Collection {cfg.probe['name']}-based metrics for {cfg.model['name']}")
-    log.warning(
-        f"\t\tTrain datasets: {cfg.datapack['datasets']}")
+    datasets_test = (
+        cfg.datapack["datasets_test"]
+        if len(cfg.datapack["datasets_test"]) > 0
+        else cfg.datapack["datasets"]
+    )
+    log.warning(f"Collection {cfg.probe['name']}-based metrics for {cfg.model['name']}")
+    log.warning(f"\t\tTrain datasets: {cfg.datapack['datasets']}")
     log.warning(f"\t\tTest datasets: {datasets_test})")
     log.warning(f"\t\tOutput directory: {cfg.output_dir}")
 
@@ -86,7 +103,7 @@ def checkpointing(cfg, available_layers):
     recorded_layers = glob(f"{output_dir}/y_hat_*")
     completed_layers = []
     for file in recorded_layers:
-        match = re.search(r'y_hat_(\d+)', file)
+        match = re.search(r"y_hat_(\d+)", file)
         if match:
             completed_layers.append(int(match.group(1)))
     model_layers = set(available_layers)
@@ -101,12 +118,14 @@ def checkpointing(cfg, available_layers):
     return sorted(missing_layers)
 
 
-def save(metric_dict: Dict,
-         layer_id: int,
-         cfg: DictConfig,
-         y_hat: np.ndarray = None,
-         y_true: np.ndarray = None) -> Dict:
-    '''
+def save(
+    metric_dict: dict,
+    layer_id: int,
+    cfg: DictConfig,
+    y_hat: np.ndarray = None,
+    y_true: np.ndarray = None,
+) -> dict:
+    """
     Save the artifacts of the run.
     Args:
         metric_dict: The dictionary containing the metrics.
@@ -115,7 +134,7 @@ def save(metric_dict: Dict,
         y_hat: The predicted labels.
         y_true: The true labels.
 
-    '''
+    """
     output_dir = Path(str(cfg.output_dir)) / f"g_{cfg.datapack_test['name']}"
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -123,23 +142,22 @@ def save(metric_dict: Dict,
     metrics_path = output_dir / f"metrics_{layer_id}.json"
     _atomic_write_json(metrics_path, metric_dict)
     # 2. Numpy arrays
-    yh_path = output_dir / \
-        f"y_hat_{layer_id}.npy" if y_hat is not None else None
-    if (y_hat is not None):
+    yh_path = output_dir / f"y_hat_{layer_id}.npy" if y_hat is not None else None
+    if y_hat is not None:
         np.save(yh_path, y_hat)
     else:
         log.warning("y_hat is None")
-    yt_path = output_dir / f"y_true.npy" if y_true is not None else None
-    if (y_true is not None):
+    yt_path = output_dir / "y_true.npy" if y_true is not None else None
+    if y_true is not None:
         np.save(yt_path, y_true)
 
         # 6) Manifest (quick glance + reproducibility bits)
     manifest = {
         "layer_id": layer_id,
-        "datapack_base": cfg.datapack['name'],
-        "datapack_test": cfg.datapack_test['name'],
-        "probe": cfg.probe['name'],
-        "model": cfg.model['name'],
+        "datapack_base": cfg.datapack["name"],
+        "datapack_test": cfg.datapack_test["name"],
+        "probe": cfg.probe["name"],
+        "model": cfg.model["name"],
         "task": cfg.task,
         "paths": {
             "metrics": str(metrics_path),
@@ -157,11 +175,15 @@ def save(metric_dict: Dict,
             "numpy": np.__version__,
             "joblib": joblib.__version__,
             "hydra": hydra.__version__,
-            "sklearn": sys.modules['sklearn'].__version__,
-            "scipy": sys.modules['scipy'].__version__,
-            "polars": sys.modules['polars'].__version__ if 'polars' in sys.modules else "",
-            "pandas": sys.modules['pandas'].__version__ if 'pandas' in sys.modules else "",
-            "torch": sys.modules['torch'].__version__ if 'torch' in sys.modules else "",
+            "sklearn": sys.modules["sklearn"].__version__,
+            "scipy": sys.modules["scipy"].__version__,
+            "polars": (
+                sys.modules["polars"].__version__ if "polars" in sys.modules else ""
+            ),
+            "pandas": (
+                sys.modules["pandas"].__version__ if "pandas" in sys.modules else ""
+            ),
+            "torch": sys.modules["torch"].__version__ if "torch" in sys.modules else "",
         },
     }
     manifest_path = output_dir / "manifests"
@@ -179,21 +201,25 @@ def main(cfg: DictConfig):
     validate_config(cfg)
     log_stats(cfg)
     db = LogDataBase(
-        tab_name=f"{cfg.probe['name']}_generalization", db_name="experiments")
-    db.write(trial_id=f"{cfg.model.name}-{cfg.datapack.name}-{cfg.datapack_test.name}",
-             model=cfg.model.name,
-             datapack=cfg.datapack.name,
-             task=cfg.task,
-             parameters=f"STARTED",
-             progress=0,
-             status=0)
+        tab_name=f"{cfg.probe['name']}_generalization", db_name="experiments"
+    )
+    db.write(
+        trial_id=f"{cfg.model.name}-{cfg.datapack.name}-{cfg.datapack_test.name}",
+        model=cfg.model.name,
+        datapack=cfg.datapack.name,
+        task=cfg.task,
+        parameters="STARTED",
+        progress=0,
+        status=0,
+    )
 
     task = cfg.task
 
     dh_test = load_data_with_test(cfg)
     labels = dh_test.get_test_labels()
     layer_range = np.quantile(
-        cfg.model['layers'], cfg.layer_range, method="closest_observation")
+        cfg.model["layers"], cfg.layer_range, method="closest_observation"
+    )
     log.warning(f"Layer range: {layer_range[0]} - {layer_range[1]}")
 
     avail_layers = available_layers(cfg.output_dir)
@@ -203,13 +229,13 @@ def main(cfg: DictConfig):
     if cfg.start_from_checkpoint:
         missing_layers = checkpointing(cfg, available_layers=avail_layers)
         if len(missing_layers) == 0:
-            log.warning(
-                "All layers are already processed...")
+            log.warning("All layers are already processed...")
             layers = []
             # raise Exception("All layers are already processed.")
         else:
             log.warning(
-                f"Checkpointing: Processing the missing layers: {missing_layers}")
+                f"Checkpointing: Processing the missing layers: {missing_layers}"
+            )
             layers = missing_layers
     else:
         layers = cfg["layers"]
@@ -218,7 +244,11 @@ def main(cfg: DictConfig):
         layers = [13]
     # PER LAYER
     for layer_id in layers:
-        if cfg.run_debugging == True and layer_id > 6 and should_process_layer(layer_id, cfg):
+        if (
+            cfg.run_debugging == True
+            and layer_id > 6
+            and should_process_layer(layer_id, cfg)
+        ):
             log.warning(f"Processing layer {layer_id} || Debugging mode")
         elif cfg.run_debugging == False and should_process_layer(layer_id, cfg):
             log.warning(f"Processing layer {layer_id}")
@@ -226,37 +256,34 @@ def main(cfg: DictConfig):
             log.warning(f"Skipping layer {layer_id}")
             continue
         # INSTANTIATE THE PROBE RUNNER
-        if task == -1 and cfg.probe['name'] in ['sawmil', 'svm']:  # MULTICLASS PROBE
+        if task == -1 and cfg.probe["name"] in ["sawmil", "svm"]:  # MULTICLASS PROBE
             log.warning("Using multiclass probe runner")
-            runner = PROBES[cfg.probe['name']+'_mc'](cfg)
+            runner = PROBES[cfg.probe["name"] + "_mc"](cfg)
         else:
-            runner = PROBES[cfg.probe['name']](cfg)
+            runner = PROBES[cfg.probe["name"]](cfg)
         runner.load(output_dir=cfg.output_dir, layer_id=layer_id)
 
         # CONFORMAL PREDICTION
-        X_te = dh_test.test_bags(
-            layer_id=layer_id, drop_zeros=True)["embeddings"]
+        X_te = dh_test.test_bags(layer_id=layer_id, drop_zeros=True)["embeddings"]
 
         bag_yh_te = runner.bag_predict_proba(X_te)
         bag_yc_te = runner.bag_conformal_prediction(X_te)
         bag_preds = np.asarray(runner.bag_predict(X_te), dtype=int)
 
         metric_dict = {
-            'bag': {},
-            'instance': {},  # last instance in bag
-            'instance_tf': {},  # only on true and false
+            "bag": {},
+            "instance": {},  # last instance in bag
+            "instance_tf": {},  # only on true and false
         }
 
         # Metrics for the whole bag
-        metric_dict['bag']['default'] = log_metric(y_true=labels,
-                                                   preds=bag_preds,
-                                                   scores=bag_yh_te,
-                                                   cfg=cfg)
-        metric_dict['bag']['conformal'] = log_metric(y_true=labels,
-                                                     preds=bag_yc_te,
-                                                     scores=bag_yh_te,
-                                                     cfg=cfg)
-        
+        metric_dict["bag"]["default"] = log_metric(
+            y_true=labels, preds=bag_preds, scores=bag_yh_te, cfg=cfg
+        )
+        metric_dict["bag"]["conformal"] = log_metric(
+            y_true=labels, preds=bag_yc_te, scores=bag_yh_te, cfg=cfg
+        )
+
         # print("bag_default", metric_dict['bag']['default']['cm'])
         # print("bag_conformal", metric_dict['bag']['conformal']['cm'])
         # Metrics for the last instance in the bag
@@ -274,62 +301,62 @@ def main(cfg: DictConfig):
             # Take only the positive class scores for multiclass
             yh_te = yh_te[:, 1]
 
-        metric_dict['instance']['default'] = log_metric(preds=preds,
-                                                        scores=yh_te,
-                                                        y_true=labels,
-                                                        cfg=cfg)
-        metric_dict['instance']['conformal'] = log_metric(y_true=labels,
-                                                          preds=yc_te,
-                                                          scores=yc_te,
-                                                          cfg=cfg)
+        metric_dict["instance"]["default"] = log_metric(
+            preds=preds, scores=yh_te, y_true=labels, cfg=cfg
+        )
+        metric_dict["instance"]["conformal"] = log_metric(
+            y_true=labels, preds=yc_te, scores=yc_te, cfg=cfg
+        )
         # print("inst_default", metric_dict['instance']['default']['cm'])
         # print("inst_conformal", metric_dict['instance']['conformal']['cm'])
         # Metrics for the last instance in the bag, only true and false (no neither-valued statements)
         mask_tf = (labels == 1) | (labels == 0)
 
-        metric_dict['instance_tf']['default'] = log_metric_binary(preds=preds,
-                                                                  scores=yh_te,
-                                                                  y_true=labels,
-                                                                  mask=mask_tf, 
-                                                                  cfg=cfg)
-        metric_dict['instance_tf']['conformal'] = log_metric_binary(y_true=labels,
-                                                                    preds=yc_te,
-                                                                    scores=yh_te,
-                                                                    mask=mask_tf, 
-                                                                    cfg=cfg)
+        metric_dict["instance_tf"]["default"] = log_metric_binary(
+            preds=preds, scores=yh_te, y_true=labels, mask=mask_tf, cfg=cfg
+        )
+        metric_dict["instance_tf"]["conformal"] = log_metric_binary(
+            y_true=labels, preds=yc_te, scores=yh_te, mask=mask_tf, cfg=cfg
+        )
         # print("inst_tf_default", metric_dict['instance_tf']['default']['cm'])
         # print("inst_tf_conformal", metric_dict['instance_tf']['conformal']['cm'])
 
         if cfg.save_results:
-            _ = save(metric_dict=metric_dict,
-                     layer_id=layer_id,
-                     cfg=cfg,
-                     y_hat=bag_yh_te,
-                     y_true=labels)
+            _ = save(
+                metric_dict=metric_dict,
+                layer_id=layer_id,
+                cfg=cfg,
+                y_hat=bag_yh_te,
+                y_true=labels,
+            )
         else:
             log.warning(
-                f"Metric for layer {layer_id}: \n{pprint.pformat(metric_dict, indent=2)}")
+                f"Metric for layer {layer_id}: \n{pprint.pformat(metric_dict, indent=2)}"
+            )
 
         # Write to DATABASE
         db_params = f"WMCC: {metric_dict['bag']['conformal']['wmcc']}Layers: {layer_id}/{avail_layers[-1]}"
         db_trial_id = f"{cfg.model.name}-{cfg.datapack.name}-{cfg.datapack_test.name}"
-        db.write(trial_id=db_trial_id,
-                 model=cfg.model.name,
-                 datapack=cfg.datapack.name,
-                 task=cfg.task,
-                 parameters=db_params,
-                 progress=layer_id/avail_layers[-1],
-                 status=0)
+        db.write(
+            trial_id=db_trial_id,
+            model=cfg.model.name,
+            datapack=cfg.datapack.name,
+            task=cfg.task,
+            parameters=db_params,
+            progress=layer_id / avail_layers[-1],
+            status=0,
+        )
 
-    db.write(trial_id=f"{cfg.model.name}-{cfg.datapack.name}-{cfg.datapack_test.name}",
-             model=cfg.model.name,
-             datapack=cfg.datapack.name,
-             task=-1,
-             parameters=f"Finished",
-             progress=1,
-             status=1)
-    log.warning(
-        'Finished!')
+    db.write(
+        trial_id=f"{cfg.model.name}-{cfg.datapack.name}-{cfg.datapack_test.name}",
+        model=cfg.model.name,
+        datapack=cfg.datapack.name,
+        task=-1,
+        parameters="Finished",
+        progress=1,
+        status=1,
+    )
+    log.warning("Finished!")
 
 
 if __name__ == "__main__":

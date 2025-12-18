@@ -1,39 +1,52 @@
-import logging
-import hydra
-from utils_hydra import load_data, get_device, prepare_nnsight, clear_device_cache, NpEncoder
-from omegaconf import DictConfig, OmegaConf
-import numpy as np
-import os
-from misc.probe_data import ProbeData
-from response.interventions_utils import InterventionDataProcessor, InstructInterventionDataProcessor, to_log_proba, translate_concept
-import torch
+from __future__ import annotations
+
 import json
+import logging
+import os
+import pprint
+from glob import glob
+
+import hydra
 import numpy as np
 import pandas as pd
-import statsmodels.formula.api as smf
-import pprint
 import scipy.stats as stats
-from misc.db import LogDataBase
-from glob import glob
-import re
+import statsmodels.formula.api as smf
+import torch
+from omegaconf import DictConfig, OmegaConf
 
+from misc.db import LogDataBase
+from misc.probe_data import ProbeData
+from response.interventions_utils import (
+    InstructInterventionDataProcessor,
+    InterventionDataProcessor,
+    to_log_proba,
+    translate_concept,
+)
 from utils import should_process_layer
+from utils_hydra import (
+    NpEncoder,
+    clear_device_cache,
+    get_device,
+    load_data,
+    prepare_nnsight,
+)
 
 log = logging.getLogger(__name__)
 
 
 def validate_config(cfg: DictConfig):
-    assert type(
-        cfg.datapack['datasets']) == list or type(cfg.datapack['datasets']).__name__ == "ListConfig", f"Datasets must be a list. Not {type(cfg.datapack['datasets'])}"
-    assert len(cfg.datapack['datasets']
-               ) > 0, "At least one dataset must be selected."
+    assert (
+        type(cfg.datapack["datasets"]) == list
+        or type(cfg.datapack["datasets"]).__name__ == "ListConfig"
+    ), f"Datasets must be a list. Not {type(cfg.datapack['datasets'])}"
+    assert len(cfg.datapack["datasets"]) > 0, "At least one dataset must be selected."
     OmegaConf.set_struct(cfg, False)  # Allow overriding
     trial_name = cfg.trial_name
     if cfg.probe["sparsify_data"] > 0:
         trial_name += f"_sparse-{cfg.probe['sparsify_data']}"
     if cfg.search:
         trial_name += "_search"
-    trial_name += f'_task-{cfg.task}'
+    trial_name += f"_task-{cfg.task}"
     cfg["trial_name"] = trial_name
     cfg["output_dir"] = os.path.join(cfg.output_dir, trial_name)
     if cfg.device == None:
@@ -44,15 +57,19 @@ def validate_config(cfg: DictConfig):
 
 
 def log_stats(cfg):
-    datasets_test = cfg.datapack["datasets_test"] if len(
-        cfg.datapack["datasets_test"]) > 0 else cfg.datapack["datasets"]
+    datasets_test = (
+        cfg.datapack["datasets_test"]
+        if len(cfg.datapack["datasets_test"]) > 0
+        else cfg.datapack["datasets"]
+    )
     log.warning(
-        f"Interventions for {cfg.probe['name']}-based probe for {cfg.model['name']} [task: {cfg.task}]")
-    log.warning(
-        f"\t\tTrain datasets: {cfg.datapack['datasets']}")
+        f"Interventions for {cfg.probe['name']}-based probe for {cfg.model['name']} [task: {cfg.task}]"
+    )
+    log.warning(f"\t\tTrain datasets: {cfg.datapack['datasets']}")
     log.warning(f"\t\tTest datasets: {datasets_test})")
     layer_range = np.quantile(
-        cfg.model['layers'], cfg.layer_range, method="closest_observation")
+        cfg.model["layers"], cfg.layer_range, method="closest_observation"
+    )
     log.warning(f"Layer range: {layer_range[0]} - {layer_range[1]}")
     log.warning(f"\t\tConfiguration: {cfg}")
 
@@ -80,15 +97,16 @@ def checkpointing(cfg, available_layers):
 def main(cfg: OmegaConf):
     validate_config(cfg)
     log_stats(cfg)
-    db = LogDataBase(
-        tab_name=f"{cfg.probe['name']}_inter", db_name="experiments")
-    db.write(trial_id=f"{cfg.model.name}-{cfg.datapack.name}-{cfg.task}",
-             model=cfg.model.name,
-             datapack=cfg.datapack.name,
-             task=cfg.task,
-             parameters=f"STARTED",
-             progress=0,
-             status=0)
+    db = LogDataBase(tab_name=f"{cfg.probe['name']}_inter", db_name="experiments")
+    db.write(
+        trial_id=f"{cfg.model.name}-{cfg.datapack.name}-{cfg.task}",
+        model=cfg.model.name,
+        datapack=cfg.datapack.name,
+        task=cfg.task,
+        parameters="STARTED",
+        progress=0,
+        status=0,
+    )
     # PER LAYER
     probe_path = f"outputs/probes/{cfg.probe['name']}/{cfg.model['name']}/{cfg.datapack['name']}_search_task-{cfg.task}"
     # reader = ProbeData(output_dir=cfg.output_dir, task=cfg['task'], model_name=cfg.model["name"],
@@ -100,17 +118,21 @@ def main(cfg: OmegaConf):
     dh = load_data(cfg)
     # dh_test = load_data(cfg) if cfg.datapack['datasets_test'] else dh
 
-    if not cfg.model['instruct']:
+    if not cfg.model["instruct"]:
         log.warning("Using standard InterventionDataProcessor")
         idp = InterventionDataProcessor(
-            datahandler=dh, datapack_name=cfg.datapack['name'], tokenizer=tokenizer)
-    elif cfg.model['instruct']:
+            datahandler=dh, datapack_name=cfg.datapack["name"], tokenizer=tokenizer
+        )
+    elif cfg.model["instruct"]:
         log.warning("Using InstructInterventionDataProcessor")
         idp = InstructInterventionDataProcessor(
-            datahandler=dh, datapack_name=cfg.datapack['name'], tokenizer=tokenizer,
-            user_role=cfg.model['user_role'],
-            assist_role=cfg.model['assist_role'],
-            system_role=cfg.model['system_role'])
+            datahandler=dh,
+            datapack_name=cfg.datapack["name"],
+            tokenizer=tokenizer,
+            user_role=cfg.model["user_role"],
+            assist_role=cfg.model["assist_role"],
+            system_role=cfg.model["system_role"],
+        )
     else:
         raise NotImplementedError()
 
@@ -122,10 +144,10 @@ def main(cfg: OmegaConf):
         layers = reader.available_layers()
 
     dataset = idp.return_processed_test_df()
-    start_token = cfg.counter_method['start_token']
-    absolute = cfg.counter_method['absolute']
+    start_token = cfg.counter_method["start_token"]
+    absolute = cfg.counter_method["absolute"]
     assert absolute, 'This experiment supports only "absolute" method of translation.'
-    c = cfg.counter_method['target_coord']
+    c = cfg.counter_method["target_coord"]
 
     print(layers)
     for layer_id in layers:
@@ -135,8 +157,7 @@ def main(cfg: OmegaConf):
             log.warning(f"Skipping layer {layer_id}")
             continue
         layer = model.model.layers[layer_id]
-        direction = reader.direction(
-            layer_id, as_tensor=True).half().to(device)
+        direction = reader.direction(layer_id, as_tensor=True).half().to(device)
         # Store results
         RES_pos = []
         RAND_pos = []
@@ -147,64 +168,62 @@ def main(cfg: OmegaConf):
 
         n = 0
         for i, row in dataset.iterrows():
-            statement = row['statement']
-            answer = row['answer']
+            statement = row["statement"]
+            answer = row["answer"]
             proba_orig, proba_neg, proba_pos = [], [], []
             proba_rorig, proba_rneg, proba_rpos = [], [], []
 
             seq_stats, seq_ans, seq_ans_ids, seq_init_ids = idp.get_answer_seq_ids(
-                statement=statement, answer=answer)
+                statement=statement, answer=answer
+            )
             rand_ans_ids = np.random.choice(
-                tokenizer.vocab_size, len(seq_ans_ids), replace=False)
+                tokenizer.vocab_size, len(seq_ans_ids), replace=False
+            )
 
             for j, st in enumerate(seq_stats[:-1]):
                 if j == 0:
                     assert start_token <= 0, "Start token must be less than 0."
                     _start_token = len(seq_init_ids) + start_token
-                with model.trace() as tracer:
-                    with tracer.invoke(st) as _:
-                        _output_orig = model.output['logits'][0, -
-                                                              1].cpu().save()
+                with model.trace() as tracer, tracer.invoke(st) as _:
+                    _output_orig = model.output["logits"][0, -1].cpu().save()
 
-                output_orig = torch.softmax(_output_orig, dim=0)[
-                    seq_ans_ids[j]]
+                output_orig = torch.softmax(_output_orig, dim=0)[seq_ans_ids[j]]
                 output_rorig = torch.softmax(_output_orig, dim=0)[
-                    rand_ans_ids[j]].unsqueeze(0)
+                    rand_ans_ids[j]
+                ].unsqueeze(0)
                 proba_orig.append(output_orig)
                 proba_rorig.append(output_rorig)
-                with model.trace() as tracer:
-                    with tracer.invoke(st) as _:
-                        output = layer.output
-                        _output = output[0].clone()
-                        _output[0, _start_token:] = translate_concept(
-                            _output, direction, c, absolute=absolute)[0, _start_token:]
-                        # layer.output = (_output,)
-                        if 'stablelm' in cfg['model']['name']:
-                            layer.output = (_output, output[1])
-                        else:
-                            layer.output = (_output,)
-                        _output_pos = model.lm_head.output[0, -1].cpu().save()
+                with model.trace() as tracer, tracer.invoke(st) as _:
+                    output = layer.output
+                    _output = output[0].clone()
+                    _output[0, _start_token:] = translate_concept(
+                        _output, direction, c, absolute=absolute
+                    )[0, _start_token:]
+                    # layer.output = (_output,)
+                    if "stablelm" in cfg["model"]["name"]:
+                        layer.output = (_output, output[1])
+                    else:
+                        layer.output = (_output,)
+                    _output_pos = model.lm_head.output[0, -1].cpu().save()
                 output_pos = torch.softmax(_output_pos, dim=0)[seq_ans_ids[j]]
-                outpit_rpos = torch.softmax(_output_pos, dim=0)[
-                    rand_ans_ids[j]]
+                outpit_rpos = torch.softmax(_output_pos, dim=0)[rand_ans_ids[j]]
                 # print(output_pos)
                 proba_pos.append(output_pos)
                 proba_rpos.append(outpit_rpos)
-                with model.trace() as tracer:
-                    with tracer.invoke(st) as _:
-                        output = layer.output
-                        _output = output[0].clone()
-                        _output[0, _start_token:] = translate_concept(
-                            _output, direction, -c, absolute=absolute)[0, _start_token:]
-                        # layer.output = (_output,)
-                        if 'stablelm' in cfg['model']['name']:
-                            layer.output = (_output, output[1])
-                        else:
-                            layer.output = (_output,)
-                        _output_neg = model.lm_head.output[0, -1].cpu().save()
+                with model.trace() as tracer, tracer.invoke(st) as _:
+                    output = layer.output
+                    _output = output[0].clone()
+                    _output[0, _start_token:] = translate_concept(
+                        _output, direction, -c, absolute=absolute
+                    )[0, _start_token:]
+                    # layer.output = (_output,)
+                    if "stablelm" in cfg["model"]["name"]:
+                        layer.output = (_output, output[1])
+                    else:
+                        layer.output = (_output,)
+                    _output_neg = model.lm_head.output[0, -1].cpu().save()
                 output_neg = torch.softmax(_output_neg, dim=0)[seq_ans_ids[j]]
-                output_rneg = torch.softmax(_output_neg, dim=0)[
-                    rand_ans_ids[j]]
+                output_rneg = torch.softmax(_output_neg, dim=0)[rand_ans_ids[j]]
                 proba_rneg.append(output_rneg)
                 proba_neg.append(output_neg)
                 # print(output_neg)
@@ -230,7 +249,7 @@ def main(cfg: OmegaConf):
         RAND_pos = np.array(RAND_pos)
 
         if np.isnan(RES_neg).any() or np.isnan(RES_pos).any():
-            log.warning(f'Found NaNs in the results for layer {layer_id}')
+            log.warning(f"Found NaNs in the results for layer {layer_id}")
 
             for i in range(RES_neg.shape[0]):
                 if np.isnan(RES_neg[i]):
@@ -238,8 +257,12 @@ def main(cfg: OmegaConf):
                 if np.isnan(RES_pos[i]):
                     RES_pos[i] = RES_orig[i]
 
-        if np.isnan(RAND_neg).any() or np.isnan(RAND_pos).any() or np.isnan(RAND_orig).any():
-            log.warning(f'Found NaNs in the results for layer {layer_id}')
+        if (
+            np.isnan(RAND_neg).any()
+            or np.isnan(RAND_pos).any()
+            or np.isnan(RAND_orig).any()
+        ):
+            log.warning(f"Found NaNs in the results for layer {layer_id}")
 
             for i in range(RAND_neg.shape[0]):
                 if np.isnan(RAND_neg[i]):
@@ -257,139 +280,141 @@ def main(cfg: OmegaConf):
 
         ols_res = diff_ols(diff_pos, diff_neg, dataset)
         ols_res_rand = diff_ols_rand(
-            diff_pos, diff_neg, diff_rand_pos, diff_rand_neg, dataset)
+            diff_pos, diff_neg, diff_rand_pos, diff_rand_neg, dataset
+        )
         ttest_res = diff_ttest(diff_pos, diff_neg, dataset, task=cfg.task)
 
-        save(cfg=cfg,
-             layer_id=layer_id,
-             ols=ols_res,
-             rand_ols=ols_res_rand,
-             ttest=ttest_res,
-             s_orig=RES_orig, s_neg=RES_neg, s_pos=RES_pos,
-             r_orig=RAND_orig, r_neg=RAND_neg, r_pos=RAND_pos)
+        save(
+            cfg=cfg,
+            layer_id=layer_id,
+            ols=ols_res,
+            rand_ols=ols_res_rand,
+            ttest=ttest_res,
+            s_orig=RES_orig,
+            s_neg=RES_neg,
+            s_pos=RES_pos,
+            r_orig=RAND_orig,
+            r_neg=RAND_neg,
+            r_pos=RAND_pos,
+        )
 
         db_params = f"Rand OLS: {ols_res_rand.params['Intercept']} Layers: {layer_id/reader.available_layers()[-1]}"
         db_trial_id = f"{cfg.model.name}-{cfg.datapack.name}-{cfg.task}"
         status = 1 if layer_id == reader.available_layers()[-1] else 0
-        db.write(trial_id=db_trial_id,
-                 model=cfg.model.name,
-                 datapack=cfg.datapack.name,
-                 task=cfg.task,
-                 parameters=db_params,
-                 progress=layer_id/reader.available_layers()[-1],
-                 status=status)
+        db.write(
+            trial_id=db_trial_id,
+            model=cfg.model.name,
+            datapack=cfg.datapack.name,
+            task=cfg.task,
+            parameters=db_params,
+            progress=layer_id / reader.available_layers()[-1],
+            status=status,
+        )
 
     db_trial_id = f"{cfg.model.name}-{cfg.datapack.name}-{cfg.task}"
-    db.write(trial_id=db_trial_id,
-             model=cfg.model.name,
-             datapack=cfg.datapack.name,
-             task=cfg.task,
-             parameters='Finished',
-             progress=1,
-             status=1)
+    db.write(
+        trial_id=db_trial_id,
+        model=cfg.model.name,
+        datapack=cfg.datapack.name,
+        task=cfg.task,
+        parameters="Finished",
+        progress=1,
+        status=1,
+    )
     log.warning(
-        f"Finished processing layers for {cfg.probe['name']}-based probe for {cfg.model['name']} [task: {cfg.task}]")
+        f"Finished processing layers for {cfg.probe['name']}-based probe for {cfg.model['name']} [task: {cfg.task}]"
+    )
 
 
 def diff_ols(diff_pos, diff_neg, dataset):
-    '''Return the OLS regression for real statements only.
-    Hypothesis: Diff_pos > Diff_neg'''
+    """Return the OLS regression for real statements only.
+    Hypothesis: Diff_pos > Diff_neg"""
     N = diff_pos.shape[0]
-    y = dataset['correct'].values[:N]
-    r = dataset['real_object'].values[:N]
-    mask = (r == 1)
+    y = dataset["correct"].values[:N]
+    r = dataset["real_object"].values[:N]
+    mask = r == 1
     diff = diff_pos - diff_neg
-    df = pd.DataFrame({
-        'diff': diff[mask],
-        'group': y[mask]
-    })
+    df = pd.DataFrame({"diff": diff[mask], "group": y[mask]})
     model = smf.ols("diff ~ group", data=df)
-    return model.fit(cov_type='HC3')
+    return model.fit(cov_type="HC3")
 
 
-def diff_ols_rand(diff_pos, diff_neg, diff_rand_pos, diff_rand_neg,
-                  dataset):
-    '''Return the OLS regression for real and true statements only.'
-    'Hypothesis: Diff_true > Diff_random'''
+def diff_ols_rand(diff_pos, diff_neg, diff_rand_pos, diff_rand_neg, dataset):
+    """Return the OLS regression for real and true statements only.'
+    'Hypothesis: Diff_true > Diff_random"""
     N = diff_pos.shape[0]
-    y = dataset['correct'].values[:N]
-    r = dataset['real_object'].values[:N]
+    y = dataset["correct"].values[:N]
+    r = dataset["real_object"].values[:N]
     mask = (r == 1) & (y == 1)
     diff = diff_pos - diff_neg
-    df1 = pd.DataFrame({
-        'diff': diff[mask],
-        'group': 1
-    })
+    df1 = pd.DataFrame({"diff": diff[mask], "group": 1})
     diff_rand = diff_rand_pos - diff_rand_neg
-    df2 = pd.DataFrame({
-        'diff': diff_rand[mask],
-        'group': 0
-    })
+    df2 = pd.DataFrame({"diff": diff_rand[mask], "group": 0})
     df = pd.concat([df1, df2], ignore_index=True)
 
     model = smf.ols("diff ~ group", data=df)
-    return model.fit(cov_type='HC3')
+    return model.fit(cov_type="HC3")
 
 
 def diff_ttest(diff_pos, diff_neg, dataset, task):
     """Return the t-test stats for real statements only."""
     N = diff_pos.shape[0]
-    y = dataset['correct'].values[:N]
-    r = dataset['real_object'].values[:N]
+    y = dataset["correct"].values[:N]
+    r = dataset["real_object"].values[:N]
     mask = (r == 1) & (y == 1)
     if task in [0, 4]:
-        result = stats.ttest_rel(
-            diff_pos[mask], diff_neg[mask], alternative='greater')
+        result = stats.ttest_rel(diff_pos[mask], diff_neg[mask], alternative="greater")
     elif task in [1, 5]:
-        result = stats.ttest_rel(
-            diff_pos[mask], diff_neg[mask], alternative='less')
+        result = stats.ttest_rel(diff_pos[mask], diff_neg[mask], alternative="less")
     return result
 
-def save(cfg, layer_id, ols, rand_ols, ttest, s_orig, s_neg, s_pos, r_orig, r_neg, r_pos):
+
+def save(
+    cfg, layer_id, ols, rand_ols, ttest, s_orig, s_neg, s_pos, r_orig, r_neg, r_pos
+):
     output = {
         "ols": {
-            "intercept_coef": ols.params['Intercept'],
-            "intercept_std": ols.bse['Intercept'],
+            "intercept_coef": ols.params["Intercept"],
+            "intercept_std": ols.bse["Intercept"],
             "intercept_ci": ols.conf_int().loc["Intercept"].values,
-            "intercept_pval": ols.pvalues['Intercept'],
-            "intercept_zval": ols.tvalues['Intercept'],
-            "group_coef": ols.params['group'],
-            "group_std": ols.bse['group'],
+            "intercept_pval": ols.pvalues["Intercept"],
+            "intercept_zval": ols.tvalues["Intercept"],
+            "group_coef": ols.params["group"],
+            "group_std": ols.bse["group"],
             "group_ci": ols.conf_int().loc["group"].values,
-            "group_pval": ols.pvalues['group'],
-            "group_zval": ols.tvalues['group'],
+            "group_pval": ols.pvalues["group"],
+            "group_zval": ols.tvalues["group"],
             "df": ols.df_resid,
-            "n_inst": ols.nobs
+            "n_inst": ols.nobs,
         },
-        'rand_ols': {
-            "intercept_coef": rand_ols.params['Intercept'],
-            "intercept_std": rand_ols.bse['Intercept'],
+        "rand_ols": {
+            "intercept_coef": rand_ols.params["Intercept"],
+            "intercept_std": rand_ols.bse["Intercept"],
             "intercept_ci": rand_ols.conf_int().loc["Intercept"].values,
-            "intercept_pval": rand_ols.pvalues['Intercept'],
-            "intercept_zval": rand_ols.tvalues['Intercept'],
-            "group_coef": rand_ols.params['group'],
-            "group_std": rand_ols.bse['group'],
+            "intercept_pval": rand_ols.pvalues["Intercept"],
+            "intercept_zval": rand_ols.tvalues["Intercept"],
+            "group_coef": rand_ols.params["group"],
+            "group_std": rand_ols.bse["group"],
             "group_ci": rand_ols.conf_int().loc["group"].values,
-            "group_pval": rand_ols.pvalues['group'],
-            "group_zval": rand_ols.tvalues['group'],
+            "group_pval": rand_ols.pvalues["group"],
+            "group_zval": rand_ols.tvalues["group"],
             "df": rand_ols.df_resid,
             "n_inst": rand_ols.nobs,
-            'signf': int(rand_ols.pvalues['group'] < 0.05)
+            "signf": int(rand_ols.pvalues["group"] < 0.05),
         },
         "ttest": {
             "statistic": ttest.statistic,
             "pvalue": ttest.pvalue,
-            'df': ttest.df,
-            'signf': int(ttest.pvalue < 0.05)
-        }
+            "df": ttest.df,
+            "signf": int(ttest.pvalue < 0.05),
+        },
     }
 
-    if os.path.exists(f'{cfg.output_dir}') is False:
-        os.makedirs(f'{cfg.output_dir}')
+    if os.path.exists(f"{cfg.output_dir}") is False:
+        os.makedirs(f"{cfg.output_dir}")
 
     if cfg.save_results:
-        log.warning(
-            f"Saving results for layer {layer_id} for Task {cfg.task}")
+        log.warning(f"Saving results for layer {layer_id} for Task {cfg.task}")
         log.warning(pprint.pformat(output))
         with open(f"{cfg.output_dir}/layer_{layer_id}.json", "w") as f:
             json.dump(output, f, cls=NpEncoder)
@@ -401,8 +426,7 @@ def save(cfg, layer_id, ols, rand_ols, ttest, s_orig, s_neg, s_pos, r_orig, r_ne
         np.save(f"{cfg.output_dir}/layer_{layer_id}_rneg.npy", r_neg)
         np.save(f"{cfg.output_dir}/layer_{layer_id}_rpos.npy", r_pos)
     else:
-        log.warning(
-            f"Results for layer {layer_id} for Task {cfg.task} (not saved).")
+        log.warning(f"Results for layer {layer_id} for Task {cfg.task} (not saved).")
         log.warning(pprint.pformat(output))
 
 

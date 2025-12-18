@@ -1,23 +1,21 @@
-from hydra import compose, initialize
-from omegaconf import OmegaConf
+from __future__ import annotations
 
-from transformers import AutoTokenizer, AutoModelForCausalLM
-import torch
-from sklearn.metrics import (
-    normalized_mutual_info_score as nmi,
-    adjusted_mutual_info_score as ami,
-    average_precision_score as mAP,
-    matthews_corrcoef as mcc,
-    adjusted_rand_score as ari,
-)
-from typing import List
-import polars as pl
-from data_handler import DataHandler
-import numpy as np
-from nnsight import LanguageModel
-import logging
 import json
-log = logging.getLogger('utils')
+import logging
+
+import numpy as np
+import polars as pl
+import torch
+from hydra import compose, initialize
+from nnsight import LanguageModel
+from omegaconf import OmegaConf
+from sklearn.metrics import adjusted_mutual_info_score as ami
+from sklearn.metrics import matthews_corrcoef as mcc
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+from data_handler import DataHandler
+
+log = logging.getLogger("utils")
 
 
 class NpEncoder(json.JSONEncoder):
@@ -31,7 +29,9 @@ class NpEncoder(json.JSONEncoder):
         return super(NpEncoder, self).default(obj)
 
 
-def drop_rows_with_tail_keep(arr, num_rows_to_keep: int, last_rows_to_keep: int = 2,  random_seed: int = 42):
+def drop_rows_with_tail_keep(
+    arr, num_rows_to_keep: int, last_rows_to_keep: int = 2, random_seed: int = 42
+):
     """
     Randomly selects a specific number of rows to keep from a 2D numpy array,
     ensuring the last two rows are always retained.
@@ -55,7 +55,8 @@ def drop_rows_with_tail_keep(arr, num_rows_to_keep: int, last_rows_to_keep: int 
     # Randomly sample the specified number of rows
     np.random.seed(random_seed)
     indices_to_keep = np.random.choice(
-        len(remaining_rows), size=num_rows_to_keep-last_rows_to_keep, replace=False)
+        len(remaining_rows), size=num_rows_to_keep - last_rows_to_keep, replace=False
+    )
     sampled_rows = remaining_rows[indices_to_keep]
 
     # Combine sampled rows with the last two rows
@@ -64,7 +65,9 @@ def drop_rows_with_tail_keep(arr, num_rows_to_keep: int, last_rows_to_keep: int 
     return final_array
 
 
-def bootstrap_3_ci(metric_func, arg_1, arg_2, arg_3, n_bootstraps=1000, alpha=0.05, random_state=None):
+def bootstrap_3_ci(
+    metric_func, arg_1, arg_2, arg_3, n_bootstraps=1000, alpha=0.05, random_state=None
+):
     """
     Calculate bootstrapped confidence intervals for a given scikit-learn metric that can accept multiple arguments.
 
@@ -105,30 +108,27 @@ def bootstrap_3_ci(metric_func, arg_1, arg_2, arg_3, n_bootstraps=1000, alpha=0.
     return metric_func(arg_1, arg_2, arg_3), ci_lower, ci_upper
 
 
-
-
-
 def weighed_mcc(y_true, y_pred, coverage):
-    '''MCC adapted for cases with Abstention.
+    """MCC adapted for cases with Abstention.
     Args:
     y_true: np.array, true labels
     y_pred: np.array, predicted labels
     coverage: float, acceptance rate (fraction of predictions that are not abstained)
     Returns:
     float, weighed MCC
-    '''
+    """
     return mcc(y_true, y_pred) * coverage
 
 
 def weighed_ami(y_true, y_pred, coverage):
-    '''AMI adapted for cases with Abstention
+    """AMI adapted for cases with Abstention
     Args:
     y_true: np.array, true labels
     y_pred: np.array, predicted labels
     coverage: float, acceptance rate (fraction of predictions that are not abstained)
     Returns:
     float, weighed AMI
-    '''
+    """
     return ami(y_true, y_pred) * coverage
 
 
@@ -140,14 +140,22 @@ def load_data(cfg):
         with_calibration = True
     else:
         with_calibration = False
-    dh = DataHandler(model=cfg.model["name"], datasets=cfg.datapack["datasets"],
-                     dataset_path=cfg.setup["dataset_path"], activations_path=cfg.setup["activations_path"],
-                     output_path=cfg.setup["output_path"],
-                     activation_type=cfg.agg, with_calibration=with_calibration, load_scores=cfg.datapack[
-                         "load_scores"],
-                     )
-    dh.assemble(test_size=cfg.datapack["test_size"], calibration_size=cfg.datapack["cal_size"],
-                seed=cfg.datapack["random_seed"], exclusive_split=cfg.datapack["exclusive_split"])
+    dh = DataHandler(
+        model=cfg.model["name"],
+        datasets=cfg.datapack["datasets"],
+        dataset_path=cfg.setup["dataset_path"],
+        activations_path=cfg.setup["activations_path"],
+        output_path=cfg.setup["output_path"],
+        activation_type=cfg.agg,
+        with_calibration=with_calibration,
+        load_scores=cfg.datapack["load_scores"],
+    )
+    dh.assemble(
+        test_size=cfg.datapack["test_size"],
+        calibration_size=cfg.datapack["cal_size"],
+        seed=cfg.datapack["random_seed"],
+        exclusive_split=cfg.datapack["exclusive_split"],
+    )
     return dh
 
 
@@ -160,14 +168,22 @@ def load_data_with_test(cfg):
     else:
         with_calibration = False
     log.warning(f"Test dataset path: {cfg.setup['dataset_path']}")
-    dh = DataHandler(model=cfg.model["name"], datasets=cfg.datapack_test["datasets"],
-                     dataset_path=cfg.setup["dataset_path"], activations_path=cfg.setup["activations_path"],
-                     output_path=cfg.setup["output_path"],
-                     activation_type=cfg.agg, with_calibration=with_calibration, load_scores=cfg.datapack_test[
-                         "load_scores"]
-                     )
-    dh.assemble(test_size=cfg.datapack_test["test_size"], calibration_size=cfg.datapack_test["cal_size"],
-                seed=cfg.datapack_test["random_seed"], exclusive_split=cfg.datapack_test["exclusive_split"])
+    dh = DataHandler(
+        model=cfg.model["name"],
+        datasets=cfg.datapack_test["datasets"],
+        dataset_path=cfg.setup["dataset_path"],
+        activations_path=cfg.setup["activations_path"],
+        output_path=cfg.setup["output_path"],
+        activation_type=cfg.agg,
+        with_calibration=with_calibration,
+        load_scores=cfg.datapack_test["load_scores"],
+    )
+    dh.assemble(
+        test_size=cfg.datapack_test["test_size"],
+        calibration_size=cfg.datapack_test["cal_size"],
+        seed=cfg.datapack_test["random_seed"],
+        exclusive_split=cfg.datapack_test["exclusive_split"],
+    )
     return dh
 
 
@@ -175,28 +191,40 @@ def return_layers(model, cfg):
     """
     Return the layers to save activations from (as a list)
     """
-    return list(range(len(model.get_submodule(cfg.model["module"]).get_submodule(cfg.model["encoders"]))))
+    return list(
+        range(
+            len(
+                model.get_submodule(cfg.model["module"]).get_submodule(
+                    cfg.model["encoders"]
+                )
+            )
+        )
+    )
 
 
-def flatten(xss) -> List:
+def flatten(xss) -> list:
     """
     Flatten a list of lists
     """
     return [x for xs in xss for x in xs]
 
 
-def load_statements(dataset: List) -> List[str]:
+def load_statements(dataset: list) -> list[str]:
     """
     Load the dataset from the file
     """
-    return flatten(pl.read_csv(f"datasets/{dataset}.csv").select("statement").to_numpy())
+    return flatten(
+        pl.read_csv(f"datasets/{dataset}.csv").select("statement").to_numpy()
+    )
 
 
-def load_statements_with_targets(dataset: List) -> List[str]:
+def load_statements_with_targets(dataset: list) -> list[str]:
     """
     Load the dataset from the file
     """
-    return flatten(pl.read_csv(f"datasets/{dataset}.csv").select("statement").to_numpy()), flatten(pl.read_csv(f"datasets/{dataset}.csv").select("correct").to_numpy())
+    return flatten(
+        pl.read_csv(f"datasets/{dataset}.csv").select("statement").to_numpy()
+    ), flatten(pl.read_csv(f"datasets/{dataset}.csv").select("correct").to_numpy())
 
 
 def get_device():
@@ -235,7 +263,11 @@ def return_layers(model, cfg):
     """
     Return the layers to save activations from (as a list)
     """
-    return list(range(len(model.get_submodule(cfg.model.module).get_submodule(cfg.model.encoders))))
+    return list(
+        range(
+            len(model.get_submodule(cfg.model.module).get_submodule(cfg.model.encoders))
+        )
+    )
 
 
 def prepare_hf_model(cfg, device=None):
@@ -249,18 +281,27 @@ def prepare_hf_model(cfg, device=None):
     if cfg.model["dtype"] == "float16":
         _dtype = torch.float16
         model = AutoModelForCausalLM.from_pretrained(
-            pretrained_model_name_or_path=cfg.model["model"], token=cfg.model["token"],
-            torch_dtype=_dtype,  attn_implementation="eager", device_map={"": device})
+            pretrained_model_name_or_path=cfg.model["model"],
+            token=cfg.model["token"],
+            torch_dtype=_dtype,
+            attn_implementation="eager",
+            device_map={"": device},
+        )
     elif cfg.model["dtype"] == "float32":
         _dtype = torch.float16
         model = AutoModelForCausalLM.from_pretrained(
-            pretrained_model_name_or_path=cfg.model["model"], token=cfg.model["token"], torch_dtype=_dtype, device_map={"": device})
+            pretrained_model_name_or_path=cfg.model["model"],
+            token=cfg.model["token"],
+            torch_dtype=_dtype,
+            device_map={"": device},
+        )
     else:
         raise ValueError("dtype must be either 'bfloat16' or 'float32'.")
 
     # Load Tokenizer
     tokenizer = AutoTokenizer.from_pretrained(
-        pretrained_model_name_or_path=cfg.model["model"], token=cfg.model["token"])
+        pretrained_model_name_or_path=cfg.model["model"], token=cfg.model["token"]
+    )
     tokenizer.pad_token = tokenizer.eos_token
     tokenizer.padding_side = "left"
     # Load model
@@ -278,7 +319,8 @@ def prepare_hf_tokenizer(cfg, device=None):
         device = torch.device(device)
     # Load Tokenizer
     tokenizer = AutoTokenizer.from_pretrained(
-        pretrained_model_name_or_path=cfg.model["model"], token=cfg.model["token"])
+        pretrained_model_name_or_path=cfg.model["model"], token=cfg.model["token"]
+    )
     tokenizer.pad_token = tokenizer.eos_token
     tokenizer.padding_side = "left"
     # Load model
@@ -301,14 +343,17 @@ def prepare_nnsight(cfg):
     #     model = AutoModelForCausalLM.from_pretrained(
     #         pretrained_model_name_or_path=cfg.model["model"], token=cfg.model["token"], torch_dtype="auto", device_map={"": device})
     # Load model and tokenizer
-    if cfg.model["dtype"] == "float16":
-        _dtype = torch.float16
-    elif cfg.model["dtype"] == "float32":
+    if cfg.model["dtype"] == "float16" or cfg.model["dtype"] == "float32":
         _dtype = torch.float16
     model = LanguageModel(
-        cfg.model["model"], token=cfg.model["token"], device_map={"": device}, dispatch=True, torch_dtype=_dtype,
-        offload_folder="offload",    # local dir to spill weights to
-        offload_state_dict=True)
+        cfg.model["model"],
+        token=cfg.model["token"],
+        device_map={"": device},
+        dispatch=True,
+        torch_dtype=_dtype,
+        offload_folder="offload",  # local dir to spill weights to
+        offload_state_dict=True,
+    )
 
     model.tokenizer.pad_token = model.tokenizer.eos_token
     model.tokenizer.pad_token_id = model.tokenizer.eos_token_id
@@ -327,7 +372,11 @@ def return_label(data):
         real: np.array of real_object labels
         negated: np.array of negation labels
     """
-    correct, real, negated = data["correct"].values, data["real_object"].values, data["negation"].values
+    correct, real, negated = (
+        data["correct"].values,
+        data["real_object"].values,
+        data["negation"].values,
+    )
     return correct, real, negated
 
 
@@ -339,6 +388,8 @@ def normalize(X):
 
 def load_hydra_experiment(model, datapack, probe, config_name):
     with initialize(version_base="1.1", config_path="configs"):
-        cfg = compose(config_name=config_name, overrides=[
-                      f'model={model}', f'datapack={datapack}', f'probe={probe}'])
+        cfg = compose(
+            config_name=config_name,
+            overrides=[f"model={model}", f"datapack={datapack}", f"probe={probe}"],
+        )
     return OmegaConf.to_container(cfg, resolve=True)

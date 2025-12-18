@@ -1,14 +1,19 @@
-import polars as pl
-from typing import List
-import torch
-import numpy as np
-from glob import glob
-import os
+from __future__ import annotations
+
 import logging
+import os
 from dataclasses import dataclass, field
+from glob import glob
+from typing import List
+
+import numpy as np
+import polars as pl
+import torch
+
 LEGAL_ACTIVATION_TYPES = ["last", "full"]
 
 log = logging.getLogger(__name__)
+
 
 def shape_as_tuple(x):
     d = x.shape[0]
@@ -49,7 +54,10 @@ def stack_tensors(tensors, padding_value=0, max_length=None):
         if pad_size > 0:
             # Create a padding tensor with the required size
             pad_tensor = torch.full(
-                (tensor.size(0), pad_size, tensor.size(2)), padding_value, dtype=tensor.dtype)
+                (tensor.size(0), pad_size, tensor.size(2)),
+                padding_value,
+                dtype=tensor.dtype,
+            )
             padded_tensor = torch.cat((tensor, pad_tensor), dim=1)
         else:
             padded_tensor = tensor
@@ -75,25 +83,38 @@ class DataHandler:
         load_scores (str): Name of the scores to load.
         verbose (bool): Whether to print verbose logs.
     """
-    model: str = field(default="llama-3-8b",
-                       metadata={"help": "The LLM use in the project."})
-    datasets: List[str] = field(default_factory=lambda: ["city_locations", "city_locations_synthetic"],
-                                metadata={
-                                "help": "The datasets to be used in the project."})
-    activation_type: str = field(default="last"),
+
+    model: str = field(
+        default="llama-3-8b", metadata={"help": "The LLM use in the project."}
+    )
+    datasets: list[str] = field(
+        default_factory=lambda: ["city_locations", "city_locations_synthetic"],
+        metadata={"help": "The datasets to be used in the project."},
+    )
+    activation_type: str = (field(default="last"),)
     dataset_path: str = field(default="datasets/")
     activations_path: str = field(default="outputs/activations/")
     output_path: str = field(default="outputs/")
-    with_calibration: bool = field(default=False,
-                                   metadata={"help": "Whether to include a calibration set."})
-    load_scores: str = field(default=''),
+    with_calibration: bool = field(
+        default=False, metadata={"help": "Whether to include a calibration set."}
+    )
+    load_scores: str = (field(default=""),)
     output_path: str = field(default="outputs/")
     verbose: bool = field(default=True)
 
     def __post_init__(self):
-        assert self.activation_type in LEGAL_ACTIVATION_TYPES, f"Activation type must be either {LEGAL_ACTIVATION_TYPES}."
+        assert (
+            self.activation_type in LEGAL_ACTIVATION_TYPES
+        ), f"Activation type must be either {LEGAL_ACTIVATION_TYPES}."
 
-    def assemble(self, exclusive_split: bool, test_size: float = 0.2, calibration_size: float = 0.2, seed: int = 42, shuffle: bool = True):
+    def assemble(
+        self,
+        exclusive_split: bool,
+        test_size: float = 0.2,
+        calibration_size: float = 0.2,
+        seed: int = 42,
+        shuffle: bool = True,
+    ):
         """
         Assemble the data for the project.
         """
@@ -103,28 +124,39 @@ class DataHandler:
             # Load the dataset
             _path = os.path.join(self.dataset_path, f"{dataset}.csv")
             df = pl.read_csv(_path)
-            df = df.with_columns([
-                pl.col("correct").cast(pl.Int32()),
-                pl.col("negation").cast(pl.Int32()),
-                pl.col("real_object").cast(pl.Int32()),
-            ])
-            if self.load_scores != '' or self.load_scores != False:
+            df = df.with_columns(
+                [
+                    pl.col("correct").cast(pl.Int32()),
+                    pl.col("negation").cast(pl.Int32()),
+                    pl.col("real_object").cast(pl.Int32()),
+                ]
+            )
+            if self.load_scores != "" or self.load_scores:
                 try:
-                    _path = os.path.join(self.output_path,
-                                         "probes", "prompt", str(self.load_scores), self.model, dataset, "scores.npy")
+                    _path = os.path.join(
+                        self.output_path,
+                        "probes",
+                        "prompt",
+                        str(self.load_scores),
+                        self.model,
+                        dataset,
+                        "scores.npy",
+                    )
                     scores = np.load(_path)
                     n_scores = scores.shape[-1]
                     df = df.with_columns(
-                        [pl.Series(f"scores_{i}", scores[:, i]) for i in range(n_scores)])
+                        [
+                            pl.Series(f"scores_{i}", scores[:, i])
+                            for i in range(n_scores)
+                        ]
+                    )
                 except Exception as e:
                     log.error(e)
-                    log.error(
-                        f"Scores not found for {self.model} and {dataset}.")
+                    log.error(f"Scores not found for {self.model} and {dataset}.")
             missing_columns = set(columns).difference(set(df.columns))
             for column in missing_columns:
                 df = df.with_columns(pl.lit(0.0).alias(column))
-            data.append(df.select(sorted(df.columns))
-                        )
+            data.append(df.select(sorted(df.columns)))
 
         # Concatenate the datasets
         data = pl.concat(data, how="vertical_relaxed").to_pandas()
@@ -134,21 +166,37 @@ class DataHandler:
             log.warning("Datasets assembled.")
         if exclusive_split:
             self.__exclusive_data_split__(
-                test_size=test_size, calibration_size=calibration_size, seed=seed, shuffle=shuffle)
+                test_size=test_size,
+                calibration_size=calibration_size,
+                seed=seed,
+                shuffle=shuffle,
+            )
         else:
             self.__data_split__(
-                test_size=test_size, calibration_size=calibration_size, seed=seed, shuffle=shuffle)
+                test_size=test_size,
+                calibration_size=calibration_size,
+                seed=seed,
+                shuffle=shuffle,
+            )
 
-    def __exclusive_data_split__(self, test_size: float = 0.2, calibration_size: float = 0.2, seed: int = 42, shuffle: bool = True):
+    def __exclusive_data_split__(
+        self,
+        test_size: float = 0.2,
+        calibration_size: float = 0.2,
+        seed: int = 42,
+        shuffle: bool = True,
+    ):
         """
         Split the data into training and testing sets: makes sure that objects from train set do not appear in test set.
         """
         df_train, df_test = self.__generate_exclusive_split__(
-            self.data, test_size, seed)
+            self.data, test_size, seed
+        )
 
         if self.with_calibration:
             df_train, df_calib = self.__generate_exclusive_split__(
-                df_train, calibration_size, seed)
+                df_train, calibration_size, seed
+            )
             self.calibration_ids = np.array(df_calib.index)
         else:
             self.calibration_ids = None
@@ -163,42 +211,58 @@ class DataHandler:
                 np.random.shuffle(self.calibration_ids)
 
         if self.verbose:
-            train_size_ratio = len(self.train_ids)/self.data.shape[0]
-            test_size_ratio = len(self.test_ids)/self.data.shape[0]
+            train_size_ratio = len(self.train_ids) / self.data.shape[0]
+            test_size_ratio = len(self.test_ids) / self.data.shape[0]
             if self.with_calibration:
-                calib_size_ratio = len(self.calibration_ids)/self.data.shape[0]
+                calib_size_ratio = len(self.calibration_ids) / self.data.shape[0]
                 if self.verbose:
                     log.warning(
-                        f"Train size: {train_size_ratio:.2f}, Test size: {test_size_ratio:.2f}, Calibration size: {calib_size_ratio:.2f}")
+                        f"Train size: {train_size_ratio:.2f}, Test size: {test_size_ratio:.2f}, Calibration size: {calib_size_ratio:.2f}"
+                    )
             else:
                 if self.verbose:
                     log.warning(
-                        f"Train size: {train_size_ratio:.2f}, Test size: {test_size_ratio:.2f}, Calibration size: 0.0")
+                        f"Train size: {train_size_ratio:.2f}, Test size: {test_size_ratio:.2f}, Calibration size: 0.0"
+                    )
 
     def __generate_exclusive_split__(self, df, test_size, seed):
         """
         Split the data into training and testing sets: makes sure that objects from train set do not appear in test set.
         """
         rnd = np.random.default_rng(seed)
-        train_objects = df[["object_1", "object_2"]].drop_duplicates().sample(
-            frac=1. - test_size, random_state=seed).to_numpy().flatten()
+        train_objects = (
+            df[["object_1", "object_2"]]
+            .drop_duplicates()
+            .sample(frac=1.0 - test_size, random_state=seed)
+            .to_numpy()
+            .flatten()
+        )
 
-        train_mask = df["object_1"].isin(
-            train_objects) | df["object_2"].isin(train_objects)
+        train_mask = df["object_1"].isin(train_objects) | df["object_2"].isin(
+            train_objects
+        )
         df_train = df[train_mask]
         df_test = df[~train_mask]
         while True:
-            if df_test.shape[0]/df.shape[0] > test_size:
+            if df_test.shape[0] / df.shape[0] > test_size:
                 break
-            train_objects = rnd.choice(train_objects, size=int(
-                len(train_objects)*0.975), replace=False)
-            train_mask = df["object_1"].isin(
-                train_objects) | df["object_2"].isin(train_objects)
+            train_objects = rnd.choice(
+                train_objects, size=int(len(train_objects) * 0.975), replace=False
+            )
+            train_mask = df["object_1"].isin(train_objects) | df["object_2"].isin(
+                train_objects
+            )
             df_train = df[train_mask]
             df_test = df[~train_mask]
         return df_train, df_test
 
-    def __data_split__(self, test_size: float = 0.2, calibration_size: float = 0.2, seed: int = 42, shuffle: bool = True):
+    def __data_split__(
+        self,
+        test_size: float = 0.2,
+        calibration_size: float = 0.2,
+        seed: int = 42,
+        shuffle: bool = True,
+    ):
         np.random.seed(seed)
         ids = np.arange(len(self.data))
         mask = np.random.rand(len(self.data)) < 1 - test_size
@@ -211,7 +275,10 @@ class DataHandler:
             np.random.shuffle(self.test_ids)
         if self.calibration_ids:
             mask = np.random.rand(len(self.train_ids)) < 1 - calibration_size
-            self.train_ids, self.calibration_ids = self.train_ids[mask], self.train_ids[~mask]
+            self.train_ids, self.calibration_ids = (
+                self.train_ids[mask],
+                self.train_ids[~mask],
+            )
             if shuffle:
                 np.random.shuffle(self.train_ids)
                 np.random.shuffle(self.calibration_ids)
@@ -219,8 +286,9 @@ class DataHandler:
             self.calibration_ids = None
 
     def get_num_layers(self):
-        _path = os.path.join(self.activations_path,
-                             self.model, self.datasets[0], self.activation_type)
+        _path = os.path.join(
+            self.activations_path, self.model, self.datasets[0], self.activation_type
+        )
         return len(glob(f"{_path}/*_e.npy"))
 
     def get_activations(self, layer_id: int, module: str = "e"):
@@ -231,21 +299,29 @@ class DataHandler:
             module (str): The module to get the activations for (a - attention output, m - mlp output, e - encoder output)
         """
         assert module in [
-            "a", "m", "e"], "Module must be either 'a' (self-attention), 'm' (mlp layer) or 'e' (encoder output)."
+            "a",
+            "m",
+            "e",
+        ], "Module must be either 'a' (self-attention), 'm' (mlp layer) or 'e' (encoder output)."
         activations = list()
 
         for dataset in self.datasets:
-            data_dir = os.path.join(self.activations_path,
-                                 self.model, dataset, self.activation_type)
+            data_dir = os.path.join(
+                self.activations_path, self.model, dataset, self.activation_type
+            )
             try:
-                shape = shape_as_tuple(np.load(f'{data_dir}/shape.npy'))
+                shape = shape_as_tuple(np.load(f"{data_dir}/shape.npy"))
                 acts = np.memmap(
-                    f'{data_dir}/layer_{layer_id}_{module}_temp.npy', shape=shape, mode="r", dtype=np.float16)
-            except:
-                acts = self._load_npz(f'{data_dir}/layer_{layer_id}_{module}.npz')
+                    f"{data_dir}/layer_{layer_id}_{module}_temp.npy",
+                    shape=shape,
+                    mode="r",
+                    dtype=np.float16,
+                )
+            except (FileNotFoundError, ValueError, OSError):
+                acts = self._load_npz(f"{data_dir}/layer_{layer_id}_{module}.npz")
 
             # activations.append(torch.from_numpy(np.array(acts)))
-                    # --- Convert to float32 (or any dtype you want) ---
+            # --- Convert to float32 (or any dtype you want) ---
             arr = np.asarray(acts, dtype=np.float32)
 
             nan_mask = np.isnan(arr)
@@ -254,7 +330,6 @@ class DataHandler:
             #     mean_val = np.nanmean(arr)
             #     arr[nan_mask] = mean_val
             activations.append(torch.from_numpy(arr))
-            
 
         if self.activation_type == "full":
             output = stack_tensors(activations)
@@ -271,7 +346,9 @@ class DataHandler:
             n = activations.shape[0]
 
         n_rows = self.data.shape[0]
-        assert n == n_rows, f"Number of rows in activations ({n}) does not match the number of rows in the data ({n_rows})."
+        assert (
+            n == n_rows
+        ), f"Number of rows in activations ({n}) does not match the number of rows in the data ({n_rows})."
 
     def _load_npz(self, path: str):
         return np.load(path)["arr_0"]
@@ -279,7 +356,9 @@ class DataHandler:
     def get_att_mask(self):
         masks = []
         for dataset in self.datasets:
-            _path = os.path.join(self.activations_path, self.model, dataset, self.activation_type)
+            _path = os.path.join(
+                self.activations_path, self.model, dataset, self.activation_type
+            )
             _mask_path = os.path.join(_path, "mask.npy")
             masks.append(torch.from_numpy(np.load(_mask_path)))
         return torch.vstack(masks)
@@ -309,13 +388,13 @@ class DataHandler:
         return self.data.iloc[self.train_ids.tolist()]
 
     def train_labeled(self, layer_id: int = -1):
-        '''
+        """
         Get the train data with activation and "correct" label for the given layer.
         Args:
             layer_id (int): The layer id to get the activations for.
         Returns:
             dict: A dictionary containing the embeddings and the correct labels keys:[embeddings, correct].
-        '''
+        """
         correct = self.get_train_df()["correct"].to_numpy()
 
         if self.activation_type == "full":
@@ -332,15 +411,17 @@ class DataHandler:
             raise NotImplementedError
 
     def train_bags(self, layer_id: int = -1, drop_zeros: bool = True):
-        ''' 
+        """
         Get the training bags for the given layer.
         Args:
             layer_id (int): The layer id to get the activations for.
             drop_zeros (bool): Whether to drop padded rows from the bags.
         Returns:
             dict: A dictionary containing the bags, the correct labels and the last embedding keys:[embeddings, correct, last_embedding].
-        '''
-        assert self.activation_type == "full", "Bags can only be generated for full activations."
+        """
+        assert (
+            self.activation_type == "full"
+        ), "Bags can only be generated for full activations."
         correct = self.get_train_df()["correct"].to_numpy()
         acts = self.get_train_acts(layer_id=layer_id)
         try:
@@ -358,15 +439,17 @@ class DataHandler:
         }
 
     def test_bags(self, layer_id: int = -1, drop_zeros: bool = True):
-        ''' 
+        """
         Get the test bags for the given layer.
         Args:
             layer_id (int): The layer id to get the activations for.
             drop_zeros (bool): Whether to drop padded rows from the bags.
         Returns:
             dict: A dictionary containing the bags, the correct labels and the last embedding keys:[embeddings, correct, last_embedding].
-        '''
-        assert self.activation_type == "full", "Bags can only be generated for full activations."
+        """
+        assert (
+            self.activation_type == "full"
+        ), "Bags can only be generated for full activations."
         correct = self.get_test_df()["correct"].to_numpy()
         acts = self.get_test_acts(layer_id=layer_id)
         try:
@@ -388,8 +471,9 @@ class DataHandler:
             if bag.shape[0] == 0:
                 print("Bag is empty BEFORE THE DROP ZEROS")
         if mask is not None:
-            bags = [drop_zero_rows(self._drop_zeros_eisum(i, m))
-                    for i, m in zip(acts, mask)]
+            bags = [
+                drop_zero_rows(self._drop_zeros_eisum(i, m)) for i, m in zip(acts, mask)
+            ]
         elif mask is None:
             log.warning("No mask found. Not dropping zeros without mask.")
         for bag in bags:
@@ -399,23 +483,25 @@ class DataHandler:
 
     def _drop_zeros_eisum(self, act, mask):
         if act.shape[0] == mask.shape[0]:
-            return torch.einsum('lh, l -> lh', act, mask)
+            return torch.einsum("lh, l -> lh", act, mask)
         else:
             shape = mask.shape[0]
             mask[-5:] = 1
-            output = torch.einsum('lh, l -> lh', act[-shape:], mask)
+            output = torch.einsum("lh, l -> lh", act[-shape:], mask)
             return output
 
     def cal_bags(self, layer_id: int = -1, drop_zeros: bool = True):
-        ''' 
+        """
         Get the calibration bags for the given layer.
         Args:
             layer_id (int): The layer id to get the activations for.
             drop_zeros (bool): Whether to drop padded rows from the bags.
         Returns:
             dict: A dictionary containing the bags, the correct labels and the last embedding keys:[embeddings, correct, last_embedding].
-        '''
-        assert self.activation_type == "full", "Bags can only be generated for full activations."
+        """
+        assert (
+            self.activation_type == "full"
+        ), "Bags can only be generated for full activations."
         correct = self.get_cal_df()["correct"].to_numpy()
         acts = self.get_cal_acts(layer_id=layer_id)
         try:
@@ -433,13 +519,13 @@ class DataHandler:
         }
 
     def test_labeled(self, layer_id: int = -1):
-        '''
+        """
         Get the test data with activation and "correct" label for the given layer.
         Args:
             layer_id (int): The layer id to get the activations for.
         Returns:
             dict: A dictionary containing the embeddings and the correct labels keys:[embeddings, correct].
-        '''
+        """
         correct = self.get_test_df()["correct"].to_numpy()
 
         if self.activation_type == "full":
@@ -456,13 +542,13 @@ class DataHandler:
             raise NotImplementedError
 
     def cal_labeled(self, layer_id: int = -1):
-        '''
+        """
         Get the calibration data with activation and "correct" label for the given layer.
         Args:
             layer_id (int): The layer id to get the activations for.
         Returns:
             dict: A dictionary containing the embeddings and the correct labels keys:[embeddings, correct].
-        '''
+        """
         correct = self.get_cal_df()["correct"].to_numpy()
 
         if self.activation_type == "full":
@@ -551,8 +637,7 @@ class DataHandler:
         columns = set()
         for dataset in self.datasets:
             _path = os.path.join(self.dataset_path, dataset)
-            lf = pl.scan_csv(
-                f"{_path}.csv")
+            lf = pl.scan_csv(f"{_path}.csv")
             try:
                 columns.update(lf.collect_schema().names())
             except:
@@ -560,9 +645,9 @@ class DataHandler:
         return list(columns)
 
     def get_train_labels(self):
-        '''
+        """
         Returns the (multiclass) labels for the training data.
-        '''
+        """
 
         correct = self.get_train_df()["correct"].to_numpy()
         real = self.get_train_df()["real_object"].to_numpy()
@@ -572,9 +657,9 @@ class DataHandler:
         return labels
 
     def get_cal_labels(self):
-        '''
+        """
         Returns the (multiclass) labels for the calibration data.
-        '''
+        """
 
         correct = self.get_cal_df()["correct"].to_numpy()
         real = self.get_cal_df()["real_object"].to_numpy()
@@ -584,9 +669,9 @@ class DataHandler:
         return labels
 
     def get_test_labels(self):
-        '''
+        """
         Returns the (multiclass) labels for the test data.
-        '''
+        """
 
         correct = self.get_test_df()["correct"].to_numpy()
         real = self.get_test_df()["real_object"].to_numpy()
@@ -605,5 +690,5 @@ def drop_zero_rows(X):
 
 def unique_rows(a):
     a = np.ascontiguousarray(a)
-    unique_a = np.unique(a.view([('', a.dtype)]*a.shape[1]))
+    unique_a = np.unique(a.view([("", a.dtype)] * a.shape[1]))
     return unique_a.view(a.dtype).reshape((unique_a.shape[0], a.shape[1]))

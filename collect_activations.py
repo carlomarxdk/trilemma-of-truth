@@ -1,34 +1,43 @@
 # Description: Experiment script to GENERATE and SAVE activations from a model
 
-import logging
-import hydra
-from omegaconf import DictConfig, OmegaConf
-from utils_hydra import get_device, prepare_hf_model, load_statements, return_layers
-from tqdm import tqdm
-import torch
-import os
-import numpy as np
+from __future__ import annotations
+
 import gc
+import logging
+import os
+
+import hydra
+import numpy as np
+import torch
+from omegaconf import DictConfig, OmegaConf
+from tqdm import tqdm
+
+from utils_hydra import get_device, load_statements, prepare_hf_model
+
 log = logging.getLogger(__name__)
 
 
 def validate_config(cfg: DictConfig):
     assert cfg.agg in [
-        "last", "mean", "max", 'full'], "Aggregation tupe must be either 'last', 'mean' or 'max'."
+        "last",
+        "mean",
+        "max",
+        "full",
+    ], "Aggregation tupe must be either 'last', 'mean' or 'max'."
     assert len(cfg.layers) > 0, "At least one layer must be selected."
-    assert type(
-        cfg.datasets) == list or type(cfg.datasets).__name__ == "ListConfig", f"Datasets must be a list. Not {type(cfg.datasets)}"
+    assert (
+        isinstance(cfg.datasets, list) or type(cfg.datasets).__name__ == "ListConfig"
+    ), f"Datasets must be a list. Not {type(cfg.datasets)}"
     assert len(cfg.datasets) > 0, "At least one dataset must be selected."
-    if cfg.device == None:
+    if cfg.device is None:
         OmegaConf.set_struct(cfg, False)  # Allow overriding
         cfg["device"] = str(get_device())
         OmegaConf.set_struct(cfg, True)
 
 
 def log_stats(cfg):
-    log.warning(
-        f"Collecting activations for: {cfg.model.name} (device: {cfg.device})")
-    log.warning(f'Max length of the input sequences: {cfg.max_length}')
+    log.warning(f"Collecting activations for: {cfg.model.name} (device: {cfg.device})")
+    log.warning(f"Max length of the input sequences: {cfg.max_length}")
 
 
 def tokenize(batch, tokenizer, cfg):
@@ -39,12 +48,16 @@ def tokenize(batch, tokenizer, cfg):
 
 
 def default_tokenize(batch, tokenizer, cfg):
-    if cfg.agg == 'last':
+    if cfg.agg == "last":
+        input_seqs = tokenizer(batch.tolist(), return_tensors="pt", padding=True)
+    elif cfg.agg == "full":
         input_seqs = tokenizer(
-            batch.tolist(), return_tensors="pt", padding=True)
-    elif cfg.agg == 'full':
-        input_seqs = tokenizer(
-            batch.tolist(), return_tensors="pt", padding="max_length",  truncation=True, max_length=cfg.max_length)
+            batch.tolist(),
+            return_tensors="pt",
+            padding="max_length",
+            truncation=True,
+            max_length=cfg.max_length,
+        )
     return input_seqs
 
 
@@ -55,14 +68,18 @@ def instruct_tokenize(batch, tokenizer, cfg):
         tokenize=False,
         add_generation_prompt=False,
     )
-    tokenizer.truncation_side = "left"   # optional but recommended
+    tokenizer.truncation_side = "left"  # optional but recommended
     tokenizer.padding_side = "left"
-    if cfg.agg == 'last':
+    if cfg.agg == "last":
+        input_seqs = tokenizer(text_batch, return_tensors="pt", padding=True)
+    elif cfg.agg == "full":
         input_seqs = tokenizer(
-            text_batch, return_tensors="pt", padding=True)
-    elif cfg.agg == 'full':
-        input_seqs = tokenizer(
-            text_batch, return_tensors="pt", padding="max_length",  truncation=True, max_length=cfg.max_length)
+            text_batch,
+            return_tensors="pt",
+            padding="max_length",
+            truncation=True,
+            max_length=cfg.max_length,
+        )
     return input_seqs
 
 
@@ -77,10 +94,11 @@ class Hook:
     def __call__(self, module, module_inputs, module_outputs):
         try:
             output, _ = module_outputs
-        except:
+        except (ValueError, TypeError):
             output = module_outputs[0]
 
         self.out = output.detach().clone()
+
 
 @hydra.main(version_base=None, config_path="configs", config_name="activations")
 def main(cfg: DictConfig):
@@ -88,7 +106,7 @@ def main(cfg: DictConfig):
     log_stats(cfg)
     model, tokenizer = prepare_hf_model(cfg)
     log.warning(model)
-    
+
     # Check if we need to adjust layer indices
     # Some models include embedding layer in hidden_states[0]
     with torch.no_grad():
@@ -96,23 +114,26 @@ def main(cfg: DictConfig):
         test_output = model(
             test_input["input_ids"].to(cfg.device),
             output_hidden_states=True,
-            use_cache=False
+            use_cache=False,
         )
         num_hidden_states = len(test_output.hidden_states)
-        log.warning(f"Model outputs {num_hidden_states} hidden states (including embeddings)")
+        log.warning(
+            f"Model outputs {num_hidden_states} hidden states (including embeddings)"
+        )
         log.warning(f"Hidden state 0 shape: {test_output.hidden_states[0].shape}")
         log.warning(f"Hidden state 1 shape: {test_output.hidden_states[1].shape}")
-    
+
     torch.set_grad_enabled(False)
     model.eval()
-    
+
     for dataset in cfg.datasets:
         statements = load_statements(dataset)
         n_batches = len(statements) // int(cfg.batch_size)
         batches = np.array_split(statements, n_batches)
 
         log.warning(
-            f"Generating activations for {dataset} with {len(statements)} statements in {len(batches)} batches.")
+            f"Generating activations for {dataset} with {len(statements)} statements in {len(batches)} batches."
+        )
         log.info(f"\tExample of a statement: {statements[0]}")
 
         # Get dimensions from test run
@@ -121,15 +142,15 @@ def main(cfg: DictConfig):
             test_output = model(
                 input_seq["input_ids"].to(cfg.device),
                 output_hidden_states=True,
-                use_cache=False
+                use_cache=False,
             )
-        
+
         # Check the shape of hidden states
         # hidden_states[0] is usually the embedding layer
         # hidden_states[1] through hidden_states[n] are the transformer layers
         test_hidden = test_output.hidden_states[1]  # First transformer layer
         log.warning(f"Test hidden state shape: {test_hidden.shape}")
-        
+
         if test_hidden.dim() == 3:
             hidden_size = test_hidden.shape[-1]
             log.warning(f"3D hidden states detected: hidden_size={hidden_size}")
@@ -149,18 +170,26 @@ def main(cfg: DictConfig):
         for layer in cfg.layers:
             save_path[layer] = save_dir + f"layer_{layer}_e_temp.npy"
             compress_path[layer] = save_dir + f"layer_{layer}_e.npz"
-            if cfg.agg == 'last':
-                acts_memmap[layer] = np.memmap(save_path[layer], dtype='float16', mode='w+',
-                                               shape=(len(statements), hidden_size))
-            elif cfg.agg == 'full':
-                acts_memmap[layer] = np.memmap(save_path[layer], dtype='float16', mode='w+',
-                                               shape=(len(statements), MAX_LEN, hidden_size))
+            if cfg.agg == "last":
+                acts_memmap[layer] = np.memmap(
+                    save_path[layer],
+                    dtype="float16",
+                    mode="w+",
+                    shape=(len(statements), hidden_size),
+                )
+            elif cfg.agg == "full":
+                acts_memmap[layer] = np.memmap(
+                    save_path[layer],
+                    dtype="float16",
+                    mode="w+",
+                    shape=(len(statements), MAX_LEN, hidden_size),
+                )
                 _shape = (len(statements), MAX_LEN, hidden_size)
                 np.save(save_dir + "shape.npy", _shape)
 
         _last_row = 0
         masks = []
-        
+
         # Checkpoint setup
         total_samples = sum(len(b) for b in batches)
         batch1_cp = len(batches[0])
@@ -172,7 +201,7 @@ def main(cfg: DictConfig):
         for batch_idx, batch in tqdm(enumerate(batches), total=len(batches)):
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
-            
+
             input_seqs = tokenize(batch, tokenizer, cfg)
             input_ids = input_seqs["input_ids"].to(cfg.device)
             input_att = input_seqs["attention_mask"].to(cfg.device)
@@ -184,92 +213,109 @@ def main(cfg: DictConfig):
                     input_ids,
                     attention_mask=input_att,
                     output_hidden_states=True,
-                    use_cache=False
+                    use_cache=False,
                 )
-            
+
             hidden_states = outputs.hidden_states
-            
+
             # Process each requested layer
             for layer in cfg.layers:
                 # Note: layer 0 in cfg.layers corresponds to hidden_states[1] (first transformer layer)
                 # Adjust index as needed based on your model
                 layer_output = hidden_states[layer + 1]  # +1 to skip embedding layer
-                
+
                 # Debug first batch
                 if batch_idx == 0 and layer == cfg.layers[0]:
                     log.info(f"Layer {layer} hidden state shape: {layer_output.shape}")
-                
+
                 # hidden_states should always be 3D: (batch_size, seq_len, hidden_size)
                 if layer_output.dim() != 3:
-                    log.error(f"Unexpected hidden state dimensions for layer {layer}: {layer_output.shape}")
+                    log.error(
+                        f"Unexpected hidden state dimensions for layer {layer}: {layer_output.shape}"
+                    )
                     continue
-                
+
                 batch_size, seq_len, hidden_dim = layer_output.shape
-                
-                if cfg.agg == 'full':
+
+                if cfg.agg == "full":
                     # Adjust to MAX_LEN
                     if seq_len > MAX_LEN:
-                        embeddings = layer_output[:, -MAX_LEN:, :].cpu().numpy().astype(np.float16)
+                        embeddings = (
+                            layer_output[:, -MAX_LEN:, :]
+                            .cpu()
+                            .numpy()
+                            .astype(np.float16)
+                        )
                     elif seq_len < MAX_LEN:
                         embeddings = layer_output.cpu().numpy().astype(np.float16)
                         pad_width = MAX_LEN - seq_len
-                        embeddings = np.pad(embeddings,
-                                          ((0, 0), (pad_width, 0), (0, 0)),
-                                          mode='constant',
-                                          constant_values=0)
+                        embeddings = np.pad(
+                            embeddings,
+                            ((0, 0), (pad_width, 0), (0, 0)),
+                            mode="constant",
+                            constant_values=0,
+                        )
                     else:
                         embeddings = layer_output.cpu().numpy().astype(np.float16)
-                    
+
                     # Verify shape
-                    assert embeddings.shape == (batch.shape[0], MAX_LEN, hidden_dim), \
-                        f"Shape mismatch: {embeddings.shape}"
-                    
+                    assert embeddings.shape == (
+                        batch.shape[0],
+                        MAX_LEN,
+                        hidden_dim,
+                    ), f"Shape mismatch: {embeddings.shape}"
+
                     # Store
                     for i in range(batch.shape[0]):
                         acts_memmap[layer][_last_row + i, :, :] = embeddings[i]
-                    
-                    if batch_idx < 2:
-                        if layer % 5 == 0:
-                            log.info(f'Full Emb L{layer} | Example {embeddings[0, -1, -3:]}')
-                
-                elif cfg.agg == 'last':
+
+                    if batch_idx < 2 and layer % 5 == 0:
+                        log.info(
+                            f"Full Emb L{layer} | Example {embeddings[0, -1, -3:]}"
+                        )
+
+                elif cfg.agg == "last":
                     # Extract last token
                     embeddings = layer_output[:, -1, :].cpu().numpy().astype(np.float16)
-                    
+
                     for i in range(batch.shape[0]):
                         acts_memmap[layer][_last_row + i, :] = embeddings[i]
-                
+
                 # Force flush
                 acts_memmap[layer].flush()
-            
+
             _last_row += batch.shape[0]
-            
+
             # Checkpoint logging
             if next_checkpoint is not None and _last_row >= next_checkpoint:
-                log.info(f"[{int((next_checkpoint/total_samples)*100)}%] Processing activations | Statement: {batch[-1]}")
-                
+                log.info(
+                    f"[{int((next_checkpoint/total_samples)*100)}%] Processing activations | Statement: {batch[-1]}"
+                )
+
                 for layer in cfg.layers:
                     if layer % 5 == 0:
-                        if cfg.agg == 'last':
+                        if cfg.agg == "last":
                             last_emb = acts_memmap[layer][_last_row - 1]
                             log.info(f"Layer: {layer:>3} | Example {last_emb[-3:]}")
-                        elif cfg.agg == 'full':
+                        elif cfg.agg == "full":
                             last_emb = acts_memmap[layer][_last_row - 1]
                             log.info(f"Layer: {layer:>3} | Example {last_emb[-1][-3:]}")
-                
+
                 checkpoints.remove(next_checkpoint)
                 next_checkpoint = min(checkpoints) if checkpoints else None
-            
+
             if batch_idx % 10 == 0:
                 gc.collect()
                 if torch.cuda.is_available():
                     torch.cuda.empty_cache()
 
         # Later, at the end of processing (no change needed if you fixed above):
-        masks = torch.vstack(masks).numpy()  # Now this works because masks are already on CPU
+        masks = torch.vstack(
+            masks
+        ).numpy()  # Now this works because masks are already on CPU
         np.save(save_dir + "mask.npy", masks)
-        
-        log.info(f'\tCompression of activations for {dataset} started...')
+
+        log.info(f"\tCompression of activations for {dataset} started...")
         for layer in cfg.layers:
             acts_memmap[layer].flush()
             # Optional: compress to npz
@@ -277,7 +323,7 @@ def main(cfg: DictConfig):
             # np.savez_compressed(compress_path[layer], activations=data)
 
         log.warning(f"{cfg.model.name} activations saved for {dataset}")
-    
+
     exit()
 
 

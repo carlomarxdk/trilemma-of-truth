@@ -1,18 +1,18 @@
-# monkey patchin the miSVM package
-# to use the sparse binary SVM
-from __future__ import print_function, division
-from probes.utils import BagSplitter_pathced
-from misvm.sil import SIL
-from misvm.svm import SVM, _smart_kernel
+from __future__ import annotations
+
+import logging
 
 import numpy as np
 from misvm.kernel import by_name as kernel_by_name
-from misvm.util import spdiag
-from misvm.util import BagSplitter
+from misvm.sil import SIL
+from misvm.svm import SVM, _smart_kernel
+from misvm.util import BagSplitter, spdiag
 
-import numpy as np
+from probes.utils import BagSplitter_pathced
 
-import logging
+# monkey patchin the miSVM package
+# to use the sparse binary SVM
+
 
 log = logging.getLogger("silSVM_patch")
 
@@ -20,8 +20,16 @@ log = logging.getLogger("silSVM_patch")
 BagSplitter = BagSplitter_pathced
 
 
-def __init__(self, kernel='linear', C=1.0, p=3, gamma=1e0, scale_C=True,
-             verbose=True, sv_cutoff=1e-7):
+def __init__(
+    self,
+    kernel="linear",
+    C=1.0,
+    p=3,
+    gamma=1e0,
+    scale_C=True,
+    verbose=True,
+    sv_cutoff=1e-7,
+):
     """
     @param kernel : the desired kernel function; can be linear, quadratic,
                     polynomial, or rbf [default: linear]
@@ -101,8 +109,7 @@ def fit(self, bags, y, in_bag_labels=None):
     bs = self.bs
     self._labels = y
 
-    super(SIL, self).fit(
-        bs.instances, y)
+    super(SIL, self).fit(bs.instances, y)
 
 
 def linearize(self, normalize: bool = True):
@@ -116,15 +123,14 @@ def linearize(self, normalize: bool = True):
         w /= np.linalg.norm(w)
     # 2. Compute the bias
     non_bound_mask = (alphas > self.sv_cutoff).flatten() & (
-        alphas < self.C - self.sv_cutoff).flatten()
+        alphas < self.C - self.sv_cutoff
+    ).flatten()
 
     mask_pos = non_bound_mask & (y > 0).flatten()
     mask_neg = non_bound_mask & (y < 0).flatten()
-    bias_pos = np.mean(y.flatten()[mask_pos] -
-                       np.dot(X, w).flatten()[mask_pos])
-    bias_neg = np.mean(y.flatten()[mask_neg] -
-                       np.dot(X, w).flatten()[mask_neg])
-    bias = (bias_pos + bias_neg) / 2.
+    bias_pos = np.mean(y.flatten()[mask_pos] - np.dot(X, w).flatten()[mask_pos])
+    bias_neg = np.mean(y.flatten()[mask_neg] - np.dot(X, w).flatten()[mask_neg])
+    bias = (bias_pos + bias_neg) / 2.0
     return w, bias
 
 
@@ -132,8 +138,7 @@ def get_params(self, deep=True):
     """
     return params
     """
-    return {
-        'status': 'complete'}
+    return {"status": "complete"}
 
 
 SVM.__init__ = __init__

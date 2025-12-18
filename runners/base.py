@@ -1,6 +1,8 @@
 from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from zipfile import Path
+
 import numpy as np
 
 
@@ -11,15 +13,17 @@ class BaseProbeRunner(ABC):
     def conformal_training(self, X_cal, y_cal): ...
     def conformal_prediction(self, X): ...
     @abstractmethod
-    def decision_function(self, X):  ... 
+    def decision_function(self, X): ...
     def predict_proba(self, X):
-        '''Needs to be rewritten for probes that return probabilities'''
+        """Needs to be rewritten for probes that return probabilities"""
         return self.decision_function(X)
+
     def predict(self, X):
-        '''Needs to be rewriten for probes that return probabilities'''
+        """Needs to be rewriten for probes that return probabilities"""
         scores = self.decision_function(X)
         return np.array(scores > 0)
-    @property   
+
+    @property
     def direction(self): ...
     @property
     def bias(self): ...
