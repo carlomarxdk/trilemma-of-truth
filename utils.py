@@ -1,3 +1,9 @@
+"""Utility functions for metrics, logging, and file operations.
+
+This module provides various utility functions for calculating metrics,
+bootstrap confidence intervals, and atomic file operations.
+"""
+
 from __future__ import annotations
 
 import json
@@ -24,8 +30,15 @@ from sklearn.metrics import recall_score as recall
 log = logging.getLogger(__name__)
 
 
-#
 def available_layers(output_dir: Path | str) -> list[int]:
+    """Get list of available layer IDs from manifest files.
+
+    Args:
+        output_dir: Path to the output directory containing manifests.
+
+    Returns:
+        Sorted list of layer IDs found in manifest files.
+    """
     output_dir = Path(output_dir)
     manifest_path = output_dir / "manifests"
 
@@ -100,8 +113,18 @@ def safe_bootstrap(metric, **kwargs) -> tuple[float, float, float]:
 def log_metric_binary(
     preds: np.ndarray, scores: np.ndarray, y_true: np.ndarray, mask: np.ndarray, cfg
 ) -> dict[str, float]:
-    """
-    Log the metrics to the Weights and Biases dashboard with prefix and return as a dictionary without prefix.
+    """Calculate and return binary classification metrics.
+
+    Args:
+        preds: Predicted labels.
+        scores: Prediction scores.
+        y_true: Ground truth labels.
+        mask: Boolean mask for valid samples.
+        cfg: Configuration object containing evaluation parameters.
+
+    Returns:
+        Dictionary containing various binary classification metrics with
+        confidence intervals.
     """
     # yhat = probs.round()
     if cfg.task != -1:
@@ -317,6 +340,7 @@ def should_process_layer(layer_id: int, cfg: dict) -> bool:
 
 
 def _atomic_write_bytes(target: Path, data: bytes) -> None:
+    """Atomically write bytes to a file."""
     target.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(dir=target.parent, delete=False) as tf:
         tf.write(data)
@@ -325,6 +349,8 @@ def _atomic_write_bytes(target: Path, data: bytes) -> None:
 
 
 def _atomic_write_json(target: Path, obj: Any, indent: int = 2) -> None:
+    """Atomically write object as JSON to a file."""
+
     def default(o):
         if isinstance(o, (np.generic,)):
             return o.item()
@@ -336,6 +362,7 @@ def _atomic_write_json(target: Path, obj: Any, indent: int = 2) -> None:
 
 
 def _atomic_joblib_dump(target: Path, obj: Any) -> None:
+    """Atomically dump object using joblib."""
     target.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(dir=target.parent, delete=False) as tf:
         tmp_path = Path(tf.name)

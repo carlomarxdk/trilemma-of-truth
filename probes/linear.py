@@ -1,3 +1,9 @@
+"""Linear probe implementations for binary and multiclass classification.
+
+This module provides pre-trained linear probe classes that use fixed coefficients
+and intercepts for making predictions without requiring additional training.
+"""
+
 from __future__ import annotations
 
 import logging
@@ -14,10 +20,14 @@ log = logging.getLogger(__name__)
 
 
 class BinaryLinearProbe(BaseEstimator, ClassifierMixin):
-    """
-    A binary linear probe with pre-trained coefficients and intercept.
-    This probe does not require fitting; it uses provided coefficients and intercept
-    to make predictions.
+    """Binary linear probe with pre-trained coefficients and intercept.
+
+    This probe does not require fitting; it uses provided coefficients and
+    intercept to make predictions.
+
+    Args:
+        coef: Coefficient array for the linear model.
+        intercept: Intercept value(s) for the linear model.
     """
 
     def __init__(self, coef: np.ndarray, intercept: np.ndarray) -> BinaryLinearProbe:
@@ -29,6 +39,7 @@ class BinaryLinearProbe(BaseEstimator, ClassifierMixin):
         self.is_fitted_ = True
 
     def fit(self, X: np.ndarray = None, y: np.ndarray = None) -> BinaryLinearProbe:
+        """Fit method (no-op for pre-trained probe)."""
         log.warning("This probe is pre-trained and does not require fitting.")
         return self
 
@@ -45,23 +56,40 @@ class BinaryLinearProbe(BaseEstimator, ClassifierMixin):
         return (X @ self.coef_.T).ravel() + self.intercept_
 
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
-        """
-        Predict the probability of each sample in X.
+        """Predict probability for each sample in X.
+
+        Args:
+            X: (N, d) array of input data.
+
+        Returns:
+            (N,) array of probabilities.
         """
         return expit(self.decision_function(X))
 
     def predict(self, X: np.ndarray) -> np.ndarray:
-        """
-        Predict the class of each sample in X.
+        """Predict class labels for samples in X.
+
+        Args:
+            X: (N, d) array of input data.
+
+        Returns:
+            (N,) array of predicted class labels.
         """
         return self.predict_proba(X).round()
 
 
 class MultiClassBaggedProjector(BaseEstimator, ClassifierMixin):
-    """
-    A multiclass linear probe with pre-trained coefficients and intercept.
-    This probe does not require fitting; it uses provided coefficients and intercept to make predictions.
-    Note: This probe assumes that input X is a list of bags
+    """Multiclass linear probe for bag-of-instances data.
+
+    This probe uses pre-trained coefficients and intercept to make predictions
+    on bags of instances, aggregating predictions across instances.
+
+    Args:
+        coef: Coefficient matrix of shape (n_classes, n_features).
+        intercept: Intercept array of shape (n_classes,).
+        aggregation: Method to aggregate predictions ('max', 'mean', or 'sum').
+            Defaults to 'max'.
+        classes: Class labels. If None, uses range(n_classes).
     """
 
     def __init__(
@@ -90,22 +118,29 @@ class MultiClassBaggedProjector(BaseEstimator, ClassifierMixin):
     def fit(
         self, X: Sequence[np.ndarray] = None, y: np.ndarray = None
     ) -> MultiClassBaggedProjector:
+        """Fit method (no-op for pre-trained probe)."""
         log.warning("This probe is pre-trained and does not require fitting.")
         return self
 
     def _sanitize_(self, X: Sequence[np.ndarray]) -> list[np.ndarray]:
+        """Convert input to list of arrays."""
         if type(X) is np.ndarray:
             X = [X]
         X = [np.asarray(bag) for bag in X]
         return X
 
     def decision_function(self, X: Sequence[np.ndarray], agg: str = None) -> np.ndarray:
-        """
-        Compute the decision function for each sample in X.
+        """Compute decision function for each bag in X.
+
         Args:
-            X: (N, d) array of input data
+            X: Sequence of bags, where each bag is an array of instances.
+            agg: Aggregation method override (unused, kept for compatibility).
+
         Returns:
-            scores: (N, C) array of decision scores
+            (N, C) array of decision scores for N bags and C classes.
+
+        Raises:
+            ValueError: If aggregation method is unsupported.
         """
         check_is_fitted(self)
         X = self._sanitize_(X)
@@ -127,22 +162,40 @@ class MultiClassBaggedProjector(BaseEstimator, ClassifierMixin):
         return np.vstack(scores)
 
     def predict_proba(self, X: Sequence[np.ndarray]) -> np.ndarray:
-        """
-        Predict the probability of each sample in X.
+        """Predict class scores for each bag in X.
+
+        Args:
+            X: Sequence of bags.
+
+        Returns:
+            (N, C) array of class scores.
         """
         return self.decision_function(X)
 
     def predict(self, X: Sequence[np.ndarray]) -> np.ndarray:
-        """Predict class by argmax over aggregated logits."""
+        """Predict class labels by argmax over aggregated logits.
+
+        Args:
+            X: Sequence of bags.
+
+        Returns:
+            (N,) array of predicted class labels.
+        """
         probs = self.predict_proba(X)
         return self.classes_[np.argmax(probs, axis=1)]
 
 
 class MulticlassProbe(BaseEstimator, ClassifierMixin):
-    """
-    A multiclass probe that uses one-vs-all binary probes for each class.
-    This probe does not require fitting; it uses provided binary probes to make predictions.
-    Note: This probe assumes that input X is a list of bags
+    """Multiclass probe using base projector with optional calibration.
+
+    This probe wraps a MultiClassBaggedProjector with a scaler and predictor
+    for calibrated multiclass predictions.
+
+    Args:
+        base: Base MultiClassBaggedProjector for extracting features.
+        scaler: Transformer for scaling features. Defaults to StandardScaler.
+        predictor: Classifier for final predictions. Defaults to
+            LogisticRegression with balanced weights.
     """
 
     def __init__(
@@ -167,6 +220,15 @@ class MulticlassProbe(BaseEstimator, ClassifierMixin):
     def fit(
         self, X: Sequence[np.ndarray] | np.ndarray = None, y: np.ndarray = None
     ) -> MulticlassProbe:
+        """Fit the scaler and predictor on transformed base features.
+
+        Args:
+            X: Sequence of bags or array of samples.
+            y: Target labels.
+
+        Returns:
+            Self.
+        """
 
         scores = self.base.decision_function(X)
         transformed_scores = self.scaler.fit_transform(scores)
@@ -175,25 +237,43 @@ class MulticlassProbe(BaseEstimator, ClassifierMixin):
         return self
 
     def decision_function(self, X: Sequence[np.ndarray] | np.ndarray) -> np.ndarray:
+        """Compute decision function on X.
+
+        Args:
+            X: Input data.
+
+        Returns:
+            Decision scores.
+        """
         check_is_fitted(self)
         scores = self.base.decision_function(X)
         transformed_scores = self.scaler.transform(scores)
         return self.predictor.decision_function(transformed_scores)
 
     def predict(self, X: Sequence[np.ndarray] | np.ndarray) -> np.ndarray:
+        """Predict class labels for X.
+
+        Args:
+            X: Input data.
+
+        Returns:
+            Predicted class labels.
+        """
         check_is_fitted(self)
         scores = self.base.decision_function(X)
         transformed_scores = self.scaler.transform(scores)
         return self.predictor.predict(transformed_scores)
 
     def predict_proba(self, X: Sequence[np.ndarray] | np.ndarray) -> np.ndarray:
+        """Predict class probabilities for X.
+
+        Args:
+            X: Input data.
+
+        Returns:
+            Class probability estimates.
+        """
         check_is_fitted(self)
         scores = self.base.decision_function(X)
         transformed_scores = self.scaler.transform(scores)
         return self.predictor.predict_proba(transformed_scores)
-
-    def predict(self, X: Sequence[np.ndarray] | np.ndarray) -> np.ndarray:
-        check_is_fitted(self)
-        scores = self.base.decision_function(X)
-        transformed_scores = self.scaler.transform(scores)
-        return self.predictor.predict(transformed_scores)

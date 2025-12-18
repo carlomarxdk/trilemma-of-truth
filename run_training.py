@@ -1,3 +1,17 @@
+"""Training script for probe classifiers on model activations.
+
+This script trains various probe types (SVM, mean difference, Sawmil, etc.) on
+model activations for binary and multiclass classification tasks. It supports
+conformal prediction and comprehensive experiment tracking.
+
+Supported probe types:
+- SVM: Support Vector Machine probes
+- Mean Difference: Mean difference classifiers
+- Sawmil: Multiple Instance Learning probes
+- SPCA: Sparse PCA probes
+- TTPD: Two-Tower Projection Direction probes
+"""
+
 from __future__ import annotations
 
 import logging
@@ -33,10 +47,6 @@ from utils import log_metric_multiclass as log_metric_mc
 from utils import should_process_layer
 from utils_hydra import load_data, return_label
 
-# Code for ONE-vs-ALL probes, works both for SIL (MD+CP and SVM) and MIL (Sawmil) probes.
-# CODE for MULTICLASS probes, works both for SI-SVM and MIL (Sawmil) probes.
-
-
 log = logging.getLogger("Training")
 
 PROBES = {
@@ -60,6 +70,14 @@ except:
 
 
 def validate_config(cfg: DictConfig):
+    """Validate and update configuration.
+
+    Args:
+        cfg: Configuration object to validate and modify.
+
+    Raises:
+        AssertionError: If configuration is invalid.
+    """
     assert (
         type(cfg.datapack["datasets"]) == list
         or type(cfg.datapack["datasets"]).__name__ == "ListConfig"
@@ -81,6 +99,11 @@ def validate_config(cfg: DictConfig):
 
 
 def log_stats(cfg):
+    """Log experiment configuration statistics.
+
+    Args:
+        cfg: Configuration object.
+    """
     datasets_test = (
         cfg.datapack["datasets_test"]
         if len(cfg.datapack["datasets_test"]) > 0
@@ -107,21 +130,23 @@ def save(
     y_hat: np.ndarray = None,
     y_true: np.ndarray = None,
 ):
-    """
-    Save the artifacts of the run.
-    Args:
-        concept_direction: The direction of the concept (coef_).
-        concept_bias: The bias of the concept (intercept_).
-        scaler: The scaler used for the features.
-        transformer: The transformer used for the features.
-        conf_calibrator: The conformal calibrator used for the predictions.
-        metric_dict: The dictionary containing the metrics.
-        cfg: The configuration object.
-        layer_id: The ID of the layer.
-        y_hat: The predicted labels.
-        y_true: The true labels.
-        estimator: The object of the classifier/regressor.
+    """Save probe artifacts and results to disk.
 
+    Args:
+        concept_direction: Probe direction vector (coefficients).
+        concept_bias: Probe bias (intercept).
+        metric_dict: Dictionary of evaluation metrics.
+        layer_id: Layer ID being processed.
+        cfg: Configuration object.
+        estimator: Trained probe estimator. Defaults to None.
+        conf_calibrator: Conformal predictor. Defaults to None.
+        scaler: Feature scaler. Defaults to None.
+        transformer: Feature transformer. Defaults to None.
+        y_hat: Predicted labels. Defaults to None.
+        y_true: True labels. Defaults to None.
+
+    Returns:
+        Dictionary containing manifest information.
     """
     output_dir = Path(str(cfg.output_dir))
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -241,9 +266,14 @@ def save(
 
 
 def checkpointing(cfg, layer_range: Sequence[int]) -> list[int]:
-    """
-    Check which layers are missing from the output directory and return them.
-    If a layer is missing, also include the previous layer (to avoid missing values).
+    """Identify missing layers for resuming interrupted training.
+
+    Args:
+        cfg: Configuration object.
+        layer_range: Valid layer range.
+
+    Returns:
+        Sorted list of layer IDs that need to be processed.
     """
     output_dir = Path(str(cfg.output_dir))
     output_dir.mkdir(parents=True, exist_ok=True)
