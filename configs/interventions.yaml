@@ -25,7 +25,7 @@ defaults:
 datapack:
  load_scores: False
 counter_method:
-  target_coord: 1
+  scaler: 5
   num_tokens_to_change: -1
   absolute: True
   start_token: -1
@@ -48,5 +48,5 @@ run_debugging: False
 trial_name: ${datapack.name}
 
 
-probe_output_dir: "outputs/probes/${probe.name}/${model.name}/"
+probe_dir: "outputs/probes/${probe.name}/${model.name}"
 output_dir: "outputs/interv/${probe.name}/${model.name}"

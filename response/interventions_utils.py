@@ -1,62 +1,154 @@
-from __future__ import annotations
+"""Utilities for causal interventions on language model representations.
 
-import re
+Provides data processors for formatting intervention experiments and functions
+for translating hidden states along probe directions.
+"""
+
+from __future__ import annotations
 
 import numpy as np
 import torch
 
 
-def torch_list_to_numpy(x, eps=1e-6):
-    """
-    Transform a list of torch tensor items into a numpy arra
-    Args;
-        x: List of N tensors of various lengths
-    Returns:
-        numpy.array of size N
+def random_answer_ids(
+    seq_ids: list[list[torch.Tensor]], vocab_size: int
+) -> list[torch.Tensor]:
+    """Generate random answer token IDs for each sequence in seq_ids.
 
-    """
-    _x = []
-    for i in x:
-        _x.append(i.sum() + eps)
-    return np.array([p.cpu() for p in _x])
-
-
-def to_log_proba(proba_list):
-    """
-    Transform an array of probabilities into a marginal log-proba
     Args:
-        proba_list: numpy.array of size N with probabilties
+        seq_ids: List of N sequences (each sequence is a list of token IDs).
+        vocab_size: Size of the vocabulary (int).
+
     Returns:
-        marginal log-proba
+        List of N tensors, each containing random token IDs of the same length
+        as the corresponding sequence in seq_ids.
+
     """
-    return np.sum(np.log(torch_list_to_numpy(proba_list)))
+    output = []
+    for seq in seq_ids:
+        rnd_seq = np.random.choice(vocab_size, len(seq), replace=False)
+        output.append(torch.tensor(rnd_seq))
+    return output
+
+
+def compute_layer_scale(dh, direction, layer_id, eps=1e-6):
+    """Compute σ_layer: the standard deviation of projection onto direction.
+
+    Normalizes direction and projects activations onto it, then computes
+    standard deviation across all positions.
+
+    Args:
+        dh: DataHandler object containing training data.
+        direction: Concept direction vector (will be normalized).
+        layer_id: Index of the layer to analyze.
+        eps: Minimum value for clamping standard deviation.
+
+    Returns:
+        Standard deviation of projections as a float.
+
+    """
+    # Normalize direction
+    unit_dir = direction / direction.norm()
+
+    # Expected shape: [B, S, H]
+    X = dh.train_bags(layer_id)["last_embedding"].to(direction.device)
+
+    if X.ndim != 2:
+        raise ValueError(f"Expected X to be [B, S, H], got {X.shape}")
+
+    # Project onto direction → [B, S]
+    coords = torch.einsum("bh, h -> b", X, unit_dir)
+
+    # Pool over batch and tokens → scalar
+    sigma = coords.flatten().std().clamp_min(eps)
+
+    return sigma.item()
+
+
+def normalize_logprob(lp: torch.Tensor) -> torch.Tensor:
+    """Convert token or multi-piece log-prob tensor into a scalar.
+
+    If lp is a vector (e.g. BPE pieces), sum its entries.
+
+    Args:
+        lp: Log-probability tensor (scalar or 1D).
+
+    Returns:
+        Scalar log-probability tensor.
+
+    """
+    if lp.ndim == 0:
+        return lp
+    return lp.sum()
+
+
+def mean_logprobs(logprobs: list[torch.Tensor]) -> float:
+    """Compute mean log-probability across answer tokens.
+
+    Handles variable-length tokenizations by summing sub-token
+    log-probabilities per token before averaging.
+
+    Args:
+        logprobs: List of log-probability tensors (one per token).
+
+    Returns:
+        Mean log-probability as a float.
+
+    """
+    token_logps = [normalize_logprob(lp) for lp in logprobs]
+    return float(torch.stack(token_logps).mean())
+
+
+def sum_logprobs(logprobs: list[torch.Tensor]) -> float:
+    """Compute total log-likelihood of an answer sequence.
+
+    Handles variable-length tokenizations by summing sub-token
+    log-probabilities per token.
+
+    Args:
+        logprobs: List of log-probability tensors (one per token).
+
+    Returns:
+        Total log-likelihood as a float.
+
+    """
+    token_logps = [normalize_logprob(lp) for lp in logprobs]
+    return float(torch.stack(token_logps).sum())
 
 
 class InterventionDataProcessor:
-    """
-    Class that handles data for interventions
+    """Handle data formatting for intervention experiments.
+
+    Processes test data and formats statements according to dataset-specific
+    templates for causal intervention experiments.
+
     """
 
     def __init__(self, datahandler, tokenizer, datapack_name):
-        """Initialize the class
+        """Initialize the data processor.
+
         Args:
-            datahandler: DataHandler object
-            tokenizer: Tokenizer object
-            datapack_name: str, name of the datapack
+            datahandler: DataHandler object.
+            tokenizer: Tokenizer object.
+            datapack_name: Name of the datapack (str).
+
         """
         self.dh = datahandler
         self.datapack = datapack_name
         self.tokenizer = tokenizer
 
     def template(self, object_1, object_2, negation, category=None):
-        """
-        Apply template
+        """Apply dataset-specific statement template.
+
         Args:
-            object_1: str, first object
-            object_2: str, second object
-            negation: int, 0 or 1
+            object_1: First object (str).
+            object_2: Second object (str).
+            negation: Negation flag (0 or 1).
+            category: Optional category for definitions dataset.
+
         Returns:
-            str, formatted statement
+            Formatted statement string.
+
         """
         article = "is" if negation == 0 else "is not"
         if self.datapack in ["cities", "cities_loc"]:
@@ -81,7 +173,7 @@ class InterventionDataProcessor:
         elif self.datapack == "symptoms":
             return f"{object_1.capitalize()} {article} linked to"
         elif self.datapack in ["definitions", "defs"]:
-            if category == "instances":
+            if category == "instances":  # noqa: SIM116
                 return f"{object_1} {article} a"
             elif category == "synonyms":
                 return f"{object_1} {article} a synonym of a"
@@ -93,6 +185,12 @@ class InterventionDataProcessor:
             raise ValueError("Invalid data pack")
 
     def return_processed_test_df(self):
+        """Process test data with templated statements.
+
+        Returns:
+            DataFrame with 'statement' and 'answer' columns added.
+
+        """
         test_data = self.dh.get_test_df()[
             [
                 "object_1",
@@ -116,13 +214,31 @@ class InterventionDataProcessor:
         return test_data
 
     def get_answer_ids(self, answer):
+        """Tokenize answer and return token IDs.
+
+        Args:
+            answer: Answer string to tokenize.
+
+        Returns:
+            Tensor of token IDs.
+
+        """
         return self.tokenizer(
             answer, add_special_tokens=True, return_tensors="pt"
         ).input_ids[0]
 
     def get_answer_seq_ids(self, statement, answer):
-        """
-        For long answers
+        """Generate incremental sequences for multi-token answers.
+
+        Splits answer into words and creates progressive statement sequences.
+
+        Args:
+            statement: Base statement string.
+            answer: Answer string (may contain multiple words).
+
+        Returns:
+            Tuple of (statements, answers, answer_ids, init_statement_ids).
+
         """
         answers = [" " + a.rstrip() for a in answer.split(" ")]
         answers_ids = []
@@ -139,16 +255,52 @@ class InterventionDataProcessor:
         return statements, answers, answers_ids, init_statement_ids
 
     def _statement_to_ids(self, statement):
+        """Convert statement to token IDs.
+
+        Args:
+            statement: Statement string.
+
+        Returns:
+            List of token IDs.
+
+        """
         return self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(statement))
 
     def _answer_to_ids(self, answer):
+        """Convert answer to token IDs.
+
+        Args:
+            answer: Answer string.
+
+        Returns:
+            List of token IDs.
+
+        """
         return self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(answer))
 
 
 class InstructInterventionDataProcessor(InterventionDataProcessor):
+    """Data processor for instruction-tuned models.
+
+    Extends InterventionDataProcessor to format statements using
+    instruction templates with system/user/assistant roles.
+
+    """
+
     def __init__(
         self, datahandler, tokenizer, datapack_name, user_role, system_role, assist_role
     ):
+        """Initialize instruction-based data processor.
+
+        Args:
+            datahandler: DataHandler object.
+            tokenizer: Tokenizer object.
+            datapack_name: Name of the datapack (str).
+            user_role: User role identifier.
+            system_role: System role identifier.
+            assist_role: Assistant role identifier.
+
+        """
         super().__init__(datahandler, tokenizer, datapack_name)
         # Used only for the instruct template
         self.system_role = system_role
@@ -156,6 +308,15 @@ class InstructInterventionDataProcessor(InterventionDataProcessor):
         self.assist_role = assist_role
 
     def _instruct_template(self, statement: str):
+        """Format statement with instruction template roles.
+
+        Args:
+            statement: Statement string to format.
+
+        Returns:
+            List of message dictionaries with role and content.
+
+        """
         if self.system_role == self.user_role:
             return [
                 {
@@ -173,10 +334,28 @@ class InstructInterventionDataProcessor(InterventionDataProcessor):
             ]
 
     def _template(self, object_1, object_2, negation, category=None):
+        """Apply dataset template and wrap with instruction format.
+
+        Args:
+            object_1: First object (str).
+            object_2: Second object (str).
+            negation: Negation flag (0 or 1).
+            category: Optional category for definitions dataset.
+
+        Returns:
+            List of message dictionaries for instruction template.
+
+        """
         statement = self.template(object_1, object_2, negation, category)
         return self._instruct_template(statement)
 
     def return_processed_test_df(self):
+        """Process test data with instruction-formatted statements.
+
+        Returns:
+            DataFrame with templated instruction messages.
+
+        """
         test_data = self.dh.get_test_df()[
             [
                 "object_1",
@@ -198,13 +377,29 @@ class InstructInterventionDataProcessor(InterventionDataProcessor):
         return test_data
 
     def get_answer_ids(self, answer):
+        """Tokenize answer and return token IDs.
+
+        Args:
+            answer: Answer string to tokenize.
+
+        Returns:
+            Tensor of token IDs.
+
+        """
         return self.tokenizer(
             answer, add_special_tokens=True, return_tensors="pt"
         ).input_ids[0]
 
     def get_answer_seq_ids(self, statement, answer):
-        """
-        For long answers
+        """Generate incremental sequences for multi-token answers with instruction format.
+
+        Args:
+            statement: Instruction-formatted message list.
+            answer: Answer string (may contain multiple words).
+
+        Returns:
+            Tuple of (statements, answers, answer_ids, init_statement_ids).
+
         """
         answers = [" " + a.rstrip() for a in answer.split(" ")]
 
@@ -233,143 +428,25 @@ class InstructInterventionDataProcessor(InterventionDataProcessor):
         )
 
 
-def translate_concept(X, direction, target_coord: float, absolute=False):
-    """
-    Translate the 'X' embedding in the specified direction.
+def translate_concept(
+    X: torch.Tensor,
+    direction: torch.Tensor,
+    delta: float,
+) -> torch.Tensor:
+    """Translate embeddings by an additive shift along a concept direction.
 
-    If absolute is False (default), the embedding is moved so that its
-    projection along 'direction' becomes 'target_coord'.
-    If absolute is True, the embedding is moved by 'target_coord' units
-    along 'direction'.
-
-    Args:
-    - X: The embedding to translate (tensor of shape [B, S, H])
-    - direction: The direction to translate the embedding (tensor of shape [H])
-    - target_coord:
-         - If absolute is False: the new coordinate to set along the direction.
-         - If absolute is True: the number of units to move along the direction.
-    - absolute: If True, move by `target_coord` units, else move so that the
-                new coordinate is `target_coord`.
-
-    Returns:
-    - The translated embedding (tensor with same shape as X)
-    """
-    # Normalize the translation direction
-    unit_dir = direction / torch.norm(direction)
-
-    # Compute the current projection of X along the direction.
-    # This yields a tensor of shape [B, S]
-    curr_coord = torch.einsum("bsh, h -> bs", X, unit_dir)
-
-    # Compute the translation delta based on the mode
-    if absolute:
-        # Move by target_coord units along the direction
-        delta = torch.full_like(curr_coord, fill_value=target_coord)
-    else:
-        # Move so that the new coordinate becomes target_coord
-        delta = torch.full_like(curr_coord, fill_value=target_coord) - curr_coord
-
-    # Expand delta into the embedding space along the feature dimension
-    translation = torch.einsum("h, bs -> bsh", unit_dir, delta)
-
-    # Translate the original embedding
-    X_translated = X + translation
-    return X_translated
-
-
-def amplify_concept(X, direction, scaler: float = None):  # type: ignore
-    if torch.norm(direction) != 1:
-        direction = direction / torch.norm(direction)
-    curr_coord = torch.einsum("bsh, h -> bs", X, direction)
-    step = torch.sign(curr_coord) * scaler
-    proj = torch.einsum("h, bs -> bsh", direction, step)
-    Xs = X + proj
-    return Xs
-
-
-def polarize_concept(X, direction, scaler: float = None, positive=True):  # type: ignore
-    if torch.norm(direction) != 1:
-        direction = direction / torch.norm(direction)
-    curr_coord = torch.einsum("bsh, h -> bs", X, direction)
-    if positive:
-        step = torch.sign(curr_coord) * scaler
-        step[step < 0] = 0
-    else:
-        step = torch.sign(curr_coord) * scaler
-        step[step > 0] = 0
-    proj = torch.einsum("h, bs -> bsh", direction, step)
-    Xs = X + proj
-    return Xs
-
-
-def indirect_effect(p, p_new, targets):
-    res = {}
-    for target in targets:
-        diff = np.array(p[:, target] - p_new[:, target])
-        r = (np.mean(diff)) / (diff.std(ddof=1) / np.sqrt(len(diff)))
-        res[target] = r
-    return res
-
-
-def NIE_ft(p, p_new, labels):
-    pd_minus = ((p[:, 0] - p[:, 1])[labels == 0]).mean()
-    pd_plus = ((p[:, 0] - p[:, 1])[labels == 1]).mean()
-    pd_minus_star = ((p_new[:, 0] - p_new[:, 1])[labels == 0]).mean()
-    return (pd_minus_star - pd_minus) / (pd_plus - pd_minus)
-
-
-def NIE_tf(p, p_new, labels):
-    pd_minus = ((p[:, 0] - p[:, 1])[labels == 0]).mean()
-    pd_plus = ((p[:, 0] - p[:, 1])[labels == 1]).mean()
-    pd_plus_star = ((p_new[:, 0] - p_new[:, 1])[labels == 1]).mean()
-    return (pd_plus_star - pd_plus) / (pd_minus - pd_plus)
-
-
-def decoherence(p, p_new, valid_classes):
-    p_valid = p[:, valid_classes].sum(1)
-    p_new_valid = p_new[:, valid_classes].sum(1)
-    p_invalid = 1 - p_valid
-    p_new_invalid = 1 - p_new_valid
-    return p_new_invalid / p_invalid
-
-
-def localized_effect_ratio(p, p_new, invalid_classes):
-    p_invalid = np.abs(p[:, invalid_classes] - p_new[:, invalid_classes]).sum()
-    p_all = np.abs(p - p_new).sum()
-    return p_invalid / p_all
-
-
-def extract_coef_numbers(file_paths):
-    """
-    Extract numbers that appear after 'coef_' in a list of file paths.
+    This applies a causal intervention of the form:
+        X ← X + delta · d̂
+    where d̂ is the unit-normalized concept direction.
 
     Args:
-        file_paths (list): List of file paths as strings.
+        X: Hidden states to modify, shape [B, S, H].
+        direction: Concept direction vector, shape [H].
+        delta: Scalar translation magnitude (e.g. ±sigma).
 
     Returns:
-        list: List of integers representing the numbers after 'coef_'.
+        Translated embeddings with the same shape as X.
+
     """
-    coef_numbers = []
-    for path in file_paths:
-        match = re.search(r"coef_(\d+)", path)
-        if match:
-            coef_numbers.append(int(match.group(1)))
-    return coef_numbers
-
-
-def extract_result_numbers(file_paths):
-    """
-    Extract numbers that appear after 'coef_' in a list of file paths.
-
-    Args:
-        file_paths (list): List of file paths as strings.
-
-    Returns:
-        list: List of integers representing the numbers after 'coef_'.
-    """
-    coef_numbers = []
-    for path in file_paths:
-        match = re.search(r"results_(\d+)", path)
-        if match:
-            coef_numbers.append(int(match.group(1)))
-    return coef_numbers
+    unit_dir = direction / direction.norm()
+    return X + delta * unit_dir.view(1, 1, -1)
