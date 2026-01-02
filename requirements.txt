@@ -28,6 +28,7 @@ spacy
 spacy-transformers
 statsmodels
 torch==2.4.1
+torchvision==0.19.1
 tqdm
 transformers==4.48.2
 wordfreq

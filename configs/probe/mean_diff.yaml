@@ -14,7 +14,7 @@ init_params:
   cov_reg: 1e-8
   tol: 1e-8
   fit_intercept: True
-param_grid: 
+param_grid:
   cov_type: ["empirical"] # on search it is better to use empirical covariance (faster)
   with_covariance: [True, False]
   fit_intercept: [True, False]

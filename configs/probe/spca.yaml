@@ -6,7 +6,6 @@ name: spca
 with_bags: False
 train_sample_limit: 1000000 # Limit the number of training samples (aka bags) for trainings
 
-
 init_params:
   n_components: 1000
   cov_type: "oas" #"oas"
@@ -15,7 +14,6 @@ init_params:
   lr_reg: 1.0
   verbose: True
 param_grid:
-  n_components:  [1, 10, 100, 500, 1000, 1500, 2000] 
+  n_components: [1, 10, 100, 500, 1000, 1500, 2000]
   cov_type: ["empirical"] # on search it is better to use empirical covariance (faster)
-
 

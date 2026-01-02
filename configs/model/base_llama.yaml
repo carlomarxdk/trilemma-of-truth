@@ -13,4 +13,4 @@ dtype: float32
 system_role: system
 user_role: user
 assist_role: assistant
-end_token: 'auto'
+end_token: "auto"

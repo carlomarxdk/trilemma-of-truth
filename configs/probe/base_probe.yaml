@@ -1,5 +1,5 @@
 name: ???
-init_params: 
+init_params:
   verbose: False
 param_grid: ???
 normalize_data: True # Normalize the data before training

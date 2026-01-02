@@ -11,6 +11,8 @@ import logging
 import os
 import pprint
 import re
+import warnings
+from sklearn.exceptions import InconsistentVersionWarning
 from collections.abc import Sequence
 from glob import glob
 from pathlib import Path
@@ -22,6 +24,9 @@ import patsy
 import statsmodels.api as sm
 import torch
 from omegaconf import DictConfig, OmegaConf
+
+# Suppress scikit-learn version warnings when loading pickled models
+warnings.filterwarnings('ignore', category=InconsistentVersionWarning)
 
 from misc.db import LogDataBase
 from response.interventions_utils import (

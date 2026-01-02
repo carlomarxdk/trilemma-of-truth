@@ -1,0 +1,49 @@
+{
+  "did": {
+    "intercept_coef": 0.027343750000000028,
+    "intercept_std": 0.03521046167445307,
+    "intercept_ci": [
+      -0.04166748676095587,
+      0.09635498676095593
+    ],
+    "intercept_pval": 0.43740644290235964,
+    "intercept_zval": 0.7765802747153205,
+    "token_coef": -0.07128906250000008,
+    "token_std": 0.033799739025545596,
+    "token_ci": [
+      -0.1375353336769224,
+      -0.005042791323077778
+    ],
+    "token_pval": 0.03493076068281073,
+    "token_zval": -2.1091601460626763,
+    "translation_coef": -0.1367187500000001,
+    "translation_std": 0.08297908510253135,
+    "translation_ci": [
+      -0.2993547682710457,
+      0.025917268271045485
+    ],
+    "translation_pval": 0.09942881829894233,
+    "translation_zval": -1.6476290360524761,
+    "interaction_coef": 0.2968750000000001,
+    "interaction_std": 0.11003856098646228,
+    "interaction_ci": [
+      0.08120338355591977,
+      0.5125466164440804
+    ],
+    "interaction_pval": 0.006977465278984724,
+    "interaction_zval": 2.6979178693233163,
+    "r_squared": 0.6651404082553287,
+    "df_resid": 12.0,
+    "n_obs": 16,
+    "n_statements": 4,
+    "signf": 1
+  },
+  "descriptives": {
+    "correct_orig_mean": -4.886186079545454,
+    "correct_pos_mean": -4.721590909090909,
+    "correct_neg_mean": -4.953480113636363,
+    "random_orig_mean": -19.866477272727273,
+    "random_pos_mean": -19.90625,
+    "random_neg_mean": -19.838068181818183
+  }
+}

@@ -4,14 +4,14 @@ hydra:
     version: 1
     disable_existing_loggers: false
     root:
-      level: WARNING  # Suppress all logs below WARNING globally
+      level: WARNING # Suppress all logs below WARNING globally
     loggers:
       sklearn.utils.validation:
-        level: WARNING  # Suppress INFO logs for sklearn.utils.validation
+        level: WARNING # Suppress INFO logs for sklearn.utils.validation
       sklearnex:
-        level: WARNING  # Suppress INFO logs for sklearnex
+        level: WARNING # Suppress INFO logs for sklearnex
       nnsight:
-        level: WARNING  # Suppress INFO logs for nnsight
+        level: WARNING # Suppress INFO logs for nnsight
   run:
     dir: outputs/hydra_logs/interventions/${probe.name}/${model.name}/${now:%Y-%m-%d}/${now:%H-%M-%S}
 
@@ -23,13 +23,12 @@ defaults:
   - _self_
 
 datapack:
- load_scores: False
+  load_scores: False
 counter_method:
   scaler: 5
   num_tokens_to_change: -1
   absolute: True
   start_token: -1
-
 
 layers: ${model.layers}
 device: null
@@ -46,7 +45,6 @@ ndif_apikey: null # API keys to use NDIF models (very Large Language Models)
 start_from_checkpoint: True
 run_debugging: False
 trial_name: ${datapack.name}
-
 
 probe_dir: "outputs/probes/${probe.name}/${model.name}"
 output_dir: "outputs/interv/${probe.name}/${model.name}"
