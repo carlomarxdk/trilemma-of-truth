@@ -173,8 +173,8 @@ def main(cfg: DictConfig):
         log.warning(
             f"Model outputs {num_hidden_states} hidden states (including embeddings)"
         )
-        log.warning(f"Hidden state 0 shape: {test_output.hidden_states[0].shape}")
-        log.warning(f"Hidden state 1 shape: {test_output.hidden_states[1].shape}")
+        log.debug(f"START | Hidden state 0 shape: {test_output.hidden_states[0].shape}")
+        log.debug(f"START | Hidden state 1 shape: {test_output.hidden_states[1].shape}")
 
     torch.set_grad_enabled(False)
     model.eval()
@@ -323,8 +323,8 @@ def main(cfg: DictConfig):
                         acts_memmap[layer][_last_row + i, :, :] = embeddings[i]
 
                     if batch_idx < 2 and layer % 5 == 0:
-                        log.info(
-                            f"Full Emb L{layer} | Example {embeddings[0, -1, -3:]}"
+                        log.debug(
+                            f"TEST | Full Emb L{layer} | Example {embeddings[0, -1, -3:]}"
                         )
 
                 elif cfg.agg == "last":
