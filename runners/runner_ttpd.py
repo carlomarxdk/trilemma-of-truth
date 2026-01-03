@@ -330,7 +330,7 @@ class TTPD_Runner(BaseProbeRunner):
         """
         return self.conformal_prediction(X)
 
-    def load(self, output_dir: str | Path, layer_id: int) -> "TTPD_Runner":
+    def load(self, output_dir: str | Path, layer_id: int) -> TTPD_Runner:
         """
         Reload saved artifacts into this runner.
         Args:

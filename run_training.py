@@ -41,10 +41,9 @@ from runners import (
     SVMProbeRunner,
     TTPD_Runner,
 )
-from utils import _atomic_joblib_dump, _atomic_write_json
+from utils import _atomic_joblib_dump, _atomic_write_json, should_process_layer
 from utils import log_metric_binary as log_metric
 from utils import log_metric_multiclass as log_metric_mc
-from utils import should_process_layer
 from utils_hydra import load_data, return_label
 
 log = logging.getLogger("Training")

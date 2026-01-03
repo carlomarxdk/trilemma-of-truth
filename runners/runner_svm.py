@@ -469,7 +469,7 @@ class SVMProbeRunner(BaseProbeRunner):
             X = [X]
         return self.scaler.transform(self._bags_to_instance(X))
 
-    def load(self, output_dir: str | Path, layer_id: int) -> "SVMProbeRunner":
+    def load(self, output_dir: str | Path, layer_id: int) -> SVMProbeRunner:
         """
         Reload saved artifacts into this runner.
         Args:

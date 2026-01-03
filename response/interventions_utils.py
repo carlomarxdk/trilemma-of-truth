@@ -7,7 +7,15 @@ for translating hidden states along probe directions.
 from __future__ import annotations
 
 import numpy as np
+import pandas as pd
+import patsy
+import statsmodels.api as sm
 import torch
+from scipy.stats import binomtest
+
+################################
+#### Intervention utilities ####
+################################
 
 
 def random_answer_ids(
@@ -116,6 +124,181 @@ def sum_logprobs(logprobs: list[torch.Tensor]) -> float:
     return float(torch.stack(token_logps).sum())
 
 
+#############################
+####       Tests.        ####
+#############################
+def diff_of_diff_ols(
+    diff_pos: np.ndarray,
+    diff_neg: np.ndarray,
+    diff_rand_pos: np.ndarray,
+    diff_rand_neg: np.ndarray,
+    dataset: pd.DataFrame,
+):
+    """Difference-in-differences analysis for intervention effects on token probabilities.
+
+    Tests whether translating hidden states along a direction vector differentially
+    affects correct answer tokens vs random control tokens. Uses a 2×2 factorial
+    design (token type × intervention direction) with standard errors clustered
+    by statement.
+
+    Args:
+        diff_pos: Change in log-probability from baseline under positive
+            intervention (RES_pos - RES_orig) for correct tokens.
+        diff_neg: Change in log-probability from baseline under negative
+            intervention (RES_neg - RES_orig) for correct tokens.
+        diff_rand_pos: Change in log-probability from baseline under positive
+            intervention for random control tokens.
+        diff_rand_neg: Change in log-probability from baseline under negative
+            intervention for random control tokens.
+        dataset: DataFrame containing 'real_object' and 'correct' columns for
+            filtering to real, true statements.
+
+    Returns:
+        Fitted OLS model with clustered standard errors. Key coefficient is
+        'is_correct_token:is_pos_translation' (the DiD estimator).
+
+    Note:
+        The interaction term tests:
+            H0: (effect_pos - effect_neg)_correct = (effect_pos - effect_neg)_random
+            H1: Positive translation boosts correct tokens more than random tokens
+
+        Coefficients:
+            - Intercept: baseline effect for random tokens under negative intervention
+            - is_correct_token: main effect of token type (correct vs random)
+            - is_pos_translation: main effect of intervention direction
+            - is_correct_token:is_pos_translation: DiD estimator (key result)
+
+    """
+    N = diff_pos.shape[0]
+    r = dataset["real_object"].values[:N]
+    c = dataset["correct"].values[:N]
+
+    mask = (r == 1) & (c == 1)
+    M = mask.sum()
+
+    df = pd.DataFrame(
+        {
+            "effect": np.concatenate(
+                [
+                    diff_pos[mask],
+                    diff_neg[mask],
+                    diff_rand_pos[mask],
+                    diff_rand_neg[mask],
+                ]
+            ),
+            # More interpretable names
+            "is_correct_token": ([1] * M) + ([1] * M) + ([0] * M) + ([0] * M),
+            "is_pos_translation": ([1] * M) + ([0] * M) + ([1] * M) + ([0] * M),
+            "statement": np.tile(np.arange(M), 4),
+        }
+    )
+
+    y, X = patsy.dmatrices(
+        "effect ~ is_correct_token * is_pos_translation",
+        data=df,
+        return_type="dataframe",
+    )
+    groups = df.loc[X.index, "statement"].to_numpy()
+    model = sm.OLS(y, X).fit(cov_type="cluster", cov_kwds={"groups": groups})
+    return model
+
+
+def intervention_success_rate(
+    diff_pos: np.ndarray,
+    diff_neg: np.ndarray,
+    eps: float = 1e-12,
+    dataset: pd.DataFrame | None = None,
+):
+    """
+    Compute per-statement intervention success based on directional consistency.
+
+    A statement is considered successful if:
+      (1) Positive and negative interventions have opposing effects, and
+      (2) The positive intervention aligns with the dominant direction.
+
+    Args:
+        diff_pos: Array of per-statement effects under positive intervention
+                  (e.g., RES_pos - RES_orig).
+        diff_neg: Array of per-statement effects under negative intervention
+                  (e.g., RES_neg - RES_orig).
+        eps: Small tolerance to treat near-zero effects as zero.
+        dataset: Optional DataFrame with 'real_object' and 'correct' columns
+                 for filtering to real, true statements.
+
+    Returns:
+        dict with:
+            - success_rate: ω, fraction of successful statements
+            - dominant_direction: +1 or -1
+            - n_success: number of successful statements
+            - n_total: number of valid statements
+            - p_value: one-sided binomial test p-value (H0: ω ≤ 0.5)
+            - opposition_rate: fraction with sign(diff_pos) != sign(diff_neg)
+    """
+    assert diff_pos.shape == diff_neg.shape, "diff_pos and diff_neg must match"
+
+    if dataset is not None:
+        N = diff_pos.shape[0]
+        r = dataset["real_object"].values[:N]
+        c = dataset["correct"].values[:N]
+
+        mask = (r == 1) & (c == 1)
+        diff_pos = diff_pos[mask]
+        diff_neg = diff_neg[mask]
+
+    # Treat near-zero effects as zero
+    dp = np.where(np.abs(diff_pos) < eps, 0.0, diff_pos)
+    dn = np.where(np.abs(diff_neg) < eps, 0.0, diff_neg)
+
+    sign_pos = np.sign(dp)
+    sign_neg = np.sign(dn)
+
+    # Keep only statements with non-zero effects on both sides
+    valid = (sign_pos != 0) & (sign_neg != 0)
+    if valid.sum() == 0:
+        return {
+            "success_rate": np.nan,
+            "dominant_direction": np.nan,
+            "n_success": 0,
+            "n_total": 0,
+            "p_value": np.nan,
+            "opposition_rate": np.nan,
+        }
+
+    sign_pos = sign_pos[valid]
+    sign_neg = sign_neg[valid]
+
+    # (1) Opposing effects
+    opposition = sign_pos != sign_neg
+    opposition_rate = opposition.mean()
+
+    # Dominant direction of positive intervention
+    dominant_direction = np.sign(sign_pos.sum())
+    if dominant_direction == 0:
+        # Perfect tie → no dominant direction
+        dominant_direction = np.nan
+
+    # (2) Alignment with dominant direction
+    aligned = sign_pos == dominant_direction
+
+    # Success definition
+    success = opposition & aligned
+    n_success = success.sum()
+    n_total = success.size
+    success_rate = n_success / n_total
+
+    # One-sided binomial test: H0: ω ≤ 0.5, H1: ω > 0.5
+    p_value = binomtest(n_success, n_total, p=0.5, alternative="greater").pvalue
+
+    return {
+        "success_rate": float(success_rate),
+        "dominant_direction": float(dominant_direction),
+        "n_success": int(n_success),
+        "n_total": int(n_total),
+        "p_value": float(p_value),
+        "opposition_rate": float(opposition_rate),
+    }
+
+
 class InterventionDataProcessor:
     """Handle data formatting for intervention experiments.
 
@@ -151,7 +334,7 @@ class InterventionDataProcessor:
 
         """
         article = "is" if negation == 0 else "is not"
-        if self.datapack in ["cities", "cities_loc"]:
+        if self.datapack in ["city_locations", "cities_loc"]:
             if "city" in object_1.lower():
                 return f"{object_1} is located in"
             return f"The city of {object_1} {article} located in"
@@ -172,7 +355,7 @@ class InterventionDataProcessor:
             return f"{object_1.capitalize()} {article} indicated for the treatment of"
         elif self.datapack == "symptoms":
             return f"{object_1.capitalize()} {article} linked to"
-        elif self.datapack in ["definitions", "defs"]:
+        elif self.datapack in ["word_definitions", "defs"]:
             if category == "instances":  # noqa: SIM116
                 return f"{object_1} {article} a"
             elif category == "synonyms":

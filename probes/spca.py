@@ -27,7 +27,7 @@ class SupervisedPCA(ClassifierMixin, BaseEstimator):
         ),
         verbose: bool = False,
         random_seed: int = 42,
-    ) -> "SupervisedPCA":
+    ) -> SupervisedPCA:
         """
         Initialize the SupervisedPCA model.
         Args:
@@ -62,7 +62,7 @@ class SupervisedPCA(ClassifierMixin, BaseEstimator):
         self.explained_variance_ = None
         self.classes_ = np.array([0, 1])
 
-    def fit(self, X: np.array, y: np.array) -> "SupervisedPCA":
+    def fit(self, X: np.array, y: np.array) -> SupervisedPCA:
         """
         Get the truth direction using PCA + Logistic Regression.
         Args:

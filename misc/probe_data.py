@@ -182,6 +182,35 @@ class ExperimentData:
             results[layer] = metric[0]
         return max(results, key=results.get)
 
+    def top_k_layers(
+        self, k: int = 3, keys: list[str] = ["conformal", "wmcc"], path: Path | None = None
+    ) -> list[int]:
+        """Get the top k layers with the highest metric values.
+        Args:
+            k (int): Number of top layers to return.
+            keys (list of str): The key or list of keys to navigate through the JSON structure to find the metric.
+            path (Path, optional): The base path to the experiment data. If None, uses the default base path.
+        Returns:
+            list[int]: List of layer numbers sorted by metric value (highest first).
+        """
+        results = {}
+        for layer in self.available_layers:
+            try:
+                metric = self.read_metrics(layer, keys, path=path)
+                # Handle both scalar values and [value, lower, upper] tuples
+                if isinstance(metric, (list, tuple)) and len(metric) > 0:
+                    results[layer] = metric[0]
+                else:
+                    results[layer] = metric
+            except (KeyError, AssertionError):
+                # Skip layers without the specified metric
+                continue
+        
+        # Sort layers by metric value (descending) and return top k
+        sorted_layers = sorted(results.items(), key=lambda x: x[1], reverse=True)
+        return [layer for layer, _ in sorted_layers[:k]]
+
+
     def read_metrics(
         self,
         layer_id: int,

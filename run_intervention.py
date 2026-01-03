@@ -12,27 +12,28 @@ import os
 import pprint
 import re
 import warnings
-from sklearn.exceptions import InconsistentVersionWarning
 from collections.abc import Sequence
 from glob import glob
 from pathlib import Path
 
 import hydra
 import numpy as np
-import pandas as pd
-import patsy
 import statsmodels.api as sm
 import torch
 from omegaconf import DictConfig, OmegaConf
+from sklearn.exceptions import InconsistentVersionWarning
 
 # Suppress scikit-learn version warnings when loading pickled models
 warnings.filterwarnings('ignore', category=InconsistentVersionWarning)
 
 from misc.db import LogDataBase
+from misc.probe_data import ExperimentData
 from response.interventions_utils import (
     InstructInterventionDataProcessor,
     InterventionDataProcessor,
     compute_layer_scale,
+    diff_of_diff_ols,
+    intervention_success_rate,
     mean_logprobs,
     random_answer_ids,
     translate_concept,
@@ -67,6 +68,7 @@ PROBES = {
     "spca": SPCA_Runner,
     "ttpd": TTPD_Runner,
 }
+
 
 log = logging.getLogger("Intervention")
 
@@ -214,19 +216,59 @@ def main(cfg: OmegaConf): # noqa: C901
 
     avail_layers = available_layers(cfg.probe_dir)
 
-    # # Checkpointing
-    if cfg.start_from_checkpoint:
-        missing_layers = checkpointing(cfg, existing_layers=avail_layers)
-        if len(missing_layers) == 0:
-            log.warning("All layers are already processed...")
-            layers = []
+    # Determine which layers to process
+    if cfg.use_best_layers:
+        # Use top N best performing layers based on probe metrics
+        if cfg.probe['name'] != 'svm':
+            best_layer_metric_keys =  cfg.best_layer_metric_keys
         else:
-            log.warning(
-                f"Checkpointing: Processing the missing layers: {missing_layers}"
-            )
-            layers = missing_layers
+            best_layer_metric_keys = ["default", "mcc"]
+        log.warning(
+            f"Using top {cfg.num_best_layers} best performing layers based on {best_layer_metric_keys} metrics"
+        )
+        
+        # Create ExperimentData object to access probe metrics
+        experiment_data = ExperimentData(
+            model_name=cfg.model["name"],
+            probe_name=cfg.probe["name"],
+            dataset_name=cfg.datapack["name"],
+            task=cfg.task,
+            with_search=cfg.search,
+        )
+        # Get top k best performing layers
+        best_layers = experiment_data.top_k_layers(
+            k=cfg.num_best_layers,
+            keys=best_layer_metric_keys,
+        )
+        log.warning(f"Selected best layers: {best_layers}")
+        
+        # If checkpointing is enabled, only process layers not yet completed
+        if cfg.start_from_checkpoint:
+            missing_layers = checkpointing(cfg, existing_layers=best_layers)
+            if len(missing_layers) == 0:
+                log.warning("All best layers are already processed...")
+                layers = []
+            else:
+                log.warning(
+                    f"Checkpointing: Processing the missing best layers: {missing_layers}"
+                )
+                layers = missing_layers
+        else:
+            layers = best_layers
     else:
-        layers = cfg["layers"]
+        # Use standard layer selection based on layer_range or checkpointing
+        if cfg.start_from_checkpoint:
+            missing_layers = checkpointing(cfg, existing_layers=avail_layers)
+            if len(missing_layers) == 0:
+                log.warning("All layers are already processed...")
+                layers = []
+            else:
+                log.warning(
+                    f"Checkpointing: Processing the missing layers: {missing_layers}"
+                )
+                layers = missing_layers
+        else:
+            layers = cfg["layers"]
 
     if cfg.run_debugging:
         layers = [13]
@@ -288,7 +330,9 @@ def main(cfg: OmegaConf): # noqa: C901
                 ### POSITIVE INTERVENTION
                 with model.trace() as tracer: # noqa: SIM117
                     with tracer.invoke(st) as _:
-                        h = layer.output[0].clone()
+                        h = layer.output[0].clone() if isinstance(layer.output, tuple) else layer.output.clone()
+                        #log.debug(f"Layer output shape: {h.shape}")
+
                         h[:, _start_token, :] = translate_concept(
                             h[:, _start_token, :],
                             direction,
@@ -309,7 +353,8 @@ def main(cfg: OmegaConf): # noqa: C901
                 ### NEGATIVE INTERVENTION
                 with model.trace() as tracer:  # noqa: SIM117
                     with tracer.invoke(st) as _:
-                        h = layer.output[0].clone()
+                        h = layer.output[0].clone() if isinstance(layer.output, tuple) else layer.output.clone()
+                        #log.debug(f"Layer output shape: {h.shape}")
                         h[:, _start_token, :] = translate_concept(
                             h[:, _start_token, :],
                             direction,
@@ -373,14 +418,22 @@ def main(cfg: OmegaConf): # noqa: C901
             diff_rand_neg=diff_rand_neg,
             dataset=dataset,
         )
+        
+        success = intervention_success_rate(
+            diff_pos=diff_pos,
+            diff_neg=diff_neg,
+            dataset=dataset,
+        )
 
         # Full summary for the interaction
         log.debug(result.summary())
+        log.debug(f"Success rate: {pprint.pformat(success)}")
 
         save(
             cfg=cfg,
             layer_id=layer_id,
             did_result=result,
+            success_results=success,
             s_orig=RES_orig,
             s_neg=RES_neg,
             s_pos=RES_pos,
@@ -417,86 +470,13 @@ def main(cfg: OmegaConf): # noqa: C901
     )
 
 
-def diff_of_diff_ols(
-    diff_pos: np.ndarray,
-    diff_neg: np.ndarray,
-    diff_rand_pos: np.ndarray,
-    diff_rand_neg: np.ndarray,
-    dataset: pd.DataFrame,
-):
-    """Difference-in-differences analysis for intervention effects on token probabilities.
-
-    Tests whether translating hidden states along a direction vector differentially
-    affects correct answer tokens vs random control tokens. Uses a 2×2 factorial
-    design (token type × intervention direction) with standard errors clustered
-    by statement.
-
-    Args:
-        diff_pos: Change in log-probability from baseline under positive
-            intervention (RES_pos - RES_orig) for correct tokens.
-        diff_neg: Change in log-probability from baseline under negative
-            intervention (RES_neg - RES_orig) for correct tokens.
-        diff_rand_pos: Change in log-probability from baseline under positive
-            intervention for random control tokens.
-        diff_rand_neg: Change in log-probability from baseline under negative
-            intervention for random control tokens.
-        dataset: DataFrame containing 'real_object' and 'correct' columns for
-            filtering to real, true statements.
-
-    Returns:
-        Fitted OLS model with clustered standard errors. Key coefficient is
-        'is_correct_token:is_pos_translation' (the DiD estimator).
-
-    Note:
-        The interaction term tests:
-            H0: (effect_pos - effect_neg)_correct = (effect_pos - effect_neg)_random
-            H1: Positive translation boosts correct tokens more than random tokens
-
-        Coefficients:
-            - Intercept: baseline effect for random tokens under negative intervention
-            - is_correct_token: main effect of token type (correct vs random)
-            - is_pos_translation: main effect of intervention direction
-            - is_correct_token:is_pos_translation: DiD estimator (key result)
-
-    """
-    N = diff_pos.shape[0]
-    r = dataset["real_object"].values[:N]
-    c = dataset["correct"].values[:N]
-
-    mask = (r == 1) & (c == 1)
-    M = mask.sum()
-
-    df = pd.DataFrame(
-        {
-            "effect": np.concatenate(
-                [
-                    diff_pos[mask],
-                    diff_neg[mask],
-                    diff_rand_pos[mask],
-                    diff_rand_neg[mask],
-                ]
-            ),
-            # More interpretable names
-            "is_correct_token": ([1] * M) + ([1] * M) + ([0] * M) + ([0] * M),
-            "is_pos_translation": ([1] * M) + ([0] * M) + ([1] * M) + ([0] * M),
-            "statement": np.tile(np.arange(M), 4),
-        }
-    )
-
-    y, X = patsy.dmatrices(
-        "effect ~ is_correct_token * is_pos_translation",
-        data=df,
-        return_type="dataframe",
-    )
-    groups = df.loc[X.index, "statement"].to_numpy()
-    model = sm.OLS(y, X).fit(cov_type="cluster", cov_kwds={"groups": groups})
-    return model
 
 
 def save(
     cfg: DictConfig,
     layer_id: int,
     did_result: sm.regression.linear_model.RegressionResultsWrapper,
+    success_results: dict,
     s_orig: np.ndarray,
     s_neg: np.ndarray,
     s_pos: np.ndarray,
@@ -584,6 +564,7 @@ def save(
                 did_result.pvalues["is_correct_token:is_pos_translation"] < 0.05
             ),
         },
+        "success_results": success_results,
         "descriptives": {
             "correct_orig_mean": float(np.mean(s_orig)),
             "correct_pos_mean": float(np.mean(s_pos)),

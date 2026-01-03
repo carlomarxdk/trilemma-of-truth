@@ -1,13 +1,13 @@
-from abc import ABC, abstractmethod
-from typing import Dict, List
 import random
+from abc import ABC, abstractmethod
+
+import inflect
 import numpy as np
 import polars as pl
-import inflect
 
 
 class DatasetGenerator(ABC):
-    def __init__(self, source: Dict[str, List[str]],
+    def __init__(self, source: dict[str, list[str]],
                  random_seed: int = 42,
                  is_fake: bool = False, category=None):
         self.source = source
@@ -36,11 +36,7 @@ class DatasetGenerator(ABC):
         '''
         correct = self.source[key]
         choice = random.choice(list(set(self.values) - set(correct)))
-        if choice.lower() in [c.lower() for c in correct]:
-            return self.lookup_incorrect(key)
-        # elif abbreviate(choice) in [abbreviate(c) for c in correct] or abbreviate(choice) in [c for c in correct]:
-        #     return self.lookup_incorrect(key)
-        elif any(word in c.lower().split() for word in choice.lower().split() for c in correct):
+        if choice.lower() in [c.lower() for c in correct] or any(word in c.lower().split() for word in choice.lower().split() for c in correct):
             return self.lookup_incorrect(key)
         return choice
 
@@ -158,11 +154,7 @@ class DrugDisease(DatasetGenerator):
         '''
         correct = self.source[key]
         choice = random.choice(list(set(self.values) - set(correct)))
-        if choice.lower() in [c.lower() for c in correct]:
-            return self.lookup_incorrect(key)
-        elif abbreviate(choice) in [abbreviate(c) for c in correct] or abbreviate(choice) in [c for c in correct]:
-            return self.lookup_incorrect(key)
-        elif any(word in c.lower().split() for word in choice.lower().split() for c in correct):
+        if choice.lower() in [c.lower() for c in correct] or abbreviate(choice) in [abbreviate(c) for c in correct] or abbreviate(choice) in [c for c in correct] or any(word in c.lower().split() for word in choice.lower().split() for c in correct):
             return self.lookup_incorrect(key)
         return choice
     
