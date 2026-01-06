@@ -315,8 +315,8 @@ def main(cfg: OmegaConf): # noqa: C901
         else:
             direction = _runner.direction.astype(np.float32)
         direction = torch.from_numpy(direction).to(device)
-        delta = 1 #compute_layer_scale(dh=dh, direction=direction, layer_id=layer_id) * c #TODO: uncomment
         # Compute scale
+        delta = compute_layer_scale(dh=dh, direction=direction, layer_id=layer_id) * c 
 
         # Store results
         RES_orig, RES_neg, RES_pos = [], [], []
