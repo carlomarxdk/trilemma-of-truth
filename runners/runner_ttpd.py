@@ -369,3 +369,16 @@ class TTPD_Runner(BaseProbeRunner):
 
         self.is_fitted_ = True
         return self
+
+    def get_truth_direction(self) -> np.ndarray:
+        """
+        Get the truth direction from the TTPD runner.
+        Args:
+            self: TTPD_Runner instance
+        Returns:
+            direction: np.ndarray representing the truth direction
+        """
+    
+        direction = np.asarray(self.estimator.w_t).astype(np.float32)
+
+        return direction

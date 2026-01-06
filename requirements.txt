@@ -10,7 +10,7 @@ matplotlib>=3.9
 mpltern
 mrmr-selection
 namemaker
-nnsight>=0.5.5
+nnsight>=0.5.13
 numba
 numpy>=2.0
 omegaconf

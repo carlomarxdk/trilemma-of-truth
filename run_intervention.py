@@ -73,6 +73,30 @@ PROBES = {
 log = logging.getLogger("Intervention")
 
 
+def _get_logits(output):
+    """Extract logits tensor from varied HF/NNSight outputs."""
+
+    if hasattr(output, "logits"):
+        return output.logits
+    if isinstance(output, dict) and "logits" in output:
+        return output["logits"]
+    if isinstance(output, tuple) and len(output) > 0:
+        first = output[0]
+        if isinstance(first, torch.Tensor):
+            return first
+    raise TypeError(f"Cannot extract logits from output type {type(output)}")
+
+
+def _get_hidden(out):
+    """Extract hidden-state tensor from layer outputs (handles tuples)."""
+
+    if isinstance(out, torch.Tensor):
+        return out
+    if isinstance(out, tuple) and len(out) > 0 and isinstance(out[0], torch.Tensor):
+        return out[0]
+    raise TypeError(f"Cannot extract hidden state from output type {type(out)}")
+
+
 def validate_config(cfg: DictConfig):
     """Validate and prepare configuration for intervention experiments.
 
@@ -286,8 +310,12 @@ def main(cfg: OmegaConf): # noqa: C901
         # Setup probe and direction
         _runner = runner.load(output_dir=cfg.probe_dir, layer_id=layer_id)
         layer = model.model.layers[layer_id]
-        direction = torch.from_numpy(_runner.direction.astype(np.float32)).to(device)
-        delta = compute_layer_scale(dh=dh, direction=direction, layer_id=layer_id) * c
+        if cfg.probe['name'] == 'ttpd':
+            direction = _runner.get_truth_direction()
+        else:
+            direction = _runner.direction.astype(np.float32)
+        direction = torch.from_numpy(direction).to(device)
+        delta = 1 #compute_layer_scale(dh=dh, direction=direction, layer_id=layer_id) * c #TODO: uncomment
         # Compute scale
 
         # Store results
@@ -295,8 +323,22 @@ def main(cfg: OmegaConf): # noqa: C901
         RAND_orig, RAND_neg, RAND_pos = [], [], []
 
         np.random.seed(cfg.random_seed)
+        # Track how many *correct* statements we've processed so we can stop
+        # once we reach `cfg.limit_num_statements` correct examples.
+        correct_count = 0
+        limit_enabled = cfg.limit_num_statements > 0
+
         for n, (i, row) in enumerate(dataset.iterrows()):
             statement = row["statement"]
+            if row['correct'] == 0:
+                log.debug(f"Skipping statement {i} as it is marked incorrect in dataset.")
+                RES_orig.append(-100)
+                RES_pos.append(-100)
+                RES_neg.append(-100)
+                RAND_orig.append(-100)
+                RAND_pos.append(-100)
+                RAND_neg.append(-100)
+                continue
             proba_orig, proba_neg, proba_pos = [], [], []
             proba_rorig, proba_rneg, proba_rpos = [], [], []
 
@@ -316,7 +358,7 @@ def main(cfg: OmegaConf): # noqa: C901
                 ### ORIGINAL VALUES
                 with model.trace() as tracer:  # noqa: SIM117
                     with tracer.invoke(st) as _:
-                        logits = model.output.logits[0, -1].clone().cpu().save()
+                        logits = _get_logits(model.output)[0, -1].clone().cpu().save()
                     
 
                 probs = torch.log_softmax(logits, dim=-1)
@@ -330,7 +372,7 @@ def main(cfg: OmegaConf): # noqa: C901
                 ### POSITIVE INTERVENTION
                 with model.trace() as tracer: # noqa: SIM117
                     with tracer.invoke(st) as _:
-                        h = layer.output[0].clone() if isinstance(layer.output, tuple) else layer.output.clone()
+                        h = _get_hidden(layer.output).clone()
                         #log.debug(f"Layer output shape: {h.shape}")
 
                         h[:, _start_token, :] = translate_concept(
@@ -339,7 +381,7 @@ def main(cfg: OmegaConf): # noqa: C901
                             delta)
                         layer.output[0][:] = h
 
-                        logits = model.output.logits[0, -1].clone().cpu().save() 
+                        logits = _get_logits(model.output)[0, -1].clone().cpu().save() 
 
                 probs = torch.log_softmax(logits, dim=-1)
                 output_pos = probs[seq_ans_ids[j]]
@@ -353,14 +395,14 @@ def main(cfg: OmegaConf): # noqa: C901
                 ### NEGATIVE INTERVENTION
                 with model.trace() as tracer:  # noqa: SIM117
                     with tracer.invoke(st) as _:
-                        h = layer.output[0].clone() if isinstance(layer.output, tuple) else layer.output.clone()
+                        h = _get_hidden(layer.output).clone()
                         #log.debug(f"Layer output shape: {h.shape}")
                         h[:, _start_token, :] = translate_concept(
                             h[:, _start_token, :],
                             direction,
                             -delta)
                         layer.output[0][:] = h
-                        logits = model.output.logits[0, -1].clone().cpu().save()  
+                        logits = _get_logits(model.output)[0, -1].clone().cpu().save()  
 
                 probs = torch.log_softmax(logits, dim=-1)
                 output_neg = probs[seq_ans_ids[j]]
@@ -369,6 +411,16 @@ def main(cfg: OmegaConf): # noqa: C901
                 # log.debug(f"Output Score (neg): {output_neg}")
                 proba_neg.append(output_neg)
                 proba_rneg.append(output_rneg)
+
+                # Optional debug: warn if interventions did not move logits
+                if cfg.run_debugging:
+                    delta_pos = (output_pos - output_orig).abs().max().item()
+                    delta_neg = (output_neg - output_orig).abs().max().item()
+                    if delta_pos == 0.0 and delta_neg == 0.0:
+                        log.warning(
+                            "No logit change after interventions | "
+                            f"layer {layer_id} statement {i} step {j}"
+                        )
 
             # log.debug(f"Statement {i} - Original probs: {proba_orig} - Pos probs: {proba_pos} - Neg probs: {proba_neg}")
             RES_orig.append(mean_logprobs(proba_orig))
@@ -382,9 +434,13 @@ def main(cfg: OmegaConf): # noqa: C901
                 f"Statement {i} | Pos: {RES_pos[-1]} |  Orig: {RES_orig[-1]}  | Neg: {RES_neg[-1]}"
             )
 
-            if n >= cfg.limit_num_statements:
-                break
+            # Only count statements that were marked correct (we skip incorrect
+            # ones above). Stop when we've processed the configured number of
+            # correct statements.
+            correct_count += 1
             clear_device_cache(device)
+            if limit_enabled and correct_count >= cfg.limit_num_statements:
+                break
 
         # PART II
         RES_neg, RES_orig, RES_pos, RAND_neg, RAND_orig, RAND_pos = map(

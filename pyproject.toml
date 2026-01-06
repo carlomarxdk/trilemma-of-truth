@@ -51,4 +51,5 @@ exclude = [
     "outputs/",
     "build/",
     "dist/",
+    "datasets/",
 ]

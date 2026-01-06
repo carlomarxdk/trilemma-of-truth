@@ -11,7 +11,10 @@ import pandas as pd
 import patsy
 import statsmodels.api as sm
 import torch
+import logging 
 from scipy.stats import binomtest
+
+log = logging.getLogger("InterventionUtils")
 
 ################################
 #### Intervention utilities ####
@@ -133,7 +136,8 @@ def diff_of_diff_ols(
     diff_rand_pos: np.ndarray,
     diff_rand_neg: np.ndarray,
     dataset: pd.DataFrame,
-):
+    additional_mask: np.ndarray | None = None,
+) -> sm.regression.linear_model.RegressionResultsWrapper:
     """Difference-in-differences analysis for intervention effects on token probabilities.
 
     Tests whether translating hidden states along a direction vector differentially
@@ -152,6 +156,7 @@ def diff_of_diff_ols(
             intervention for random control tokens.
         dataset: DataFrame containing 'real_object' and 'correct' columns for
             filtering to real, true statements.
+        additional_mask: Optional boolean array to further filter statements.
 
     Returns:
         Fitted OLS model with clustered standard errors. Key coefficient is
@@ -208,7 +213,7 @@ def intervention_success_rate(
     diff_neg: np.ndarray,
     eps: float = 1e-12,
     dataset: pd.DataFrame | None = None,
-):
+) -> dict[str, float | int]:
     """
     Compute per-statement intervention success based on directional consistency.
 
@@ -240,54 +245,39 @@ def intervention_success_rate(
         N = diff_pos.shape[0]
         r = dataset["real_object"].values[:N]
         c = dataset["correct"].values[:N]
-
         mask = (r == 1) & (c == 1)
         diff_pos = diff_pos[mask]
         diff_neg = diff_neg[mask]
 
-    # Treat near-zero effects as zero
+    # Zero out numerically small effects
     dp = np.where(np.abs(diff_pos) < eps, 0.0, diff_pos)
     dn = np.where(np.abs(diff_neg) < eps, 0.0, diff_neg)
 
     sign_pos = np.sign(dp)
     sign_neg = np.sign(dn)
 
-    # Keep only statements with non-zero effects on both sides
-    valid = (sign_pos != 0) & (sign_neg != 0)
-    if valid.sum() == 0:
-        return {
-            "success_rate": np.nan,
-            "dominant_direction": np.nan,
-            "n_success": 0,
-            "n_total": 0,
-            "p_value": np.nan,
-            "opposition_rate": np.nan,
-        }
+    # --- dominant direction (ignore zeros) ---
+    nonzero_pos = sign_pos[sign_pos != 0]
+    if nonzero_pos.size == 0:
+        dominant_direction = 0
+    else:
+        dominant_direction = np.sign(nonzero_pos.sum())
 
-    sign_pos = sign_pos[valid]
-    sign_neg = sign_neg[valid]
-
-    # (1) Opposing effects
-    opposition = sign_pos != sign_neg
-    opposition_rate = opposition.mean()
-
-    # Dominant direction of positive intervention
-    dominant_direction = np.sign(sign_pos.sum())
-    if dominant_direction == 0:
-        # Perfect tie → no dominant direction
-        dominant_direction = np.nan
-
-    # (2) Alignment with dominant direction
+    # --- success definition ---
+    opposing = sign_pos == -sign_neg
     aligned = sign_pos == dominant_direction
 
-    # Success definition
-    success = opposition & aligned
-    n_success = success.sum()
+    success = opposing & aligned
+
     n_total = success.size
+    n_success = success.sum()
     success_rate = n_success / n_total
 
-    # One-sided binomial test: H0: ω ≤ 0.5, H1: ω > 0.5
-    p_value = binomtest(n_success, n_total, p=0.5, alternative="greater").pvalue
+    opposition_rate = opposing.mean()
+
+    p_value = binomtest(
+        n_success, n_total, p=0.5, alternative="greater"
+    ).pvalue
 
     return {
         "success_rate": float(success_rate),
@@ -296,8 +286,14 @@ def intervention_success_rate(
         "n_total": int(n_total),
         "p_value": float(p_value),
         "opposition_rate": float(opposition_rate),
+        "zero_effect_rate": float(
+            np.mean((sign_pos == 0) | (sign_neg == 0))
+        ),
     }
 
+##############################
+####   Data Processors.   ####
+##############################
 
 class InterventionDataProcessor:
     """Handle data formatting for intervention experiments.
