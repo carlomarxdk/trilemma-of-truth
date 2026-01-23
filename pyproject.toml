@@ -21,10 +21,10 @@ exclude = '''
 
 [tool.isort]
 profile = "black"
-line_length = 88
+line_length = 90
 
 [tool.ruff]
-line-length = 88
+line-length = 90
 
 [tool.ruff.lint]
 select = [
@@ -37,7 +37,7 @@ select = [
     "S",    # flake8-bandit (security)
     "C90",  # mccabe complexity
 ]
-ignore = ["E501"]
+ignore = ["E501"]  # E501: line too long, handled by black/isort
 
 [tool.ruff.lint.mccabe]
 max-complexity = 10
@@ -51,4 +51,5 @@ exclude = [
     "outputs/",
     "build/",
     "dist/",
+    "datasets/",
 ]

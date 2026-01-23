@@ -4,12 +4,23 @@ hydra:
     dir: outputs/hydra_logs/probes/prompt/${model.name}/${now:%Y-%m-%d}/${now:%H-%M-%S}
 
 defaults:
-  - model: ??? 
+  - model: ???
   - setup: base
   - _self_
 
-datasets: ["city_locations", "city_locations_synthetic",
-           "med_indications", "med_indications_synthetic", ...]
+datasets:
+  [
+    "city_locations",
+    "city_locations_synthetic",
+    "med_indications",
+    "med_indications_synthetic",
+    "word_instances",
+    "word_instances_synthetic",
+    "word_synonyms",
+    "word_synonyms_synthetic",
+    "word_types",
+    "word_types_synthetic",
+  ]
 layers: ${model.layers}
 device: null # null means use the default device (if GPU or MPS is available)
 variation: "default"
@@ -20,6 +31,4 @@ question_type: multichoice
 random_seed: 42
 batch_size: 12
 limit_batches: -1 # number of batches to run the analysis on
-enum_list: [1,2,3,4,5,6]
-
-
+enum_list: [1, 2, 3, 4, 5, 6]

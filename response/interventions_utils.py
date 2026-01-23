@@ -1,65 +1,337 @@
+"""Utilities for causal interventions on language model representations.
+
+Provides data processors for formatting intervention experiments and functions
+for translating hidden states along probe directions.
+"""
+
 from __future__ import annotations
 
-import re
+import logging
 
 import numpy as np
+import pandas as pd
+import patsy
+import statsmodels.api as sm
 import torch
+from scipy.stats import binomtest
+
+log = logging.getLogger("InterventionUtils")
+
+################################
+#### Intervention utilities ####
+################################
 
 
-def torch_list_to_numpy(x, eps=1e-6):
-    """
-    Transform a list of torch tensor items into a numpy arra
-    Args;
-        x: List of N tensors of various lengths
-    Returns:
-        numpy.array of size N
+def random_answer_ids(
+    seq_ids: list[list[torch.Tensor]], vocab_size: int
+) -> list[torch.Tensor]:
+    """Generate random answer token IDs for each sequence in seq_ids.
 
-    """
-    _x = []
-    for i in x:
-        _x.append(i.sum() + eps)
-    return np.array([p.cpu() for p in _x])
-
-
-def to_log_proba(proba_list):
-    """
-    Transform an array of probabilities into a marginal log-proba
     Args:
-        proba_list: numpy.array of size N with probabilties
-    Returns:
-        marginal log-proba
-    """
-    return np.sum(np.log(torch_list_to_numpy(proba_list)))
+        seq_ids: List of N sequences (each sequence is a list of token IDs).
+        vocab_size: Size of the vocabulary (int).
 
+    Returns:
+        List of N tensors, each containing random token IDs of the same length
+        as the corresponding sequence in seq_ids.
+
+    """
+    output = []
+    for seq in seq_ids:
+        rnd_seq = np.random.choice(vocab_size, len(seq), replace=False)
+        output.append(torch.tensor(rnd_seq))
+    return output
+
+
+def compute_layer_scale(dh, direction, layer_id, eps=1e-6):
+    """Compute σ_layer: the standard deviation of projection onto direction.
+
+    Normalizes direction and projects activations onto it, then computes
+    standard deviation across all positions.
+
+    Args:
+        dh: DataHandler object containing training data.
+        direction: Concept direction vector (will be normalized).
+        layer_id: Index of the layer to analyze.
+        eps: Minimum value for clamping standard deviation.
+
+    Returns:
+        Standard deviation of projections as a float.
+
+    """
+    # Normalize direction
+    unit_dir = direction / direction.norm()
+
+    # Expected shape: [B, S, H]
+    X = dh.train_bags(layer_id)["last_embedding"].to(direction.device)
+
+    if X.ndim != 2:
+        raise ValueError(f"Expected X to be [B, S, H], got {X.shape}")
+
+    # Project onto direction → [B, S]
+    coords = torch.einsum("bh, h -> b", X, unit_dir)
+
+    # Pool over batch and tokens → scalar
+    sigma = coords.flatten().std().clamp_min(eps)
+
+    return sigma.item()
+
+
+def normalize_logprob(lp: torch.Tensor) -> torch.Tensor:
+    """Convert token or multi-piece log-prob tensor into a scalar.
+
+    If lp is a vector (e.g. BPE pieces), sum its entries.
+
+    Args:
+        lp: Log-probability tensor (scalar or 1D).
+
+    Returns:
+        Scalar log-probability tensor.
+
+    """
+    if lp.ndim == 0:
+        return lp
+    return lp.sum()
+
+
+def mean_logprobs(logprobs: list[torch.Tensor]) -> float:
+    """Compute mean log-probability across answer tokens.
+
+    Handles variable-length tokenizations by summing sub-token
+    log-probabilities per token before averaging.
+
+    Args:
+        logprobs: List of log-probability tensors (one per token).
+
+    Returns:
+        Mean log-probability as a float.
+
+    """
+    token_logps = [normalize_logprob(lp) for lp in logprobs]
+    return float(torch.stack(token_logps).mean())
+
+
+def sum_logprobs(logprobs: list[torch.Tensor]) -> float:
+    """Compute total log-likelihood of an answer sequence.
+
+    Handles variable-length tokenizations by summing sub-token
+    log-probabilities per token.
+
+    Args:
+        logprobs: List of log-probability tensors (one per token).
+
+    Returns:
+        Total log-likelihood as a float.
+
+    """
+    token_logps = [normalize_logprob(lp) for lp in logprobs]
+    return float(torch.stack(token_logps).sum())
+
+
+#############################
+####       Tests.        ####
+#############################
+def diff_of_diff_ols(
+    diff_pos: np.ndarray,
+    diff_neg: np.ndarray,
+    diff_rand_pos: np.ndarray,
+    diff_rand_neg: np.ndarray,
+    dataset: pd.DataFrame,
+    additional_mask: np.ndarray | None = None,
+) -> sm.regression.linear_model.RegressionResultsWrapper:
+    """Difference-in-differences analysis for intervention effects on token probabilities.
+
+    Tests whether translating hidden states along a direction vector differentially
+    affects correct answer tokens vs random control tokens. Uses a 2×2 factorial
+    design (token type × intervention direction) with standard errors clustered
+    by statement.
+
+    Args:
+        diff_pos: Change in log-probability from baseline under positive
+            intervention (RES_pos - RES_orig) for correct tokens.
+        diff_neg: Change in log-probability from baseline under negative
+            intervention (RES_neg - RES_orig) for correct tokens.
+        diff_rand_pos: Change in log-probability from baseline under positive
+            intervention for random control tokens.
+        diff_rand_neg: Change in log-probability from baseline under negative
+            intervention for random control tokens.
+        dataset: DataFrame containing 'real_object' and 'correct' columns for
+            filtering to real, true statements.
+        additional_mask: Optional boolean array to further filter statements.
+
+    Returns:
+        Fitted OLS model with clustered standard errors. Key coefficient is
+        'is_correct_token:is_pos_translation' (the DiD estimator).
+
+    Note:
+        The interaction term tests:
+            H0: (effect_pos - effect_neg)_correct = (effect_pos - effect_neg)_random
+            H1: Positive translation boosts correct tokens more than random tokens
+
+        Coefficients:
+            - Intercept: baseline effect for random tokens under negative intervention
+            - is_correct_token: main effect of token type (correct vs random)
+            - is_pos_translation: main effect of intervention direction
+            - is_correct_token:is_pos_translation: DiD estimator (key result)
+
+    """
+    N = diff_pos.shape[0]
+    r = dataset["real_object"].values[:N]
+    c = dataset["correct"].values[:N]
+
+    mask = (r == 1) & (c == 1)
+    M = mask.sum()
+
+    df = pd.DataFrame(
+        {
+            "effect": np.concatenate(
+                [
+                    diff_pos[mask],
+                    diff_neg[mask],
+                    diff_rand_pos[mask],
+                    diff_rand_neg[mask],
+                ]
+            ),
+            # More interpretable names
+            "is_correct_token": ([1] * M) + ([1] * M) + ([0] * M) + ([0] * M),
+            "is_pos_translation": ([1] * M) + ([0] * M) + ([1] * M) + ([0] * M),
+            "statement": np.tile(np.arange(M), 4),
+        }
+    )
+
+    y, X = patsy.dmatrices(
+        "effect ~ is_correct_token * is_pos_translation",
+        data=df,
+        return_type="dataframe",
+    )
+    groups = df.loc[X.index, "statement"].to_numpy()
+    model = sm.OLS(y, X).fit(cov_type="cluster", cov_kwds={"groups": groups})
+    return model
+
+
+def intervention_success_rate(
+    diff_pos: np.ndarray,
+    diff_neg: np.ndarray,
+    eps: float = 1e-12,
+    dataset: pd.DataFrame | None = None,
+) -> dict[str, float | int]:
+    """
+    Compute per-statement intervention success based on directional consistency.
+
+    A statement is considered successful if:
+      (1) Positive and negative interventions have opposing effects, and
+      (2) The positive intervention aligns with the dominant direction.
+
+    Args:
+        diff_pos: Array of per-statement effects under positive intervention
+                  (e.g., RES_pos - RES_orig).
+        diff_neg: Array of per-statement effects under negative intervention
+                  (e.g., RES_neg - RES_orig).
+        eps: Small tolerance to treat near-zero effects as zero.
+        dataset: Optional DataFrame with 'real_object' and 'correct' columns
+                 for filtering to real, true statements.
+
+    Returns:
+        dict with:
+            - success_rate: ω, fraction of successful statements
+            - dominant_direction: +1 or -1
+            - n_success: number of successful statements
+            - n_total: number of valid statements
+            - p_value: one-sided binomial test p-value (H0: ω ≤ 0.5)
+            - opposition_rate: fraction with sign(diff_pos) != sign(diff_neg)
+    """
+    assert diff_pos.shape == diff_neg.shape, "diff_pos and diff_neg must match"
+
+    if dataset is not None:
+        N = diff_pos.shape[0]
+        r = dataset["real_object"].values[:N]
+        c = dataset["correct"].values[:N]
+        mask = (r == 1) & (c == 1)
+        diff_pos = diff_pos[mask]
+        diff_neg = diff_neg[mask]
+
+    # Zero out numerically small effects
+    dp = np.where(np.abs(diff_pos) < eps, 0.0, diff_pos)
+    dn = np.where(np.abs(diff_neg) < eps, 0.0, diff_neg)
+
+    sign_pos = np.sign(dp)
+    sign_neg = np.sign(dn)
+
+    # --- dominant direction (ignore zeros) ---
+    nonzero_pos = sign_pos[sign_pos != 0]
+    if nonzero_pos.size == 0:
+        dominant_direction = 0
+    else:
+        dominant_direction = np.sign(nonzero_pos.sum())
+
+    # --- success definition ---
+    opposing = sign_pos == -sign_neg
+    aligned = sign_pos == dominant_direction
+
+    success = opposing & aligned
+
+    n_total = success.size
+    n_success = success.sum()
+    success_rate = n_success / n_total
+
+    opposition_rate = opposing.mean()
+
+    p_value = binomtest(
+        n_success, n_total, p=0.5, alternative="greater"
+    ).pvalue
+
+    return {
+        "success_rate": float(success_rate),
+        "dominant_direction": float(dominant_direction),
+        "n_success": int(n_success),
+        "n_total": int(n_total),
+        "p_value": float(p_value),
+        "opposition_rate": float(opposition_rate),
+        "zero_effect_rate": float(
+            np.mean((sign_pos == 0) | (sign_neg == 0))
+        ),
+    }
+
+##############################
+####   Data Processors.   ####
+##############################
 
 class InterventionDataProcessor:
-    """
-    Class that handles data for interventions
+    """Handle data formatting for intervention experiments.
+
+    Processes test data and formats statements according to dataset-specific
+    templates for causal intervention experiments.
+
     """
 
     def __init__(self, datahandler, tokenizer, datapack_name):
-        """Initialize the class
+        """Initialize the data processor.
+
         Args:
-            datahandler: DataHandler object
-            tokenizer: Tokenizer object
-            datapack_name: str, name of the datapack
+            datahandler: DataHandler object.
+            tokenizer: Tokenizer object.
+            datapack_name: Name of the datapack (str).
+
         """
         self.dh = datahandler
         self.datapack = datapack_name
         self.tokenizer = tokenizer
 
     def template(self, object_1, object_2, negation, category=None):
-        """
-        Apply template
+        """Apply dataset-specific statement template.
+
         Args:
-            object_1: str, first object
-            object_2: str, second object
-            negation: int, 0 or 1
+            object_1: First object (str).
+            object_2: Second object (str).
+            negation: Negation flag (0 or 1).
+            category: Optional category for definitions dataset.
+
         Returns:
-            str, formatted statement
+            Formatted statement string.
+
         """
         article = "is" if negation == 0 else "is not"
-        if self.datapack in ["cities", "cities_loc"]:
+        if self.datapack in ["city_locations", "cities_loc"]:
             if "city" in object_1.lower():
                 return f"{object_1} is located in"
             return f"The city of {object_1} {article} located in"
@@ -80,8 +352,8 @@ class InterventionDataProcessor:
             return f"{object_1.capitalize()} {article} indicated for the treatment of"
         elif self.datapack == "symptoms":
             return f"{object_1.capitalize()} {article} linked to"
-        elif self.datapack in ["definitions", "defs"]:
-            if category == "instances":
+        elif self.datapack in ["word_definitions", "defs"]:
+            if category == "instances":  # noqa: SIM116
                 return f"{object_1} {article} a"
             elif category == "synonyms":
                 return f"{object_1} {article} a synonym of a"
@@ -93,6 +365,12 @@ class InterventionDataProcessor:
             raise ValueError("Invalid data pack")
 
     def return_processed_test_df(self):
+        """Process test data with templated statements.
+
+        Returns:
+            DataFrame with 'statement' and 'answer' columns added.
+
+        """
         test_data = self.dh.get_test_df()[
             [
                 "object_1",
@@ -116,13 +394,31 @@ class InterventionDataProcessor:
         return test_data
 
     def get_answer_ids(self, answer):
+        """Tokenize answer and return token IDs.
+
+        Args:
+            answer: Answer string to tokenize.
+
+        Returns:
+            Tensor of token IDs.
+
+        """
         return self.tokenizer(
             answer, add_special_tokens=True, return_tensors="pt"
         ).input_ids[0]
 
     def get_answer_seq_ids(self, statement, answer):
-        """
-        For long answers
+        """Generate incremental sequences for multi-token answers.
+
+        Splits answer into words and creates progressive statement sequences.
+
+        Args:
+            statement: Base statement string.
+            answer: Answer string (may contain multiple words).
+
+        Returns:
+            Tuple of (statements, answers, answer_ids, init_statement_ids).
+
         """
         answers = [" " + a.rstrip() for a in answer.split(" ")]
         answers_ids = []
@@ -139,16 +435,52 @@ class InterventionDataProcessor:
         return statements, answers, answers_ids, init_statement_ids
 
     def _statement_to_ids(self, statement):
+        """Convert statement to token IDs.
+
+        Args:
+            statement: Statement string.
+
+        Returns:
+            List of token IDs.
+
+        """
         return self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(statement))
 
     def _answer_to_ids(self, answer):
+        """Convert answer to token IDs.
+
+        Args:
+            answer: Answer string.
+
+        Returns:
+            List of token IDs.
+
+        """
         return self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(answer))
 
 
 class InstructInterventionDataProcessor(InterventionDataProcessor):
+    """Data processor for instruction-tuned models.
+
+    Extends InterventionDataProcessor to format statements using
+    instruction templates with system/user/assistant roles.
+
+    """
+
     def __init__(
         self, datahandler, tokenizer, datapack_name, user_role, system_role, assist_role
     ):
+        """Initialize instruction-based data processor.
+
+        Args:
+            datahandler: DataHandler object.
+            tokenizer: Tokenizer object.
+            datapack_name: Name of the datapack (str).
+            user_role: User role identifier.
+            system_role: System role identifier.
+            assist_role: Assistant role identifier.
+
+        """
         super().__init__(datahandler, tokenizer, datapack_name)
         # Used only for the instruct template
         self.system_role = system_role
@@ -156,6 +488,15 @@ class InstructInterventionDataProcessor(InterventionDataProcessor):
         self.assist_role = assist_role
 
     def _instruct_template(self, statement: str):
+        """Format statement with instruction template roles.
+
+        Args:
+            statement: Statement string to format.
+
+        Returns:
+            List of message dictionaries with role and content.
+
+        """
         if self.system_role == self.user_role:
             return [
                 {
@@ -173,10 +514,28 @@ class InstructInterventionDataProcessor(InterventionDataProcessor):
             ]
 
     def _template(self, object_1, object_2, negation, category=None):
+        """Apply dataset template and wrap with instruction format.
+
+        Args:
+            object_1: First object (str).
+            object_2: Second object (str).
+            negation: Negation flag (0 or 1).
+            category: Optional category for definitions dataset.
+
+        Returns:
+            List of message dictionaries for instruction template.
+
+        """
         statement = self.template(object_1, object_2, negation, category)
         return self._instruct_template(statement)
 
     def return_processed_test_df(self):
+        """Process test data with instruction-formatted statements.
+
+        Returns:
+            DataFrame with templated instruction messages.
+
+        """
         test_data = self.dh.get_test_df()[
             [
                 "object_1",
@@ -198,13 +557,29 @@ class InstructInterventionDataProcessor(InterventionDataProcessor):
         return test_data
 
     def get_answer_ids(self, answer):
+        """Tokenize answer and return token IDs.
+
+        Args:
+            answer: Answer string to tokenize.
+
+        Returns:
+            Tensor of token IDs.
+
+        """
         return self.tokenizer(
             answer, add_special_tokens=True, return_tensors="pt"
         ).input_ids[0]
 
     def get_answer_seq_ids(self, statement, answer):
-        """
-        For long answers
+        """Generate incremental sequences for multi-token answers with instruction format.
+
+        Args:
+            statement: Instruction-formatted message list.
+            answer: Answer string (may contain multiple words).
+
+        Returns:
+            Tuple of (statements, answers, answer_ids, init_statement_ids).
+
         """
         answers = [" " + a.rstrip() for a in answer.split(" ")]
 
@@ -233,143 +608,25 @@ class InstructInterventionDataProcessor(InterventionDataProcessor):
         )
 
 
-def translate_concept(X, direction, target_coord: float, absolute=False):
-    """
-    Translate the 'X' embedding in the specified direction.
+def translate_concept(
+    X: torch.Tensor,
+    direction: torch.Tensor,
+    delta: float,
+) -> torch.Tensor:
+    """Translate embeddings by an additive shift along a concept direction.
 
-    If absolute is False (default), the embedding is moved so that its
-    projection along 'direction' becomes 'target_coord'.
-    If absolute is True, the embedding is moved by 'target_coord' units
-    along 'direction'.
-
-    Args:
-    - X: The embedding to translate (tensor of shape [B, S, H])
-    - direction: The direction to translate the embedding (tensor of shape [H])
-    - target_coord:
-         - If absolute is False: the new coordinate to set along the direction.
-         - If absolute is True: the number of units to move along the direction.
-    - absolute: If True, move by `target_coord` units, else move so that the
-                new coordinate is `target_coord`.
-
-    Returns:
-    - The translated embedding (tensor with same shape as X)
-    """
-    # Normalize the translation direction
-    unit_dir = direction / torch.norm(direction)
-
-    # Compute the current projection of X along the direction.
-    # This yields a tensor of shape [B, S]
-    curr_coord = torch.einsum("bsh, h -> bs", X, unit_dir)
-
-    # Compute the translation delta based on the mode
-    if absolute:
-        # Move by target_coord units along the direction
-        delta = torch.full_like(curr_coord, fill_value=target_coord)
-    else:
-        # Move so that the new coordinate becomes target_coord
-        delta = torch.full_like(curr_coord, fill_value=target_coord) - curr_coord
-
-    # Expand delta into the embedding space along the feature dimension
-    translation = torch.einsum("h, bs -> bsh", unit_dir, delta)
-
-    # Translate the original embedding
-    X_translated = X + translation
-    return X_translated
-
-
-def amplify_concept(X, direction, scaler: float = None):  # type: ignore
-    if torch.norm(direction) != 1:
-        direction = direction / torch.norm(direction)
-    curr_coord = torch.einsum("bsh, h -> bs", X, direction)
-    step = torch.sign(curr_coord) * scaler
-    proj = torch.einsum("h, bs -> bsh", direction, step)
-    Xs = X + proj
-    return Xs
-
-
-def polarize_concept(X, direction, scaler: float = None, positive=True):  # type: ignore
-    if torch.norm(direction) != 1:
-        direction = direction / torch.norm(direction)
-    curr_coord = torch.einsum("bsh, h -> bs", X, direction)
-    if positive:
-        step = torch.sign(curr_coord) * scaler
-        step[step < 0] = 0
-    else:
-        step = torch.sign(curr_coord) * scaler
-        step[step > 0] = 0
-    proj = torch.einsum("h, bs -> bsh", direction, step)
-    Xs = X + proj
-    return Xs
-
-
-def indirect_effect(p, p_new, targets):
-    res = {}
-    for target in targets:
-        diff = np.array(p[:, target] - p_new[:, target])
-        r = (np.mean(diff)) / (diff.std(ddof=1) / np.sqrt(len(diff)))
-        res[target] = r
-    return res
-
-
-def NIE_ft(p, p_new, labels):
-    pd_minus = ((p[:, 0] - p[:, 1])[labels == 0]).mean()
-    pd_plus = ((p[:, 0] - p[:, 1])[labels == 1]).mean()
-    pd_minus_star = ((p_new[:, 0] - p_new[:, 1])[labels == 0]).mean()
-    return (pd_minus_star - pd_minus) / (pd_plus - pd_minus)
-
-
-def NIE_tf(p, p_new, labels):
-    pd_minus = ((p[:, 0] - p[:, 1])[labels == 0]).mean()
-    pd_plus = ((p[:, 0] - p[:, 1])[labels == 1]).mean()
-    pd_plus_star = ((p_new[:, 0] - p_new[:, 1])[labels == 1]).mean()
-    return (pd_plus_star - pd_plus) / (pd_minus - pd_plus)
-
-
-def decoherence(p, p_new, valid_classes):
-    p_valid = p[:, valid_classes].sum(1)
-    p_new_valid = p_new[:, valid_classes].sum(1)
-    p_invalid = 1 - p_valid
-    p_new_invalid = 1 - p_new_valid
-    return p_new_invalid / p_invalid
-
-
-def localized_effect_ratio(p, p_new, invalid_classes):
-    p_invalid = np.abs(p[:, invalid_classes] - p_new[:, invalid_classes]).sum()
-    p_all = np.abs(p - p_new).sum()
-    return p_invalid / p_all
-
-
-def extract_coef_numbers(file_paths):
-    """
-    Extract numbers that appear after 'coef_' in a list of file paths.
+    This applies a causal intervention of the form:
+        X ← X + delta · d̂
+    where d̂ is the unit-normalized concept direction.
 
     Args:
-        file_paths (list): List of file paths as strings.
+        X: Hidden states to modify, shape [B, S, H].
+        direction: Concept direction vector, shape [H].
+        delta: Scalar translation magnitude (e.g. ±sigma).
 
     Returns:
-        list: List of integers representing the numbers after 'coef_'.
+        Translated embeddings with the same shape as X.
+
     """
-    coef_numbers = []
-    for path in file_paths:
-        match = re.search(r"coef_(\d+)", path)
-        if match:
-            coef_numbers.append(int(match.group(1)))
-    return coef_numbers
-
-
-def extract_result_numbers(file_paths):
-    """
-    Extract numbers that appear after 'coef_' in a list of file paths.
-
-    Args:
-        file_paths (list): List of file paths as strings.
-
-    Returns:
-        list: List of integers representing the numbers after 'coef_'.
-    """
-    coef_numbers = []
-    for path in file_paths:
-        match = re.search(r"results_(\d+)", path)
-        if match:
-            coef_numbers.append(int(match.group(1)))
-    return coef_numbers
+    unit_dir = direction / direction.norm()
+    return X + delta * unit_dir.view(1, 1, -1)

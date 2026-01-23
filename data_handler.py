@@ -16,6 +16,11 @@ import polars as pl
 import torch
 
 LEGAL_ACTIVATION_TYPES = ["last", "full"]
+FALLBACK_MAP = {
+    'word_definitions': 'defs',
+    'city_locations': "cities_loc",
+    'med_indications': 'drugs',
+}
 
 log = logging.getLogger(__name__)
 

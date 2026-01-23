@@ -13,4 +13,4 @@ dtype: float32
 system_role: user
 user_role: user
 assist_role: model
-end_token: '<end_of_turn>'
+end_token: "<end_of_turn>"

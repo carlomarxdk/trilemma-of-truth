@@ -1,62 +1,144 @@
+"""Run causal interventions on language model representations.
+
+This module performs difference-in-differences analyses to test whether probe
+directions causally influence model outputs by intervening on hidden states
+during forward passes.
+"""
+
 from __future__ import annotations
 
-import json
 import logging
 import os
 import pprint
+import re
+import warnings
+from collections.abc import Sequence
 from glob import glob
+from pathlib import Path
 
 import hydra
 import numpy as np
-import pandas as pd
-import scipy.stats as stats
-import statsmodels.formula.api as smf
+import statsmodels.api as sm
 import torch
 from omegaconf import DictConfig, OmegaConf
+from sklearn.exceptions import InconsistentVersionWarning
+
+# Suppress scikit-learn version warnings when loading pickled models
+warnings.filterwarnings('ignore', category=InconsistentVersionWarning)
 
 from misc.db import LogDataBase
-from misc.probe_data import ProbeData
+from misc.probe_data import ExperimentData
 from response.interventions_utils import (
     InstructInterventionDataProcessor,
     InterventionDataProcessor,
-    to_log_proba,
+    compute_layer_scale,
+    diff_of_diff_ols,
+    intervention_success_rate,
+    mean_logprobs,
+    random_answer_ids,
     translate_concept,
 )
-from utils import should_process_layer
+from runners import (
+    MDProbeRunner,
+    MulticlassMILRunner,
+    MulticlassSVMRunner,
+    SawmilProbeRunner,
+    SPCA_Runner,
+    SVMProbeRunner,
+    TTPD_Runner,
+)
+from utils import (
+    _atomic_write_json,
+    available_layers,
+    should_process_layer,
+)
 from utils_hydra import (
-    NpEncoder,
     clear_device_cache,
     get_device,
     load_data,
     prepare_nnsight,
 )
 
-log = logging.getLogger(__name__)
+PROBES = {
+    "svm": SVMProbeRunner,
+    "mean_diff": MDProbeRunner,
+    "sawmil": SawmilProbeRunner,
+    "sawmil_mc": MulticlassMILRunner,
+    "svm_mc": MulticlassSVMRunner,
+    "spca": SPCA_Runner,
+    "ttpd": TTPD_Runner,
+}
+
+
+log = logging.getLogger("Intervention")
+
+
+def _get_logits(output):
+    """Extract logits tensor from varied HF/NNSight outputs."""
+
+    if hasattr(output, "logits"):
+        return output.logits
+    if isinstance(output, dict) and "logits" in output:
+        return output["logits"]
+    if isinstance(output, tuple) and len(output) > 0:
+        first = output[0]
+        if isinstance(first, torch.Tensor):
+            return first
+    raise TypeError(f"Cannot extract logits from output type {type(output)}")
+
+
+def _get_hidden(out):
+    """Extract hidden-state tensor from layer outputs (handles tuples)."""
+
+    if isinstance(out, torch.Tensor):
+        return out
+    if isinstance(out, tuple) and len(out) > 0 and isinstance(out[0], torch.Tensor):
+        return out[0]
+    raise TypeError(f"Cannot extract hidden state from output type {type(out)}")
 
 
 def validate_config(cfg: DictConfig):
-    assert (
-        type(cfg.datapack["datasets"]) == list
+    """Validate and prepare configuration for intervention experiments.
+
+    Args:
+        cfg: Hydra configuration object.
+
+    Raises:
+        ValueError: If datasets are not a list, empty, or layer_range is invalid.
+
+    """
+    if not (
+        isinstance(cfg.datapack["datasets"], list)
         or type(cfg.datapack["datasets"]).__name__ == "ListConfig"
-    ), f"Datasets must be a list. Not {type(cfg.datapack['datasets'])}"
-    assert len(cfg.datapack["datasets"]) > 0, "At least one dataset must be selected."
+    ):
+        raise ValueError(
+            f"Datasets must be a list. Not {type(cfg.datapack['datasets'])}"
+        )
+    if len(cfg.datapack["datasets"]) == 0:
+        raise ValueError("At least one dataset must be selected.")
     OmegaConf.set_struct(cfg, False)  # Allow overriding
     trial_name = cfg.trial_name
-    if cfg.probe["sparsify_data"] > 0:
-        trial_name += f"_sparse-{cfg.probe['sparsify_data']}"
     if cfg.search:
         trial_name += "_search"
     trial_name += f"_task-{cfg.task}"
     cfg["trial_name"] = trial_name
     cfg["output_dir"] = os.path.join(cfg.output_dir, trial_name)
-    if cfg.device == None:
+    cfg["probe_dir"] = os.path.join(cfg.probe_dir, trial_name)
+    if cfg.device is None:
         cfg["device"] = str(get_device())
     OmegaConf.set_struct(cfg, True)
 
-    assert len(cfg.layer_range) == 2, "Layer range must be a list of two integers."
+    if len(cfg.layer_range) != 2:
+        raise ValueError("Layer range must be a list of two integers.")
 
 
-def log_stats(cfg):
+def log_stats(cfg: DictConfig):
+    """Log experiment configuration and parameter information.
+
+    Args:
+        cfg: Hydra configuration object.
+
+    """
     datasets_test = (
         cfg.datapack["datasets_test"]
         if len(cfg.datapack["datasets_test"]) > 0
@@ -74,27 +156,48 @@ def log_stats(cfg):
     log.warning(f"\t\tConfiguration: {cfg}")
 
 
-def checkpointing(cfg, available_layers):
-    output_dir = cfg.output_dir
-    completed_layers = set()
+def checkpointing(cfg: DictConfig, existing_layers: Sequence[int]) -> list[int]:
+    """Checkpointing function to resume interrupted intervention runs.
 
-    # Check each layer if it has files for all three required signatures.
-    for layer in available_layers:
-        # Construct the file patterns for the current layer
-        layer_pattern = os.path.join(output_dir, f"layer_{layer}.*")
-        spos_pattern = os.path.join(output_dir, f"layer_{layer}_spos.*")
-        rpos_pattern = os.path.join(output_dir, f"layer_{layer}_rpos.*")
-        # Check that files exist for each pattern
-        if glob(layer_pattern) and glob(spos_pattern) and glob(rpos_pattern):
-            completed_layers.add(layer)
+    Args:
+        cfg: Configuration
+        existing_layers: List of all available model layers
+    Returns:
+        missing_layers: List of layers that have not been processed yet
 
-    # Determine missing layers as those in available_layers not in completed_layers
-    missing_layers = sorted(set(available_layers) - completed_layers)
-    return list(missing_layers)
+    """
+    output_dir = Path(cfg.output_dir)
+    recorded_layers = glob(f"{output_dir}/layer_*")
+    completed_layers = []
+    for file in recorded_layers:
+        match = re.search(r"layer_(\d+)", file)
+        if match:
+            completed_layers.append(int(match.group(1)))
+    model_layers = set(existing_layers)
+
+    completed_layers = set(completed_layers)
+
+    if len(completed_layers) == 0:
+        missing_layers = list(model_layers)
+    else:
+        missing_layers = list(model_layers - completed_layers)
+
+    return sorted(missing_layers)
 
 
-@hydra.main(version_base=None, config_path="configs", config_name="intervention_linear")
-def main(cfg: OmegaConf):
+@hydra.main(version_base=None, config_path="configs", config_name="interventions")
+def main(cfg: OmegaConf): # noqa: C901
+    """Run intervention experiments on language model layers.
+
+    Loads probes, performs causal interventions by translating hidden states
+    along probe directions, and analyzes effects on output probabilities using
+    difference-in-differences regression.
+
+    Args:
+        cfg: Hydra configuration object.
+
+    """
+    # PRERAMBLE
     validate_config(cfg)
     log_stats(cfg)
     db = LogDataBase(tab_name=f"{cfg.probe['name']}_inter", db_name="experiments")
@@ -107,16 +210,15 @@ def main(cfg: OmegaConf):
         progress=0,
         status=0,
     )
-    # PER LAYER
-    probe_path = f"outputs/probes/{cfg.probe['name']}/{cfg.model['name']}/{cfg.datapack['name']}_search_task-{cfg.task}"
-    # reader = ProbeData(output_dir=cfg.output_dir, task=cfg['task'], model_name=cfg.model["name"],
-    #                       datapack=cfg.datapack['name'], trial_name=cfg.trial_name, probe_name=cfg.probe["name"])
-    reader = ProbeData(probe_path)
-    device = torch.device(cfg.device)
 
+    task = cfg.task
+    if task == -1:
+        raise NotImplementedError("Multiclass probe not implemented yet.")
+
+    device = torch.device(cfg.device)
     model, tokenizer = prepare_nnsight(cfg)
     dh = load_data(cfg)
-    # dh_test = load_data(cfg) if cfg.datapack['datasets_test'] else dh
+    runner = PROBES[cfg.probe["name"]](cfg)  # INSTANTIATE THE PROBE RUNNER
 
     if not cfg.model["instruct"]:
         log.warning("Using standard InterventionDataProcessor")
@@ -136,160 +238,277 @@ def main(cfg: OmegaConf):
     else:
         raise NotImplementedError()
 
-    if cfg.start_from_checkpoint:
-        log.warning("Checkpointing...")
-        layers = checkpointing(cfg, reader.available_layers())
+    avail_layers = available_layers(cfg.probe_dir)
 
+    # Determine which layers to process
+    if cfg.use_best_layers:
+        # Use top N best performing layers based on probe metrics
+        if cfg.probe['name'] != 'svm':
+            best_layer_metric_keys =  cfg.best_layer_metric_keys
+        else:
+            best_layer_metric_keys = ["default", "mcc"]
+        log.warning(
+            f"Using top {cfg.num_best_layers} best performing layers based on {best_layer_metric_keys} metrics"
+        )
+        
+        # Create ExperimentData object to access probe metrics
+        experiment_data = ExperimentData(
+            model_name=cfg.model["name"],
+            probe_name=cfg.probe["name"],
+            dataset_name=cfg.datapack["name"],
+            task=cfg.task,
+            with_search=cfg.search,
+        )
+        # Get top k best performing layers
+        best_layers = experiment_data.top_k_layers(
+            k=cfg.num_best_layers,
+            keys=best_layer_metric_keys,
+        )
+        log.warning(f"Selected best layers: {best_layers}")
+        
+        # If checkpointing is enabled, only process layers not yet completed
+        if cfg.start_from_checkpoint:
+            missing_layers = checkpointing(cfg, existing_layers=best_layers)
+            if len(missing_layers) == 0:
+                log.warning("All best layers are already processed...")
+                layers = []
+            else:
+                log.warning(
+                    f"Checkpointing: Processing the missing best layers: {missing_layers}"
+                )
+                layers = missing_layers
+        else:
+            layers = best_layers
     else:
-        layers = reader.available_layers()
+        # Use standard layer selection based on layer_range or checkpointing
+        if cfg.start_from_checkpoint:
+            missing_layers = checkpointing(cfg, existing_layers=avail_layers)
+            if len(missing_layers) == 0:
+                log.warning("All layers are already processed...")
+                layers = []
+            else:
+                log.warning(
+                    f"Checkpointing: Processing the missing layers: {missing_layers}"
+                )
+                layers = missing_layers
+        else:
+            layers = cfg["layers"]
+
+    if cfg.run_debugging:
+        layers = [13]
 
     dataset = idp.return_processed_test_df()
     start_token = cfg.counter_method["start_token"]
-    absolute = cfg.counter_method["absolute"]
-    assert absolute, 'This experiment supports only "absolute" method of translation.'
-    c = cfg.counter_method["target_coord"]
+    c = cfg.counter_method["scaler"]
 
-    print(layers)
     for layer_id in layers:
         if should_process_layer(layer_id, cfg):
             log.warning(f"Processing layer {layer_id}")
         else:
             log.warning(f"Skipping layer {layer_id}")
             continue
+        # Setup probe and direction
+        _runner = runner.load(output_dir=cfg.probe_dir, layer_id=layer_id)
         layer = model.model.layers[layer_id]
-        direction = reader.direction(layer_id, as_tensor=True).half().to(device)
-        # Store results
-        RES_pos = []
-        RAND_pos = []
-        RES_neg = []
-        RAND_neg = []
-        RES_orig = []
-        RAND_orig = []
+        if cfg.probe['name'] == 'ttpd':
+            direction = _runner.get_truth_direction()
+        else:
+            direction = _runner.direction.astype(np.float32)
+        direction = torch.from_numpy(direction).to(device)
+        # Compute scale
+        delta = compute_layer_scale(dh=dh, direction=direction, layer_id=layer_id) * c 
 
-        n = 0
-        for i, row in dataset.iterrows():
+        # Store results
+        RES_orig, RES_neg, RES_pos = [], [], []
+        RAND_orig, RAND_neg, RAND_pos = [], [], []
+
+        np.random.seed(cfg.random_seed)
+        # Track how many *correct* statements we've processed so we can stop
+        # once we reach `cfg.limit_num_statements` correct examples.
+        correct_count = 0
+        limit_enabled = cfg.limit_num_statements > 0
+
+        for n, (i, row) in enumerate(dataset.iterrows()):
             statement = row["statement"]
-            answer = row["answer"]
+            if row['correct'] == 0:
+                log.debug(f"Skipping statement {i} as it is marked incorrect in dataset.")
+                RES_orig.append(-100)
+                RES_pos.append(-100)
+                RES_neg.append(-100)
+                RAND_orig.append(-100)
+                RAND_pos.append(-100)
+                RAND_neg.append(-100)
+                continue
             proba_orig, proba_neg, proba_pos = [], [], []
             proba_rorig, proba_rneg, proba_rpos = [], [], []
 
             seq_stats, seq_ans, seq_ans_ids, seq_init_ids = idp.get_answer_seq_ids(
-                statement=statement, answer=answer
+                statement=statement, answer="New York"
             )
-            rand_ans_ids = np.random.choice(
-                tokenizer.vocab_size, len(seq_ans_ids), replace=False
+            rand_ans_ids = random_answer_ids(
+                seq_ids=seq_ans_ids, vocab_size=tokenizer.vocab_size
             )
 
             for j, st in enumerate(seq_stats[:-1]):
                 if j == 0:
-                    assert start_token <= 0, "Start token must be less than 0."
+                    if start_token > 0:
+                        raise ValueError("Start token must be less than 0.")
                     _start_token = len(seq_init_ids) + start_token
-                with model.trace() as tracer, tracer.invoke(st) as _:
-                    _output_orig = model.output["logits"][0, -1].cpu().save()
+                #############################
+                ### ORIGINAL VALUES
+                try:
+                    with model.trace() as tracer:  # noqa: SIM117
+                        with tracer.invoke(st) as _:
+                            logits = _get_logits(model.output)[0, -1].clone().cpu().save()
+                        
+                    probs = torch.log_softmax(logits, dim=-1)
+                    output_orig = probs[seq_ans_ids[j]]
+                    output_rorig = probs[rand_ans_ids[j]]
+                    proba_orig.append(output_orig)
+                    proba_rorig.append(output_rorig)
+                except (KeyError, SystemError) as e: # catch errors with Gemma-2-9b model
+                    log.error(
+                        f"Error during original pass at layer {layer_id}, statement {i}, step {j}: {e}"
+                    )
+                    proba_orig.append(torch.tensor(float(-1e10)))
+                    proba_rorig.append(torch.tensor(float(-1e10)))
 
-                output_orig = torch.softmax(_output_orig, dim=0)[seq_ans_ids[j]]
-                output_rorig = torch.softmax(_output_orig, dim=0)[
-                    rand_ans_ids[j]
-                ].unsqueeze(0)
-                proba_orig.append(output_orig)
-                proba_rorig.append(output_rorig)
-                with model.trace() as tracer, tracer.invoke(st) as _:
-                    output = layer.output
-                    _output = output[0].clone()
-                    _output[0, _start_token:] = translate_concept(
-                        _output, direction, c, absolute=absolute
-                    )[0, _start_token:]
-                    # layer.output = (_output,)
-                    if "stablelm" in cfg["model"]["name"]:
-                        layer.output = (_output, output[1])
-                    else:
-                        layer.output = (_output,)
-                    _output_pos = model.lm_head.output[0, -1].cpu().save()
-                output_pos = torch.softmax(_output_pos, dim=0)[seq_ans_ids[j]]
-                outpit_rpos = torch.softmax(_output_pos, dim=0)[rand_ans_ids[j]]
-                # print(output_pos)
-                proba_pos.append(output_pos)
-                proba_rpos.append(outpit_rpos)
-                with model.trace() as tracer, tracer.invoke(st) as _:
-                    output = layer.output
-                    _output = output[0].clone()
-                    _output[0, _start_token:] = translate_concept(
-                        _output, direction, -c, absolute=absolute
-                    )[0, _start_token:]
-                    # layer.output = (_output,)
-                    if "stablelm" in cfg["model"]["name"]:
-                        layer.output = (_output, output[1])
-                    else:
-                        layer.output = (_output,)
-                    _output_neg = model.lm_head.output[0, -1].cpu().save()
-                output_neg = torch.softmax(_output_neg, dim=0)[seq_ans_ids[j]]
-                output_rneg = torch.softmax(_output_neg, dim=0)[rand_ans_ids[j]]
-                proba_rneg.append(output_rneg)
-                proba_neg.append(output_neg)
-                # print(output_neg)
+                #############################
+                ### POSITIVE INTERVENTION
+                try:
+                    with model.trace() as tracer: # noqa: SIM117
+                        with tracer.invoke(st) as _:
+                            h = _get_hidden(layer.output).clone()
+                            #log.debug(f"Layer output shape: {h.shape}")
 
-            RES_orig.append(to_log_proba(proba_orig))
-            RES_pos.append(to_log_proba(proba_pos))
-            RES_neg.append(to_log_proba(proba_neg))
-            RAND_orig.append(to_log_proba(proba_rorig))
-            RAND_pos.append(to_log_proba(proba_rpos))
-            RAND_neg.append(to_log_proba(proba_rneg))
+                            h[:, _start_token, :] = translate_concept(
+                                h[:, _start_token, :],
+                                direction,
+                                delta)
+                            layer.output[0][:] = h
 
-            if n > cfg.limit_num_statements:
-                break
-            n += 1
+                            logits = _get_logits(model.output)[0, -1].clone().cpu().save() 
+                
+                    probs = torch.log_softmax(logits, dim=-1)
+                    output_pos = probs[seq_ans_ids[j]]
+                    output_rpos = probs[rand_ans_ids[j]]
+
+                    proba_pos.append(output_pos)
+                    proba_rpos.append(output_rpos)
+                except (KeyError, SystemError) as e: # catch errors with Gemma-2-9b model
+                    log.error(
+                        f"Error during positive intervention at layer {layer_id}, statement {i}, step {j}: {e}"
+                    )
+                    proba_pos.append(torch.tensor(float('nan')))
+                    proba_rpos.append(torch.tensor(float('nan')))
+                    
+
+                #############################
+                ### NEGATIVE INTERVENTION
+                try:
+                    with model.trace() as tracer:  # noqa: SIM117
+                        with tracer.invoke(st) as _:
+                            h = _get_hidden(layer.output).clone()
+                            #log.debug(f"Layer output shape: {h.shape}")
+                            h[:, _start_token, :] = translate_concept(
+                                h[:, _start_token, :],
+                                direction,
+                                -delta)
+                            layer.output[0][:] = h
+                            logits = _get_logits(model.output)[0, -1].clone().cpu().save()  
+
+                    probs = torch.log_softmax(logits, dim=-1)
+                    output_neg = probs[seq_ans_ids[j]]
+                    output_rneg = probs[rand_ans_ids[j]]
+
+                    # log.debug(f"Output Score (neg): {output_neg}")
+                    proba_neg.append(output_neg)
+                    proba_rneg.append(output_rneg)
+                except (KeyError, SystemError) as e: # catch errors with Gemma-2-9b model
+                    log.error(
+                        f"Error during negative intervention at layer {layer_id}, statement {i}, step {j}: {e}"
+                    )
+                    proba_neg.append(torch.tensor(float('nan')))
+                    proba_rneg.append(torch.tensor(float('nan')))
+
+                # Optional debug: warn if interventions did not move logits
+                if cfg.run_debugging:
+                    delta_pos = (output_pos - output_orig).abs().max().item()
+                    delta_neg = (output_neg - output_orig).abs().max().item()
+                    if delta_pos == 0.0 and delta_neg == 0.0:
+                        log.warning(
+                            "No logit change after interventions | "
+                            f"layer {layer_id} statement {i} step {j}"
+                        )
+
+            # log.debug(f"Statement {i} - Original probs: {proba_orig} - Pos probs: {proba_pos} - Neg probs: {proba_neg}")
+            RES_orig.append(mean_logprobs(proba_orig))
+            RES_pos.append(mean_logprobs(proba_pos))
+            RES_neg.append(mean_logprobs(proba_neg))
+            RAND_orig.append(mean_logprobs(proba_rorig))
+            RAND_pos.append(mean_logprobs(proba_rpos))
+            RAND_neg.append(mean_logprobs(proba_rneg))
+
+            log.debug(
+                f"Statement {i} | Pos: {RES_pos[-1]} |  Orig: {RES_orig[-1]}  | Neg: {RES_neg[-1]}"
+            )
+
+            # Only count statements that were marked correct (we skip incorrect
+            # ones above). Stop when we've processed the configured number of
+            # correct statements.
+            correct_count += 1
             clear_device_cache(device)
+            if limit_enabled and correct_count >= cfg.limit_num_statements:
+                break
 
         # PART II
-        RES_neg = np.array(RES_neg)
-        RES_orig = np.array(RES_orig)
-        RES_pos = np.array(RES_pos)
-        RAND_neg = np.array(RAND_neg)
-        RAND_orig = np.array(RAND_orig)
-        RAND_pos = np.array(RAND_pos)
+        RES_neg, RES_orig, RES_pos, RAND_neg, RAND_orig, RAND_pos = map(
+            np.array, [RES_neg, RES_orig, RES_pos, RAND_neg, RAND_orig, RAND_pos]
+        )
 
-        if np.isnan(RES_neg).any() or np.isnan(RES_pos).any():
-            log.warning(f"Found NaNs in the results for layer {layer_id}")
+        # Replace NaNs with fallback values
+        def fill_nan(arr, fallback, current_layer_id):
+            mask = np.isnan(arr)
+            if mask.any():
+                log.warning(f"Found {mask.sum()} NaNs in layer {current_layer_id}")
+                arr = np.where(mask, fallback, arr)
+            return arr
 
-            for i in range(RES_neg.shape[0]):
-                if np.isnan(RES_neg[i]):
-                    RES_neg[i] = RES_orig[i]
-                if np.isnan(RES_pos[i]):
-                    RES_pos[i] = RES_orig[i]
+        RAND_orig = fill_nan(RAND_orig, RES_orig, layer_id)
+        RES_neg = fill_nan(RES_neg, RES_orig, layer_id)
+        RES_pos = fill_nan(RES_pos, RES_orig, layer_id)
+        RAND_neg = fill_nan(RAND_neg, RAND_orig, layer_id)
+        RAND_pos = fill_nan(RAND_pos, RAND_orig, layer_id)
 
-        if (
-            np.isnan(RAND_neg).any()
-            or np.isnan(RAND_pos).any()
-            or np.isnan(RAND_orig).any()
-        ):
-            log.warning(f"Found NaNs in the results for layer {layer_id}")
-
-            for i in range(RAND_neg.shape[0]):
-                if np.isnan(RAND_neg[i]):
-                    RAND_neg[i] = RAND_orig[i]
-                if np.isnan(RAND_pos[i]):
-                    RAND_pos[i] = RAND_orig[i]
-                if np.isnan(RAND_orig[i]):
-                    RAND_orig[i] = RES_orig[i]
-
+        # Compute diffs
         diff_neg = RES_neg - RES_orig
         diff_pos = RES_pos - RES_orig
-
         diff_rand_neg = RAND_neg - RAND_orig
         diff_rand_pos = RAND_pos - RAND_orig
 
-        ols_res = diff_ols(diff_pos, diff_neg, dataset)
-        ols_res_rand = diff_ols_rand(
-            diff_pos, diff_neg, diff_rand_pos, diff_rand_neg, dataset
+        result = diff_of_diff_ols(
+            diff_pos=diff_pos,
+            diff_neg=diff_neg,
+            diff_rand_pos=diff_rand_pos,
+            diff_rand_neg=diff_rand_neg,
+            dataset=dataset,
         )
-        ttest_res = diff_ttest(diff_pos, diff_neg, dataset, task=cfg.task)
+        
+        success = intervention_success_rate(
+            diff_pos=diff_pos,
+            diff_neg=diff_neg,
+            dataset=dataset,
+        )
+
+        # Full summary for the interaction
+        log.debug(result.summary())
+        log.debug(f"Success rate: {pprint.pformat(success)}")
 
         save(
             cfg=cfg,
             layer_id=layer_id,
-            ols=ols_res,
-            rand_ols=ols_res_rand,
-            ttest=ttest_res,
+            did_result=result,
+            success_results=success,
             s_orig=RES_orig,
             s_neg=RES_neg,
             s_pos=RES_pos,
@@ -298,16 +517,16 @@ def main(cfg: OmegaConf):
             r_pos=RAND_pos,
         )
 
-        db_params = f"Rand OLS: {ols_res_rand.params['Intercept']} Layers: {layer_id/reader.available_layers()[-1]}"
+        db_params = f"Rand OLS: {result.params['Intercept']} Layers: {layer_id/avail_layers[-1]}"
         db_trial_id = f"{cfg.model.name}-{cfg.datapack.name}-{cfg.task}"
-        status = 1 if layer_id == reader.available_layers()[-1] else 0
+        status = 1 if layer_id == avail_layers[-1] else 0
         db.write(
             trial_id=db_trial_id,
             model=cfg.model.name,
             datapack=cfg.datapack.name,
             task=cfg.task,
             parameters=db_params,
-            progress=layer_id / reader.available_layers()[-1],
+            progress=layer_id / avail_layers[-1],
             status=status,
         )
 
@@ -326,87 +545,108 @@ def main(cfg: OmegaConf):
     )
 
 
-def diff_ols(diff_pos, diff_neg, dataset):
-    """Return the OLS regression for real statements only.
-    Hypothesis: Diff_pos > Diff_neg"""
-    N = diff_pos.shape[0]
-    y = dataset["correct"].values[:N]
-    r = dataset["real_object"].values[:N]
-    mask = r == 1
-    diff = diff_pos - diff_neg
-    df = pd.DataFrame({"diff": diff[mask], "group": y[mask]})
-    model = smf.ols("diff ~ group", data=df)
-    return model.fit(cov_type="HC3")
-
-
-def diff_ols_rand(diff_pos, diff_neg, diff_rand_pos, diff_rand_neg, dataset):
-    """Return the OLS regression for real and true statements only.'
-    'Hypothesis: Diff_true > Diff_random"""
-    N = diff_pos.shape[0]
-    y = dataset["correct"].values[:N]
-    r = dataset["real_object"].values[:N]
-    mask = (r == 1) & (y == 1)
-    diff = diff_pos - diff_neg
-    df1 = pd.DataFrame({"diff": diff[mask], "group": 1})
-    diff_rand = diff_rand_pos - diff_rand_neg
-    df2 = pd.DataFrame({"diff": diff_rand[mask], "group": 0})
-    df = pd.concat([df1, df2], ignore_index=True)
-
-    model = smf.ols("diff ~ group", data=df)
-    return model.fit(cov_type="HC3")
-
-
-def diff_ttest(diff_pos, diff_neg, dataset, task):
-    """Return the t-test stats for real statements only."""
-    N = diff_pos.shape[0]
-    y = dataset["correct"].values[:N]
-    r = dataset["real_object"].values[:N]
-    mask = (r == 1) & (y == 1)
-    if task in [0, 4]:
-        result = stats.ttest_rel(diff_pos[mask], diff_neg[mask], alternative="greater")
-    elif task in [1, 5]:
-        result = stats.ttest_rel(diff_pos[mask], diff_neg[mask], alternative="less")
-    return result
 
 
 def save(
-    cfg, layer_id, ols, rand_ols, ttest, s_orig, s_neg, s_pos, r_orig, r_neg, r_pos
+    cfg: DictConfig,
+    layer_id: int,
+    did_result: sm.regression.linear_model.RegressionResultsWrapper,
+    success_results: dict,
+    s_orig: np.ndarray,
+    s_neg: np.ndarray,
+    s_pos: np.ndarray,
+    r_orig: np.ndarray,
+    r_neg: np.ndarray,
+    r_pos: np.ndarray,
 ):
+    """Save difference-in-differences analysis results to disk.
+
+    Extracts coefficients, standard errors, confidence intervals, and p-values
+    from the fitted DiD model, computes descriptive statistics, and saves
+    everything to JSON. Also saves raw log-probability arrays as .npy files
+    for downstream analysis.
+
+    Args:
+        cfg: Configuration object with 'output_dir', 'save_results', and 'task'
+            attributes.
+        layer_id: Index of the transformer layer being analyzed.
+        did_result: Fitted OLS model from diff_of_diff_ols() containing DiD
+            coefficients and statistics.
+        s_orig: Log-probabilities of correct tokens under no intervention.
+        s_neg: Log-probabilities of correct tokens under negative intervention.
+        s_pos: Log-probabilities of correct tokens under positive intervention.
+        r_orig: Log-probabilities of random tokens under no intervention.
+        r_neg: Log-probabilities of random tokens under negative intervention.
+        r_pos: Log-probabilities of random tokens under positive intervention.
+
+    Side Effects:
+        If cfg.save_results is True:
+            - Creates cfg.output_dir if it doesn't exist
+            - Writes layer_{layer_id}.json with DiD results and descriptives
+            - Writes layer_{layer_id}_{sorig,sneg,spos,rorig,rneg,rpos}.npy files
+        Always logs results via log.warning.
+
+    Note:
+        The JSON output contains two sections:
+            - 'did': All coefficients from the 2×2 factorial model, with the
+              interaction term ('is_correct_token:is_pos_translation') being
+              the primary DiD estimator.
+            - 'descriptives': Mean log-probabilities for each condition.
+
+    """
     output = {
-        "ols": {
-            "intercept_coef": ols.params["Intercept"],
-            "intercept_std": ols.bse["Intercept"],
-            "intercept_ci": ols.conf_int().loc["Intercept"].values,
-            "intercept_pval": ols.pvalues["Intercept"],
-            "intercept_zval": ols.tvalues["Intercept"],
-            "group_coef": ols.params["group"],
-            "group_std": ols.bse["group"],
-            "group_ci": ols.conf_int().loc["group"].values,
-            "group_pval": ols.pvalues["group"],
-            "group_zval": ols.tvalues["group"],
-            "df": ols.df_resid,
-            "n_inst": ols.nobs,
+        "did": {
+            # Intercept (random token, negative intervention baseline)
+            "intercept_coef": did_result.params["Intercept"],
+            "intercept_std": did_result.bse["Intercept"],
+            "intercept_ci": did_result.conf_int().loc["Intercept"].values.tolist(),
+            "intercept_pval": did_result.pvalues["Intercept"],
+            "intercept_zval": did_result.tvalues["Intercept"],
+            # Main effect: correct vs random token
+            "token_coef": did_result.params["is_correct_token"],
+            "token_std": did_result.bse["is_correct_token"],
+            "token_ci": did_result.conf_int().loc["is_correct_token"].values.tolist(),
+            "token_pval": did_result.pvalues["is_correct_token"],
+            "token_zval": did_result.tvalues["is_correct_token"],
+            # Main effect: positive vs negative translation
+            "translation_coef": did_result.params["is_pos_translation"],
+            "translation_std": did_result.bse["is_pos_translation"],
+            "translation_ci": did_result.conf_int()
+            .loc["is_pos_translation"]
+            .values.tolist(),
+            "translation_pval": did_result.pvalues["is_pos_translation"],
+            "translation_zval": did_result.tvalues["is_pos_translation"],
+            # Interaction (DiD estimator) — the key result
+            "interaction_coef": did_result.params[
+                "is_correct_token:is_pos_translation"
+            ],
+            "interaction_std": did_result.bse["is_correct_token:is_pos_translation"],
+            "interaction_ci": did_result.conf_int()
+            .loc["is_correct_token:is_pos_translation"]
+            .values.tolist(),
+            "interaction_pval": did_result.pvalues[
+                "is_correct_token:is_pos_translation"
+            ],
+            "interaction_zval": did_result.tvalues[
+                "is_correct_token:is_pos_translation"
+            ],
+            # Model stats
+            "r_squared": did_result.rsquared,
+            "df_resid": did_result.df_resid,
+            "n_obs": int(did_result.nobs),
+            "n_statements": int(did_result.nobs / 4),  # 4 obs per statement
+            "signf": int(
+                did_result.pvalues["is_correct_token:is_pos_translation"] < 0.05
+            ),
         },
-        "rand_ols": {
-            "intercept_coef": rand_ols.params["Intercept"],
-            "intercept_std": rand_ols.bse["Intercept"],
-            "intercept_ci": rand_ols.conf_int().loc["Intercept"].values,
-            "intercept_pval": rand_ols.pvalues["Intercept"],
-            "intercept_zval": rand_ols.tvalues["Intercept"],
-            "group_coef": rand_ols.params["group"],
-            "group_std": rand_ols.bse["group"],
-            "group_ci": rand_ols.conf_int().loc["group"].values,
-            "group_pval": rand_ols.pvalues["group"],
-            "group_zval": rand_ols.tvalues["group"],
-            "df": rand_ols.df_resid,
-            "n_inst": rand_ols.nobs,
-            "signf": int(rand_ols.pvalues["group"] < 0.05),
-        },
-        "ttest": {
-            "statistic": ttest.statistic,
-            "pvalue": ttest.pvalue,
-            "df": ttest.df,
-            "signf": int(ttest.pvalue < 0.05),
+        "success_results": success_results,
+        "descriptives": {
+            "correct_orig_mean": float(np.mean(s_orig)),
+            "correct_pos_mean": float(np.mean(s_pos)),
+            "correct_neg_mean": float(np.mean(s_neg)),
+            "random_orig_mean": float(np.mean(r_orig)),
+            "random_pos_mean": float(np.mean(r_pos)),
+            "random_neg_mean": float(np.mean(r_neg)),
         },
     }
 
@@ -416,15 +656,21 @@ def save(
     if cfg.save_results:
         log.warning(f"Saving results for layer {layer_id} for Task {cfg.task}")
         log.warning(pprint.pformat(output))
-        with open(f"{cfg.output_dir}/layer_{layer_id}.json", "w") as f:
-            json.dump(output, f, cls=NpEncoder)
 
-        np.save(f"{cfg.output_dir}/layer_{layer_id}_sorig.npy", s_orig)
-        np.save(f"{cfg.output_dir}/layer_{layer_id}_sneg.npy", s_neg)
-        np.save(f"{cfg.output_dir}/layer_{layer_id}_spos.npy", s_pos)
-        np.save(f"{cfg.output_dir}/layer_{layer_id}_rorig.npy", r_orig)
-        np.save(f"{cfg.output_dir}/layer_{layer_id}_rneg.npy", r_neg)
-        np.save(f"{cfg.output_dir}/layer_{layer_id}_rpos.npy", r_pos)
+        score_path = Path(cfg.output_dir) / "scores" / f"layer_{layer_id}"
+        score_path.mkdir(parents=True, exist_ok=True)
+
+        np.save(score_path / "s_orig.npy", s_orig)
+        np.save(score_path / "s_neg.npy", s_neg)
+        np.save(score_path / "s_pos.npy", s_pos)
+        np.save(score_path / "r_orig.npy", r_orig)
+        np.save(score_path / "r_neg.npy", r_neg)
+        np.save(score_path / "r_pos.npy", r_pos)
+
+        summary_path = Path(cfg.output_dir) / f"layer_{layer_id}.json"
+        summary_path.parent.mkdir(parents=True, exist_ok=True)
+        _atomic_write_json(summary_path, output)
+        log.info(f"Saved results to {summary_path}")
     else:
         log.warning(f"Results for layer {layer_id} for Task {cfg.task} (not saved).")
         log.warning(pprint.pformat(output))

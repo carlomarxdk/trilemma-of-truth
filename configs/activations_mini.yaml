@@ -8,12 +8,11 @@ defaults:
   - setup: base
   - _self_
 
-
-datasets: ['med_indications', 'med_indications_synthetic']
+datasets: ["med_indications", "med_indications_synthetic"]
 
 layers: ${model.layers}
 device: null # null means use the default device (if GPU or MPS is available)
 agg: full # full (loads all activations, for each token)
-batch_size: 12 
-max_length: 100 # max length of the input sequence (used only if agg is full) 
+batch_size: 12
+max_length: 100 # max length of the input sequence (used only if agg is full)
 output_dir: "outputs/activations/${model.name}"

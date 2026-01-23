@@ -31,7 +31,7 @@ class TTPD(ClassifierMixin, BaseEstimator):
         ),
         random_seed: int = 42,
         verbose: bool = False,
-    ) -> "TTPD":
+    ) -> TTPD:
         """
         Args:
             base: Base classifier to use after projection
@@ -126,7 +126,7 @@ class TTPD(ClassifierMixin, BaseEstimator):
         z_p = X @ self.w_p
         return np.column_stack([z_t, z_p])
 
-    def fit(self, X: np.array, t_labels: np.array, p_labels: np.array) -> "TTPD":
+    def fit(self, X: np.array, t_labels: np.array, p_labels: np.array) -> TTPD:
         """
         Fit the TTPD probe.
         Args:

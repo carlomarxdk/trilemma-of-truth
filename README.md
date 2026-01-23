@@ -52,7 +52,7 @@ We examine two common methods for probing the veracity of LLMs and discover seve
   - [✍️ How to Cite?](#️-how-to-cite)
     - [Manuscript](#manuscript)
       - [NeurIPS Workshop Version](#neurips-workshop-version)
-      - [Preprint Version](#preprint-version)
+      - [ArXiv Preprint Version](#arxiv-preprint-version)
     - [Code](#code)
     - [Data](#data)
   - [📝 To Do](#-to-do)
@@ -366,18 +366,6 @@ ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split
 ## ✍️ How to Cite?
 
 ### Manuscript
-```mermaid
----
-config:
-  theme: 'neutral'
----
-timeline
-  section Pre-publication
-    ArXiv Preprint: Initial 75-page manuscript
-    NeurIPS MechInterp Workshop: Version of the ArXiv manuscript adjusted and extended for the workshop : Includes additional probing methods and generalization results
-  section Publication
-    Peer-review: Pending
-```
 
 #### NeurIPS Workshop Version
 
@@ -394,7 +382,7 @@ url={https://openreview.net/forum?id=z7dLG2ycRf}
 }
 ```
 
-#### Preprint Version
+#### ArXiv Preprint Version
 
 ```bibtex
 @inproceedings{trilemma2025preprint,
@@ -451,8 +439,8 @@ The citation for the latest version:
 - [x] Upload `llama-3-8b` activations for the `city_locations` dataset
 - [x] Add code for interventions and cross-dataset generalization
 - [x] Check the script for the cross-dataset generalization
-- [ ] Check the script for the interventions
-- [ ] Add scripts/notebooks for plot generation
+- [x] Check the script for the interventions
+- [x] Add scripts/notebooks for plot generation
 - [x] Add examples: data loading
 - [x] Describe the contents of the repository
 

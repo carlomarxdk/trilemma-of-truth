@@ -4,14 +4,14 @@ hydra:
     version: 1
     disable_existing_loggers: false
     root:
-      level: WARNING  # Suppress all logs below WARNING globally
+      level: WARNING # Suppress all logs below WARNING globally
     loggers:
       sklearn.utils.validation:
-        level: WARNING  # Suppress INFO logs for sklearn.utils.validation
+        level: WARNING # Suppress INFO logs for sklearn.utils.validation
       sklearnex:
-        level: WARNING  # Suppress INFO logs for sklearnex
+        level: WARNING # Suppress INFO logs for sklearnex
       nnsight:
-        level: WARNING  # Suppress INFO logs for nnsight
+        level: WARNING # Suppress INFO logs for nnsight
   run:
     dir: outputs/hydra_logs/interventions/${probe.name}/${model.name}/${now:%Y-%m-%d}/${now:%H-%M-%S}
 
@@ -23,21 +23,22 @@ defaults:
   - _self_
 
 datapack:
- load_scores: False
+  load_scores: False
 counter_method:
-  target_coord: 1
+  scaler: 5
   num_tokens_to_change: -1
-  absolute: True
   start_token: -1
-
 
 layers: ${model.layers}
 device: null
-max_length: 150 # max length of the input sequence (used only if agg is full)
+max_length: 100 # max length of the input sequence (used only if agg is full)
 random_seed: 42
-limit_num_statements: 1200 # limit number of statements to run the analysis on
-task: 1
+limit_num_statements: 1000 # limit number of correct statements to run the analysis on
+task: 0 # or 3 for bidirectional probes
 layer_range: [0.1, 1]
+use_best_layers: False # If True, run on top 3 best performing layers instead of layer_range
+num_best_layers: 5 # Number of best layers to use when use_best_layers is True
+best_layer_metric_keys: ["conformal", "mcc"] # Keys to navigate metrics for best layer selection
 search: True
 agg: full
 save_results: True
@@ -47,6 +48,5 @@ start_from_checkpoint: True
 run_debugging: False
 trial_name: ${datapack.name}
 
-
-probe_output_dir: "outputs/probes/${probe.name}/${model.name}/"
+probe_dir: "outputs/probes/${probe.name}/${model.name}"
 output_dir: "outputs/interv/${probe.name}/${model.name}"
