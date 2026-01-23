@@ -27,9 +27,11 @@ from utils import (
     _atomic_write_json,
     available_layers,
     log_metric_binary,
-    should_process_layer,
 )
 from utils import log_metric_multiclass as log_metric
+from utils import (
+    should_process_layer,
+)
 from utils_hydra import load_data_with_test
 
 PROBES = {

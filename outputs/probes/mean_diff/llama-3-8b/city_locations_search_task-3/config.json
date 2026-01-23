@@ -80,8 +80,8 @@
   "datapack": {
     "name": "city_locations",
     "datasets": [
-      "city_locations",
-      "city_locations_synthetic"
+      "city_country_subsample",
+      "city_country_synth_subsample"
     ],
     "datasets_test": [],
     "test_size": 0.25,
@@ -106,9 +106,9 @@
     "agg": "full"
   },
   "setup": {
-    "activations_path": "outputs/activations/",
+    "activations_path": "/projects/radlab/Germans/belief/outputs/activations/",
     "output_path": "outputs/",
-    "dataset_path": "datasets/"
+    "dataset_path": "/projects/radlab/Germans/belief/datasets/"
   },
   "conformal_params": {
     "alpha": 0.1,
@@ -162,7 +162,7 @@
   ],
   "trial_name": "city_locations_search_task-3",
   "output_dir": "outputs/probes/mean_diff/llama-3-8b/city_locations_search_task-3",
-  "run_debugging": true,
+  "run_debugging": false,
   "random_seed": 42,
   "save_results": true,
   "start_from_checkpoint": true,

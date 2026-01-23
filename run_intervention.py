@@ -356,61 +356,80 @@ def main(cfg: OmegaConf): # noqa: C901
                     _start_token = len(seq_init_ids) + start_token
                 #############################
                 ### ORIGINAL VALUES
-                with model.trace() as tracer:  # noqa: SIM117
-                    with tracer.invoke(st) as _:
-                        logits = _get_logits(model.output)[0, -1].clone().cpu().save()
-                    
-
-                probs = torch.log_softmax(logits, dim=-1)
-                output_orig = probs[seq_ans_ids[j]]
-                output_rorig = probs[rand_ans_ids[j]]
-                proba_orig.append(output_orig)
-                proba_rorig.append(output_rorig)
-                # log.debug(f"Output Score (orig): {output_orig}")
+                try:
+                    with model.trace() as tracer:  # noqa: SIM117
+                        with tracer.invoke(st) as _:
+                            logits = _get_logits(model.output)[0, -1].clone().cpu().save()
+                        
+                    probs = torch.log_softmax(logits, dim=-1)
+                    output_orig = probs[seq_ans_ids[j]]
+                    output_rorig = probs[rand_ans_ids[j]]
+                    proba_orig.append(output_orig)
+                    proba_rorig.append(output_rorig)
+                except (KeyError, SystemError) as e: # catch errors with Gemma-2-9b model
+                    log.error(
+                        f"Error during original pass at layer {layer_id}, statement {i}, step {j}: {e}"
+                    )
+                    proba_orig.append(torch.tensor(float(-1e10)))
+                    proba_rorig.append(torch.tensor(float(-1e10)))
 
                 #############################
                 ### POSITIVE INTERVENTION
-                with model.trace() as tracer: # noqa: SIM117
-                    with tracer.invoke(st) as _:
-                        h = _get_hidden(layer.output).clone()
-                        #log.debug(f"Layer output shape: {h.shape}")
+                try:
+                    with model.trace() as tracer: # noqa: SIM117
+                        with tracer.invoke(st) as _:
+                            h = _get_hidden(layer.output).clone()
+                            #log.debug(f"Layer output shape: {h.shape}")
 
-                        h[:, _start_token, :] = translate_concept(
-                            h[:, _start_token, :],
-                            direction,
-                            delta)
-                        layer.output[0][:] = h
+                            h[:, _start_token, :] = translate_concept(
+                                h[:, _start_token, :],
+                                direction,
+                                delta)
+                            layer.output[0][:] = h
 
-                        logits = _get_logits(model.output)[0, -1].clone().cpu().save() 
+                            logits = _get_logits(model.output)[0, -1].clone().cpu().save() 
+                
+                    probs = torch.log_softmax(logits, dim=-1)
+                    output_pos = probs[seq_ans_ids[j]]
+                    output_rpos = probs[rand_ans_ids[j]]
 
-                probs = torch.log_softmax(logits, dim=-1)
-                output_pos = probs[seq_ans_ids[j]]
-                output_rpos = probs[rand_ans_ids[j]]
-
-                # log.debug(f"Output Score (pos): {output_pos}")
-                proba_pos.append(output_pos)
-                proba_rpos.append(output_rpos)
+                    proba_pos.append(output_pos)
+                    proba_rpos.append(output_rpos)
+                except (KeyError, SystemError) as e: # catch errors with Gemma-2-9b model
+                    log.error(
+                        f"Error during positive intervention at layer {layer_id}, statement {i}, step {j}: {e}"
+                    )
+                    proba_pos.append(torch.tensor(float('nan')))
+                    proba_rpos.append(torch.tensor(float('nan')))
+                    
 
                 #############################
                 ### NEGATIVE INTERVENTION
-                with model.trace() as tracer:  # noqa: SIM117
-                    with tracer.invoke(st) as _:
-                        h = _get_hidden(layer.output).clone()
-                        #log.debug(f"Layer output shape: {h.shape}")
-                        h[:, _start_token, :] = translate_concept(
-                            h[:, _start_token, :],
-                            direction,
-                            -delta)
-                        layer.output[0][:] = h
-                        logits = _get_logits(model.output)[0, -1].clone().cpu().save()  
+                try:
+                    with model.trace() as tracer:  # noqa: SIM117
+                        with tracer.invoke(st) as _:
+                            h = _get_hidden(layer.output).clone()
+                            #log.debug(f"Layer output shape: {h.shape}")
+                            h[:, _start_token, :] = translate_concept(
+                                h[:, _start_token, :],
+                                direction,
+                                -delta)
+                            layer.output[0][:] = h
+                            logits = _get_logits(model.output)[0, -1].clone().cpu().save()  
 
-                probs = torch.log_softmax(logits, dim=-1)
-                output_neg = probs[seq_ans_ids[j]]
-                output_rneg = probs[rand_ans_ids[j]]
+                    probs = torch.log_softmax(logits, dim=-1)
+                    output_neg = probs[seq_ans_ids[j]]
+                    output_rneg = probs[rand_ans_ids[j]]
 
-                # log.debug(f"Output Score (neg): {output_neg}")
-                proba_neg.append(output_neg)
-                proba_rneg.append(output_rneg)
+                    # log.debug(f"Output Score (neg): {output_neg}")
+                    proba_neg.append(output_neg)
+                    proba_rneg.append(output_rneg)
+                except (KeyError, SystemError) as e: # catch errors with Gemma-2-9b model
+                    log.error(
+                        f"Error during negative intervention at layer {layer_id}, statement {i}, step {j}: {e}"
+                    )
+                    proba_neg.append(torch.tensor(float('nan')))
+                    proba_rneg.append(torch.tensor(float('nan')))
 
                 # Optional debug: warn if interventions did not move logits
                 if cfg.run_debugging:

@@ -6,12 +6,13 @@ for translating hidden states along probe directions.
 
 from __future__ import annotations
 
+import logging
+
 import numpy as np
 import pandas as pd
 import patsy
 import statsmodels.api as sm
 import torch
-import logging 
 from scipy.stats import binomtest
 
 log = logging.getLogger("InterventionUtils")
