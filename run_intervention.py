@@ -343,7 +343,7 @@ def main(cfg: OmegaConf): # noqa: C901
             proba_rorig, proba_rneg, proba_rpos = [], [], []
 
             seq_stats, seq_ans, seq_ans_ids, seq_init_ids = idp.get_answer_seq_ids(
-                statement=statement, answer="New York"
+                statement=statement, answer=row["answer"]
             )
             rand_ans_ids = random_answer_ids(
                 seq_ids=seq_ans_ids, vocab_size=tokenizer.vocab_size
