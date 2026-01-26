@@ -544,9 +544,6 @@ def main(cfg: OmegaConf): # noqa: C901
         f"Finished processing layers for {cfg.probe['name']}-based probe for {cfg.model['name']} [task: {cfg.task}]"
     )
 
-
-
-
 def save(
     cfg: DictConfig,
     layer_id: int,

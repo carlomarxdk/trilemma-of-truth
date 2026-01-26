@@ -63,7 +63,7 @@ def compute_layer_scale(dh, direction, layer_id, eps=1e-6):
     unit_dir = direction / direction.norm()
 
     # Expected shape: [B, S, H]
-    X = dh.train_bags(layer_id)["last_embedding"].to(direction.device)
+    X = dh.cal_bags(layer_id)["last_embedding"].to(direction.device)
 
     if X.ndim != 2:
         raise ValueError(f"Expected X to be [B, S, H], got {X.shape}")
@@ -620,7 +620,7 @@ def translate_concept(
     where d̂ is the unit-normalized concept direction.
 
     Args:
-        X: Hidden states to modify, shape [B, S, H].
+        X: Hidden states to modify, shape [B, H] or [B, S, H].
         direction: Concept direction vector, shape [H].
         delta: Scalar translation magnitude (e.g. ±sigma).
 
@@ -629,4 +629,4 @@ def translate_concept(
 
     """
     unit_dir = direction / direction.norm()
-    return X + delta * unit_dir.view(1, 1, -1)
+    return X + delta * unit_dir

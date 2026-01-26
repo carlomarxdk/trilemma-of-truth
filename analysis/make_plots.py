@@ -35,6 +35,8 @@ from .plots.causal import (
     plot_causal_success_average,
     plot_causal_success_by_dataset,
     plot_causal_success_interaction_2d,
+    plot_causal_interaction_average,
+    plot_causal_interaction_by_dataset,
 )
 from .plots.performance import (
     plot_generalization_by_condition,
@@ -329,12 +331,20 @@ def main() -> None:
     output_path = plot_causal_success_average(df_success=df_success, save_dir=SAVE_DIR)
     print(f"\tSaved causal-success-average plot to {output_path}")
     
-    print("Generating intervention-success-interaction-2d plot...")
     output_path = plot_causal_success_interaction_2d(
         df_success=df_success, save_dir=SAVE_DIR
     )
     print(f"\tSaved causal-success-interaction-2d plot to {output_path}")
     
+    output_path = plot_causal_interaction_average(
+        df_success=df_success, save_dir=SAVE_DIR
+    )
+    print(f"Saved causal-interaction-average plot to {output_path}")
+    
+    output_path = plot_causal_interaction_by_dataset(
+        df_success=df_success, save_dir=SAVE_DIR
+    )
+    print(f"Saved causal-interaction-by-dataset plot to {output_path}")
 
     #### Performance plots
     print("Collecting performance data...")

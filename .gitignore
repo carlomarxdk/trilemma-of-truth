@@ -242,3 +242,4 @@ configs/datapack/_med_indications.yaml
 /outputs/interv
 configs/model/base_gemma.yaml
 /.github
+/outputs/interv_wrong

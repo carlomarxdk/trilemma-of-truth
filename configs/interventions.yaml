@@ -25,7 +25,7 @@ defaults:
 datapack:
   load_scores: False
 counter_method:
-  scaler: 5
+  scaler: 1
   num_tokens_to_change: -1
   start_token: -1
 
@@ -38,7 +38,7 @@ task: 0 # or 3 for bidirectional probes
 layer_range: [0.1, 1]
 use_best_layers: False # If True, run on top 3 best performing layers instead of layer_range
 num_best_layers: 5 # Number of best layers to use when use_best_layers is True
-best_layer_metric_keys: ["conformal", "mcc"] # Keys to navigate metrics for best layer selection
+best_layer_metric_keys: ["default", "mcc"] # Keys to navigate metrics for best layer selection
 search: True
 agg: full
 save_results: True
