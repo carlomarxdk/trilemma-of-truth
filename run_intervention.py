@@ -21,7 +21,7 @@ import numpy as np
 import statsmodels.api as sm
 import torch
 from omegaconf import DictConfig, OmegaConf
-from sklearn.exceptions import InconsistentVersionWarning
+from sklearn.exceptions import InconsistentVersionWarning 
 
 # Suppress scikit-learn version warnings when loading pickled models
 warnings.filterwarnings('ignore', category=InconsistentVersionWarning)
@@ -33,10 +33,13 @@ from response.interventions_utils import (
     InterventionDataProcessor,
     compute_layer_scale,
     diff_of_diff_ols,
+    separate_direction_ols,
     intervention_success_rate,
     mean_logprobs,
     random_answer_ids,
     translate_concept,
+    check_ols_health,
+    test_asymmetry
 )
 from runners import (
     MDProbeRunner,
@@ -51,6 +54,7 @@ from utils import (
     _atomic_write_json,
     available_layers,
     should_process_layer,
+    safe_divide,
 )
 from utils_hydra import (
     clear_device_cache,
@@ -316,7 +320,8 @@ def main(cfg: OmegaConf): # noqa: C901
             direction = _runner.direction.astype(np.float32)
         direction = torch.from_numpy(direction).to(device)
         # Compute scale
-        delta = compute_layer_scale(dh=dh, direction=direction, layer_id=layer_id) * c 
+        delta, delta_stats = compute_layer_scale(dh=dh, direction=direction, layer_id=layer_id)
+        delta = c * delta
 
         # Store results
         RES_orig, RES_neg, RES_pos = [], [], []
@@ -474,7 +479,6 @@ def main(cfg: OmegaConf): # noqa: C901
                 arr = np.where(mask, fallback, arr)
             return arr
 
-        RAND_orig = fill_nan(RAND_orig, RES_orig, layer_id)
         RES_neg = fill_nan(RES_neg, RES_orig, layer_id)
         RES_pos = fill_nan(RES_pos, RES_orig, layer_id)
         RAND_neg = fill_nan(RAND_neg, RAND_orig, layer_id)
@@ -499,6 +503,23 @@ def main(cfg: OmegaConf): # noqa: C901
             diff_neg=diff_neg,
             dataset=dataset,
         )
+        
+        asymmetry = test_asymmetry(
+            diff_pos=diff_pos,
+            diff_neg=diff_neg,
+            diff_rand_pos=diff_rand_pos,
+            diff_rand_neg=diff_rand_neg,
+            dataset=dataset,
+            additional_mask=None,
+        )
+        
+        unidir_ols = separate_direction_ols(
+            diff_pos=diff_pos,
+            diff_neg=diff_neg,
+            diff_rand_pos=diff_rand_pos,
+            diff_rand_neg=diff_rand_neg,
+            dataset=dataset,
+        )
 
         # Full summary for the interaction
         log.debug(result.summary())
@@ -509,6 +530,9 @@ def main(cfg: OmegaConf): # noqa: C901
             layer_id=layer_id,
             did_result=result,
             success_results=success,
+            asymmetry_results=asymmetry,
+            unidir_results=unidir_ols,
+            delta_stats=delta_stats,
             s_orig=RES_orig,
             s_neg=RES_neg,
             s_pos=RES_pos,
@@ -548,7 +572,10 @@ def save(
     cfg: DictConfig,
     layer_id: int,
     did_result: sm.regression.linear_model.RegressionResultsWrapper,
+    delta_stats: dict,
     success_results: dict,
+    asymmetry_results: dict,
+    unidir_results: dict,
     s_orig: np.ndarray,
     s_neg: np.ndarray,
     s_pos: np.ndarray,
@@ -567,8 +594,12 @@ def save(
         cfg: Configuration object with 'output_dir', 'save_results', and 'task'
             attributes.
         layer_id: Index of the transformer layer being analyzed.
+        delta_stats: Dictionary of descriptive statistics about the intervention scale.
         did_result: Fitted OLS model from diff_of_diff_ols() containing DiD
             coefficients and statistics.
+        asymmetry_results: Results from asymmetry tests.
+        success_results: Results from intervention success rate analysis.
+        unidir_results: Results from separate direction OLS analyses.
         s_orig: Log-probabilities of correct tokens under no intervention.
         s_neg: Log-probabilities of correct tokens under negative intervention.
         s_pos: Log-probabilities of correct tokens under positive intervention.
@@ -591,6 +622,7 @@ def save(
             - 'descriptives': Mean log-probabilities for each condition.
 
     """
+    mask = ~np.isnan(s_orig) & (s_orig != -100)
     output = {
         "did": {
             # Intercept (random token, negative intervention baseline)
@@ -605,6 +637,7 @@ def save(
             "token_ci": did_result.conf_int().loc["is_correct_token"].values.tolist(),
             "token_pval": did_result.pvalues["is_correct_token"],
             "token_zval": did_result.tvalues["is_correct_token"],
+            "token_signf": int(did_result.pvalues["is_correct_token"] < 0.05),
             # Main effect: positive vs negative translation
             "translation_coef": did_result.params["is_pos_translation"],
             "translation_std": did_result.bse["is_pos_translation"],
@@ -612,8 +645,11 @@ def save(
             .loc["is_pos_translation"]
             .values.tolist(),
             "translation_pval": did_result.pvalues["is_pos_translation"],
+            "translation_signf": int(
+                did_result.pvalues["is_pos_translation"] < 0.05
+            ),
             "translation_zval": did_result.tvalues["is_pos_translation"],
-            # Interaction (DiD estimator) — the key result
+            # Interaction (DiD estimator): the KEY result
             "interaction_coef": did_result.params[
                 "is_correct_token:is_pos_translation"
             ],
@@ -627,24 +663,80 @@ def save(
             "interaction_zval": did_result.tvalues[
                 "is_correct_token:is_pos_translation"
             ],
+            "interaction_signf": int(
+                did_result.pvalues["is_correct_token:is_pos_translation"] < 0.05
+            ),
             # Model stats
             "r_squared": did_result.rsquared,
             "df_resid": did_result.df_resid,
             "n_obs": int(did_result.nobs),
             "n_statements": int(did_result.nobs / 4),  # 4 obs per statement
-            "signf": int(
-                did_result.pvalues["is_correct_token:is_pos_translation"] < 0.05
-            ),
+            "residual_std": float(np.sqrt(did_result.scale)),
+            ## Another KEY metric: normalized interaction
+            "norm_interaction": float(safe_divide(
+                did_result.params["is_correct_token:is_pos_translation"],
+                np.sqrt(did_result.scale))),
+            "selectivity_ratio": float(safe_divide(
+                abs(did_result.params["is_correct_token:is_pos_translation"]),
+                abs(did_result.params["is_correct_token"]))),
+            "condition_number": float(did_result.condition_number),
+            "health": check_ols_health(did_result),
         },
         "success_results": success_results,
-        "descriptives": {
-            "correct_orig_mean": float(np.mean(s_orig)),
-            "correct_pos_mean": float(np.mean(s_pos)),
-            "correct_neg_mean": float(np.mean(s_neg)),
-            "random_orig_mean": float(np.mean(r_orig)),
-            "random_pos_mean": float(np.mean(r_pos)),
-            "random_neg_mean": float(np.mean(r_neg)),
+        "unidir_results": {
+            "positive": {
+                "intercept_coef": unidir_results["positive"].params["Intercept"],
+                "intercept_std": unidir_results["positive"].bse["Intercept"],
+                "intercept_ci": unidir_results["positive"].conf_int().loc["Intercept"].values.tolist(),
+                "intercept_pval": unidir_results["positive"].pvalues["Intercept"],
+                "intercept_zval": unidir_results["positive"].tvalues["Intercept"],
+                "token_coef": unidir_results["positive"].params["is_correct_token"],
+                "token_std": unidir_results["positive"].bse["is_correct_token"],
+                "token_ci": unidir_results["positive"].conf_int().loc["is_correct_token"].values.tolist(),
+                "token_pval": unidir_results["positive"].pvalues["is_correct_token"],
+                "token_zval": unidir_results["positive"].tvalues["is_correct_token"],
+                "token_signf": int(unidir_results["positive"].pvalues["is_correct_token"] < 0.05),
+                "r_squared": unidir_results["positive"].rsquared,
+                "df_resid": unidir_results["positive"].df_resid,
+                "n_obs": int(unidir_results["positive"].nobs),
+                "condition_number": float(unidir_results["positive"].condition_number),
+            },
+            "negative": {
+                "intercept_coef": unidir_results["negative"].params["Intercept"],
+                "intercept_std": unidir_results["negative"].bse["Intercept"],
+                "intercept_ci": unidir_results["negative"].conf_int().loc["Intercept"].values.tolist(),
+                "intercept_pval": unidir_results["negative"].pvalues["Intercept"],
+                "intercept_zval": unidir_results["negative"].tvalues["Intercept"],
+                "token_coef": unidir_results["negative"].params["is_correct_token"],
+                "token_std": unidir_results["negative"].bse["is_correct_token"],
+                "token_ci": unidir_results["negative"].conf_int().loc["is_correct_token"].values.tolist(),
+                "token_pval": unidir_results["negative"].pvalues["is_correct_token"],
+                "token_zval": unidir_results["negative"].tvalues["is_correct_token"],
+                "token_signf": int(unidir_results["negative"].pvalues["is_correct_token"] < 0.05),
+                "r_squared": unidir_results["negative"].rsquared,
+                "df_resid": unidir_results["negative"].df_resid,
+                "n_obs": int(unidir_results["negative"].nobs),
+                "condition_number": float(unidir_results["negative"].condition_number),
+            },
+            "asymmetry_ratio": safe_divide(
+                unidir_results["positive"].params["is_correct_token"],
+                unidir_results["negative"].params["is_correct_token"],
+            ),
+            "signf": int(
+                unidir_results["positive"].pvalues["is_correct_token"] < 0.05
+                and unidir_results["negative"].pvalues["is_correct_token"] < 0.05
+            ),  # both directions significant
         },
+        "descriptives": {
+            "correct_orig_mean": float(np.mean(s_orig[mask])),
+            "correct_pos_mean": float(np.mean(s_pos[mask])),
+            "correct_neg_mean": float(np.mean(s_neg[mask])),
+            "random_orig_mean": float(np.mean(r_orig[mask])),
+            "random_pos_mean": float(np.mean(r_pos[mask])),
+            "random_neg_mean": float(np.mean(r_neg[mask])),
+        },
+        "delta_stats": delta_stats,
+        "asymmetry": asymmetry_results,
     }
 
     if os.path.exists(f"{cfg.output_dir}") is False:
@@ -663,6 +755,7 @@ def save(
         np.save(score_path / "r_orig.npy", r_orig)
         np.save(score_path / "r_neg.npy", r_neg)
         np.save(score_path / "r_pos.npy", r_pos)
+        np.save(score_path / "mask.npy", mask)
 
         summary_path = Path(cfg.output_dir) / f"layer_{layer_id}.json"
         summary_path.parent.mkdir(parents=True, exist_ok=True)

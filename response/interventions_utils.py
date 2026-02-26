@@ -57,24 +57,33 @@ def compute_layer_scale(dh, direction, layer_id, eps=1e-6):
 
     Returns:
         Standard deviation of projections as a float.
+        Dictionary of descriptive statistics.
 
     """
     # Normalize direction
     unit_dir = direction / direction.norm()
 
-    # Expected shape: [B, S, H]
+    # Expected shape: [N, H]
     X = dh.cal_bags(layer_id)["last_embedding"].to(direction.device)
-
     if X.ndim != 2:
-        raise ValueError(f"Expected X to be [B, S, H], got {X.shape}")
-
-    # Project onto direction → [B, S]
-    coords = torch.einsum("bh, h -> b", X, unit_dir)
+        raise ValueError(f"Expected X to be [N, H], got {X.shape}")
+    coords = torch.einsum("nh, h -> n", X, unit_dir)
 
     # Pool over batch and tokens → scalar
     sigma = coords.flatten().std().clamp_min(eps)
+    
+    
+    stats = {
+            'mean': coords.mean().item(),
+            'std': coords.std().item(),
+            'median': coords.median().item(),
+            'iqr': (coords.quantile(0.75) - coords.quantile(0.25)).item(),
+            'min': coords.min().item(),
+            'max': coords.max().item(),
+            'n_calibration': len(coords)
+        }
 
-    return sigma.item()
+    return sigma.item(), stats
 
 
 def normalize_logprob(lp: torch.Tensor) -> torch.Tensor:
@@ -180,6 +189,8 @@ def diff_of_diff_ols(
     c = dataset["correct"].values[:N]
 
     mask = (r == 1) & (c == 1)
+    if additional_mask is not None:
+        mask = mask & additional_mask
     M = mask.sum()
 
     df = pd.DataFrame(
@@ -214,6 +225,7 @@ def intervention_success_rate(
     diff_neg: np.ndarray,
     eps: float = 1e-12,
     dataset: pd.DataFrame | None = None,
+    additional_mask: np.ndarray | None = None,
 ) -> dict[str, float | int]:
     """
     Compute per-statement intervention success based on directional consistency.
@@ -247,50 +259,270 @@ def intervention_success_rate(
         r = dataset["real_object"].values[:N]
         c = dataset["correct"].values[:N]
         mask = (r == 1) & (c == 1)
+        if additional_mask is not None:
+            mask = mask & additional_mask
         diff_pos = diff_pos[mask]
         diff_neg = diff_neg[mask]
+    if additional_mask is not None:
+        mask &= additional_mask[:diff_pos.shape[0]]
 
     # Zero out numerically small effects
     dp = np.where(np.abs(diff_pos) < eps, 0.0, diff_pos)
     dn = np.where(np.abs(diff_neg) < eps, 0.0, diff_neg)
 
-    sign_pos = np.sign(dp)
-    sign_neg = np.sign(dn)
+    sign_pos = np.sign(dp).astype(int)
+    sign_neg = np.sign(dn).astype(int)
+    
+    has_zero = (sign_pos == 0) | (sign_neg == 0)
 
     # --- dominant direction (ignore zeros) ---
     nonzero_pos = sign_pos[sign_pos != 0]
     if nonzero_pos.size == 0:
         dominant_direction = 0
     else:
-        dominant_direction = np.sign(nonzero_pos.sum())
+        pos_ct = np.count_nonzero(nonzero_pos == 1)
+        neg_ct = np.count_nonzero(nonzero_pos == -1)
+        dominant_direction = 1 if pos_ct >= neg_ct else -1
+    
+    aligned_dom = (~has_zero) & (sign_pos == dominant_direction)
+    aligned_opp = (~has_zero) & (sign_pos == -dominant_direction)
 
-    # --- success definition ---
-    opposing = sign_pos == -sign_neg
-    aligned = sign_pos == dominant_direction
+    # Sanity: these three sets are disjoint and cover everything
+    assert np.all(has_zero | aligned_dom | aligned_opp) # noqa: S101
+    assert not np.any(has_zero & aligned_dom) # noqa: S101
+    assert not np.any(has_zero & aligned_opp) # noqa: S101
+    assert not np.any(aligned_dom & aligned_opp) # noqa: S101
+     
+    rate_dom = aligned_dom.mean()
+    rate_opp = aligned_opp.mean()
+    rate_zero = has_zero.mean()
 
-    success = opposing & aligned
+    assert np.isclose(rate_dom + rate_opp + rate_zero, 1.0, atol=1e-12) # noqa: S101
+    
+    opposing = (sign_pos * sign_neg) == -1
+    success = opposing & aligned_dom
+    
 
     n_total = success.size
     n_success = success.sum()
     success_rate = n_success / n_total
+    
 
-    opposition_rate = opposing.mean()
-
-    p_value = binomtest(
+    result = binomtest(
         n_success, n_total, p=0.5, alternative="greater"
-    ).pvalue
+    )
 
     return {
         "success_rate": float(success_rate),
         "dominant_direction": float(dominant_direction),
+        "stat":  float(result.statistic),
         "n_success": int(n_success),
         "n_total": int(n_total),
-        "p_value": float(p_value),
-        "opposition_rate": float(opposition_rate),
-        "zero_effect_rate": float(
-            np.mean((sign_pos == 0) | (sign_neg == 0))
-        ),
+        "p_value": float(result.pvalue),
+        "rate_dom": float(rate_dom),
+        "rate_opp": float(rate_opp),
+        "rate_zero": float(rate_zero),
     }
+
+def test_asymmetry(
+    diff_pos: np.ndarray,
+    diff_neg: np.ndarray,
+    diff_rand_pos: np.ndarray,
+    diff_rand_neg: np.ndarray,
+    dataset: pd.DataFrame,
+    additional_mask: np.ndarray | None = None,
+) -> dict:
+    """Test whether intervention effects are symmetric.
+    Args:
+        diff_pos: Array of per-statement effects under positive intervention
+                  (e.g., RES_pos - RES_orig).
+        diff_neg: Array of per-statement effects under negative intervention
+                  (e.g., RES_neg - RES_orig).
+        diff_rand_pos: Array of per-statement effects under positive intervention
+                    for random tokens.
+        diff_rand_neg: Array of per-statement effects under negative intervention
+                    for random tokens.  
+        dataset: DataFrame containing 'real_object' and 'correct' columns
+            for filtering to real, true statements.
+        additional_mask: Optional boolean array to further filter statements.
+    
+    Returns:
+        Statistical tests for asymmetry in:
+        - Correct tokens
+        - Random tokens  
+        - Differential asymmetry (correct vs random)
+    """
+    N = diff_pos.shape[0]
+    r = dataset["real_object"].values[:N]
+    c = dataset["correct"].values[:N]
+    
+    mask = (r == 1) & (c == 1)
+    if additional_mask is not None:
+        mask = mask & additional_mask
+    
+    # For correct tokens
+    abs_pos_correct = np.abs(diff_pos[mask])
+    abs_neg_correct = np.abs(diff_neg[mask])
+    
+    # For random tokens
+    abs_pos_random = np.abs(diff_rand_pos[mask])
+    abs_neg_random = np.abs(diff_rand_neg[mask])
+    
+    # Paired t-tests for absolute effects
+    from scipy.stats import ttest_rel
+    
+    asymmetry_correct = ttest_rel(abs_pos_correct, abs_neg_correct)
+    asymmetry_random = ttest_rel(abs_pos_random, abs_neg_random)
+    
+    # Differential asymmetry (interaction)
+    diff_asymmetry_correct = abs_pos_correct - abs_neg_correct
+    diff_asymmetry_random = abs_pos_random - abs_neg_random
+    
+    differential = ttest_rel(diff_asymmetry_correct, diff_asymmetry_random)
+    
+    return {
+        "correct_asymmetry": {
+            "mean_pos": float(abs_pos_correct.mean()),
+            "mean_neg": float(abs_neg_correct.mean()),
+            "ratio": float(abs_pos_correct.mean() / abs_neg_correct.mean()),
+            "t_stat": float(asymmetry_correct.statistic),
+            "p_value": float(asymmetry_correct.pvalue),
+            "interpretation": (
+                "Significant difference in the magnitude of interventions"
+                if asymmetry_correct.pvalue < 0.05
+                else "No significant difference in the magnitude of interventions"
+            ),
+        },
+        "random_asymmetry": {
+            "mean_pos": float(abs_pos_random.mean()),
+            "mean_neg": float(abs_neg_random.mean()),
+            "ratio": float(abs_pos_random.mean() / abs_neg_random.mean()),
+            "t_stat": float(asymmetry_random.statistic),
+            "p_value": float(asymmetry_random.pvalue),
+            "interpretation": (
+                "Significant difference in the magnitude of interventions"
+                if asymmetry_random.pvalue < 0.05
+                else "No significant difference in the magnitude of interventions"
+            ),
+        },
+        "differential_asymmetry": {
+            "t_stat": float(differential.statistic),
+            "p_value": float(differential.pvalue),
+            "interpretation": (
+                "Significant difference in the magnitude of interventions"
+                if differential.pvalue < 0.05
+                else "No significant difference in the magnitude of interventions"
+            ),
+        },
+    }
+    
+    
+def separate_direction_ols(
+    diff_pos: np.ndarray,
+    diff_rand_pos: np.ndarray,
+    diff_neg: np.ndarray,
+    diff_rand_neg: np.ndarray,
+    dataset: pd.DataFrame,
+    additional_mask: np.ndarray | None = None,
+) -> dict[str, sm.regression.linear_model.RegressionResultsWrapper]:
+    """Test each direction separately to capture asymmetric effects.
+    
+    Returns two models:
+    - positive_model: Tests if positive intervention affects correct > random
+    - negative_model: Tests if negative intervention affects correct > random
+    """
+    N = diff_pos.shape[0]
+    r = dataset["real_object"].values[:N]
+    c = dataset["correct"].values[:N]
+    
+    mask = (r == 1) & (c == 1)
+    if additional_mask is not None:
+        mask = mask & additional_mask
+    M = mask.sum()
+    
+    # Model 1: Positive direction only
+    df_pos = pd.DataFrame({
+        "effect": np.concatenate([diff_pos[mask], diff_rand_pos[mask]]),
+        "is_correct_token": [1] * M + [0] * M,
+        "statement": np.tile(np.arange(M), 2),
+    })
+    
+    y_pos, X_pos = patsy.dmatrices(
+        "effect ~ is_correct_token",
+        data=df_pos,
+        return_type="dataframe",
+    )
+    groups_pos = df_pos.loc[X_pos.index, "statement"].to_numpy()
+    model_pos = sm.OLS(y_pos, X_pos).fit(
+        cov_type="cluster", cov_kwds={"groups": groups_pos}
+    )
+    
+    # Model 2: Negative direction only
+    df_neg = pd.DataFrame({
+        "effect": np.concatenate([diff_neg[mask], diff_rand_neg[mask]]),
+        "is_correct_token": [1] * M + [0] * M,
+        "statement": np.tile(np.arange(M), 2),
+    })
+    
+    y_neg, X_neg = patsy.dmatrices(
+        "effect ~ is_correct_token",
+        data=df_neg,
+        return_type="dataframe",
+    )
+    groups_neg = df_neg.loc[X_neg.index, "statement"].to_numpy()
+    model_neg = sm.OLS(y_neg, X_neg).fit(
+        cov_type="cluster", cov_kwds={"groups": groups_neg}
+    )
+    
+    return {
+        "positive": model_pos,
+        "negative": model_neg
+    }
+
+def check_ols_health(model: sm.regression.linear_model.RegressionResultsWrapper) -> dict:
+    """Check numerical health of OLS model.
+    
+    OLS is closed-form (no iteration), but can have numerical issues:
+    - Singular/near-singular design matrix
+    - Extreme multicollinearity
+    - NaN/Inf in estimates
+    
+    Returns:
+        Dict with health indicators and overall is_healthy flag.
+    """
+    params = model.params.values
+    bse = model.bse.values
+    
+    health = {
+        # NaN/Inf checks
+        "params_finite": bool(np.all(np.isfinite(params))),
+        "stderr_finite": bool(np.all(np.isfinite(bse))),
+        "stderr_positive": bool(np.all(bse > 0)),
+        
+        # Condition number (high = multicollinearity, >30 is concerning, >100 is bad)
+        "condition_number": float(model.condition_number),
+        "condition_ok": model.condition_number < 100,
+        
+        # Residual scale is valid
+        "scale_finite": bool(np.isfinite(model.scale)),
+        "scale_positive": bool(model.scale > 0),
+        
+        # R² in valid range
+        "rsquared_valid": 0 <= model.rsquared <= 1,
+    }
+    
+    # Overall health flag
+    health["is_healthy"] = all([
+        bool(health["params_finite"]),
+        bool(health["stderr_finite"]),
+        bool(health["stderr_positive"]),
+        bool(health["condition_ok"]),
+        bool(health["scale_finite"]),
+        bool(health["scale_positive"]),
+        bool(health["rsquared_valid"]),
+    ])
+    
+    return health
 
 ##############################
 ####   Data Processors.   ####

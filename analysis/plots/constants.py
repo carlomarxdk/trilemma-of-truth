@@ -122,6 +122,10 @@ CONDITION_NAMES = {
     "instance_tf": "Instance-Level (TF Only)",
 }
 
+DOSE_COLOR: dict[int, tuple] = {
+    1: cm.lapaz(0.33),
+    3: cm.lapaz(0.66),
+}
 
 SAVE_DIR = Path("outputs/figures/summaries")
 

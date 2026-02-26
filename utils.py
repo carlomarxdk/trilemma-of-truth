@@ -368,3 +368,24 @@ def _atomic_joblib_dump(target: Path, obj: Any) -> None:
         tmp_path = Path(tf.name)
     joblib.dump(obj, tmp_path, compress=3, protocol=pickle.HIGHEST_PROTOCOL)
     tmp_path.replace(target)
+
+def safe_divide(
+    numerator: float,
+    denominator: float,
+    min_denom: float = 1e-8,
+    default: float | None = 0.0,
+) -> float | 0.0:
+    """Safe division with minimum denominator threshold.
+    
+    Args:
+        numerator: The numerator.
+        denominator: The denominator.
+        min_denom: Minimum absolute value for denominator.
+        default: Value to return if denominator is below threshold.
+    
+    Returns:
+        numerator / denominator if |denominator| > min_denom, else default.
+    """
+    if abs(denominator) < min_denom:
+        return default
+    return numerator / denominator

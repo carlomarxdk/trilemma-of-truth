@@ -29,15 +29,18 @@ from analysis.plots.constants import (
     SAVE_DIR,
     TASKS,
 )
+from analysis.plots.causal_utils import (
+    create_pooled_dataset,
+    get_median_row_per_experiment,
+    apply_fdr_correction_by_probe,
+)
 from misc.probe_data import ExperimentData
 
 from .plots.causal import (
-    plot_causal_success_average,
-    plot_causal_success_by_dataset,
-    plot_causal_success_interaction_2d,
-    plot_causal_interaction_average,
-    plot_causal_interaction_by_dataset,
+    plot_causal_success_by_probe,
+    plot_selectivity_ration_by_probe
 )
+
 from .plots.performance import (
     plot_generalization_by_condition,
     plot_generalization_by_dataset,
@@ -147,95 +150,7 @@ def collect_performance_df() -> pd.DataFrame:
             "CI_high",
         ],
     )
-    return df
-
-
-def collect_intervention_success(root: Path | None = None) -> pd.DataFrame:
-    """Collect best-layer intervention success metrics.
-
-    Traverses ``outputs/interv`` (or ``root`` when provided) to identify the
-    highest-success layer per probe/model/dataset combination. Ties in
-    ``success_rate`` are broken by selecting the smallest layer index.
-
-    Args:
-        root: Optional override for the intervention output directory.
-
-    Returns:
-        DataFrame with one row per best layer containing columns ``probe``,
-        ``model``, ``datapack``, ``best_layer``,
-        ``success_rate``
-
-    Raises:
-        FileNotFoundError: If the intervention directory is missing.
-    """
-
-    base_dir = Path(root) if root is not None else Path("outputs/interv")
-    if not base_dir.exists():
-        raise FileNotFoundError(f"Intervention output directory missing: {base_dir}")
-
-    records: list[dict] = []
-    for probe_dir in sorted(p for p in base_dir.iterdir() if p.is_dir()):
-        probe = probe_dir.name
-        for model_dir in sorted(m for m in probe_dir.iterdir() if m.is_dir()):
-            model = model_dir.name
-            for dataset_dir in sorted(d for d in model_dir.iterdir() if d.is_dir()):
-                best_layer: int | None = None
-                best_success: float = float("-inf")
-                best_payload: dict | None = None
-
-                for layer_path in sorted(dataset_dir.glob("layer_*.json")):
-                    try:
-                        layer_idx = int(layer_path.stem.split("_")[1])
-                    except (IndexError, ValueError):
-                        continue
-
-                    with layer_path.open("r", encoding="utf-8") as handle:
-                        payload = json.load(handle)
-
-                    success_payload = payload.get("success_results") or {}
-                    success_rate = success_payload.get("success_rate")
-                    if success_rate is None:
-                        continue
-                    
-                    interaction_coeff = payload.get("did", {}).get("interaction_coef")
-
-                    is_better = success_rate > best_success
-                    is_tie = math.isclose(success_rate, best_success)
-                    if (
-                        best_layer is None
-                        or is_better
-                        or (is_tie and layer_idx < best_layer)
-                    ):
-                        best_layer = layer_idx
-                        best_success = success_rate
-                        best_interaction_coeff = abs(interaction_coeff)
-                        best_payload = success_payload
-
-                if best_layer is None or best_payload is None:
-                    continue
-
-                dataset = dataset_dir.name.split("_search_task")[0]
-                records.append(
-                    {
-                        "probe": probe,
-                        "model": model,
-                        "datapack": dataset,
-                        "best_layer": best_layer,
-                        "success_rate": best_success,
-                        "interaction_coef": best_interaction_coeff,
-                    }
-                )
-
-    df = pd.DataFrame(records)
-
-    if df.empty:
-        return df
-
-    df.sort_values(
-        ["probe", "model", "datapack", "success_rate"], inplace=True, ascending=False
-    )
-    df.reset_index(drop=True, inplace=True)
-    return df
+    return df    
 
 def collect_generalization_df() -> pd.DataFrame:
     """Collect cross-dataset generalization metrics.
@@ -311,6 +226,21 @@ def collect_generalization_df() -> pd.DataFrame:
     )
 
 
+def collect_intervention_dfs(dose: list[int] | int) -> dict[int, pd.DataFrame]:
+    # 1. Load and aggregaete data for each dose level
+    dose = [dose] if isinstance(dose, int) else dose
+    dfs = {}
+    for d in dose:
+        print(f"Creating pooled dataset for dose {d}...")
+        df = create_pooled_dataset(dose=d)
+        # we take only median row per experiment  (any model-dataset-probe counts as one experiment, we collect data from top 5 layers)
+        df = get_median_row_per_experiment(df, performance_col='interaction_coef')
+        df = apply_fdr_correction_by_probe(df, pval_col='interaction_pval', alpha=0.05)
+        dfs[d] = df.copy()
+        del df
+    return dfs
+        
+
 def main() -> None:
     """Generate the performance-by-dataset figure.
 
@@ -319,32 +249,26 @@ def main() -> None:
 
     #### Intervention plots
     print("Collecting intervention data...")
-    df_success = collect_intervention_success()
+    dose = [1,3]
+    dff_intervention = collect_intervention_dfs(dose = dose)
 
-    print("Generating intervention-success-by-dataset plot...")
-    output_path = plot_causal_success_by_dataset(
-        df_success=df_success, save_dir=SAVE_DIR
-    )
-    print(f"\tSaved causal-success-by-dataset plot to {output_path}")
+    print("Generating intervention-success-by-probe plot...")
+    output_path = plot_causal_success_by_probe(
+        dfs=dff_intervention, dose=dose, save_dir=SAVE_DIR)
+    print(f"\tSaved causal-success-by-probe plot to {output_path}")
+    
+    print("Generating intervention-selectivity-ratio-by-probe plot...")
+    output_path = plot_selectivity_ration_by_probe(
+        dfs=dff_intervention, dose=dose, save_dir=SAVE_DIR)
+    print(f"\tSaved intervention-selectivity-ratio-by-probe plot to {output_path}")
 
-    print("Generating intervention-success-average plot...")
-    output_path = plot_causal_success_average(df_success=df_success, save_dir=SAVE_DIR)
-    print(f"\tSaved causal-success-average plot to {output_path}")
+
+    # print("Generating intervention-success-average plot...")
+    # output_path = plot_causal_success_average(df_success=df_success, save_dir=SAVE_DIR)
+    # print(f"\tSaved causal-success-average plot to {output_path}")
     
-    output_path = plot_causal_success_interaction_2d(
-        df_success=df_success, save_dir=SAVE_DIR
-    )
-    print(f"\tSaved causal-success-interaction-2d plot to {output_path}")
-    
-    output_path = plot_causal_interaction_average(
-        df_success=df_success, save_dir=SAVE_DIR
-    )
-    print(f"Saved causal-interaction-average plot to {output_path}")
-    
-    output_path = plot_causal_interaction_by_dataset(
-        df_success=df_success, save_dir=SAVE_DIR
-    )
-    print(f"Saved causal-interaction-by-dataset plot to {output_path}")
+
+    # print(f"Saved causal-interaction-by-dataset plot to {output_path}")
 
     #### Performance plots
     print("Collecting performance data...")

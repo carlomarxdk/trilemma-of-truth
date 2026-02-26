@@ -261,6 +261,8 @@ def plot_performance_by_condition(
         .agg(mean=("mcc", "mean"), sem=("mcc", "sem"))
         .reset_index()
     )
+    
+    print(df_agg)
 
     probe_order = [p for p in PROBE_ORDER if p in df_agg["probe"].unique()]
     if not probe_order:
