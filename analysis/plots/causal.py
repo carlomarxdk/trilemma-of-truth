@@ -11,7 +11,35 @@ import pandas as pd
 from matplotlib.ticker import PercentFormatter
 from statsmodels.stats.proportion import proportion_confint
 
-def random_effects_meta(coefs: np.ndarray, ses: np.ndarray) -> tuple[float, float, float]:
+def random_effects_pooling(coefs: np.ndarray, ses: np.ndarray) -> tuple[float, float, float]:
+    """
+    Pools estimates across experimental configurations using the
+    DerSimonian-Laird (DL) random-effects estimator [DerSimonian & Laird, 1986].
+
+    Originally developed for meta-analysis of independent studies, we adapt
+    it here to aggregate interaction effects across heterogeneous
+    configurations (probe x model x dataset). The key advantage over
+    a simple weighted mean is that DL explicitly models between-configuration
+    variance (tau^2): configurations that disagree more than sampling error
+    alone would predict are down-weighted, yielding a conservative and honest
+    pooled estimate.
+
+    Args:
+        coefs: Point estimates (e.g., interaction effects) for each
+               configuration.
+        ses:   Standard errors of those estimates, used to construct
+               inverse-variance weights.
+
+    Returns:
+        theta_re: Pooled estimate under the random-effects model.
+        se_re:    Standard error of theta_re (used to construct 95% CI as
+                  theta_re +/- 1.96 * se_re).
+        tau2:     Between-configuration variance. A value near zero indicates
+                  configurations are homogeneous; large tau2 signals that the
+                  effect varies systematically across configurations (e.g.,
+                  model family or layer depth is a meaningful moderator).
+    """
+        
     w = 1.0 / ses ** 2
     theta_fixed = (coefs * w).sum() / w.sum()
     Q = (w * (coefs - theta_fixed) ** 2).sum()
@@ -112,7 +140,7 @@ def plot_causal_success_by_probe(dfs: dict[int, pd.DataFrame], dose: list[int] |
 
     palette = {dose: DOSE_COLOR[dose] for dose in dose_order}
 
-    fig, ax = plt.subplots(figsize=(3, 2.5))
+    fig, ax = plt.subplots(figsize=(3, 2))
     legend_handles: list[plt.Artist] = []
     legend_labels: list[str] = []
     seen: set[str] = set()
@@ -199,28 +227,26 @@ def plot_causal_success_by_probe(dfs: dict[int, pd.DataFrame], dose: list[int] |
     plt.close(fig)
     return out_path
 
-def plot_selectivity_ration_by_probe(dfs: dict[int, pd.DataFrame], dose: list[int] | int, save_dir: str | Path | None = None) -> Path:
+def plot_interaction_norm_by_probe(dfs: dict[int, pd.DataFrame], dose: list[int] | int, save_dir: str | Path | None = None) -> Path:
     dose = [dose] if isinstance(dose, int) else dose
     dfs = _summarize(dfs, dose)
     
     results = []
     for d in dose:
         df = dfs[d]
-        # df['selectivity_ratio'] = df.apply(lambda row: row['selectivity_ratio'] \
-        #             if (row['successful']) else 0, axis=1)
         
         df = df.query('health_status == True ')
+        
         df['norm_interaction_std'] = df['interaction_std'] / df['residual_std']
         df['norm_interaction'] = np.abs(df['norm_interaction'])
 
-        print('dose', d)
         for probe in ['mean_diff', 'ttpd', 'svm', 'sawmil']:
             sub = df[df['probe'] == probe]
-            theta, se, tau2 = random_effects_meta(
-            sub['norm_interaction'].values,
-            sub['norm_interaction_std'].values
+            theta, se, tau2 = random_effects_pooling(
+            coefs=sub['norm_interaction'].values,
+            ses=sub['norm_interaction_std'].values
         )
-            print(f"  {probe:<10}: θ={theta:.6f} CI=({theta-1.96*se:.6f}, {theta+1.96*se:.6f})")
+            print(f"  {probe:<10}: θ={theta:.6f} CI=({theta-1.96*se:.6f}, {theta+1.96*se:.6f}, tau²={tau2:.6f})")
 
         print('=========')
         
@@ -345,13 +371,13 @@ def plot_selectivity_ration_by_probe(dfs: dict[int, pd.DataFrame], dose: list[in
 
 
     save_dir.mkdir(parents=True, exist_ok=True)
-    out_path = save_dir / "causal_selectivity_ratio_by_dose.pdf"
+    out_path = save_dir / "causal_norm_interaction_by_dose.pdf"
     fig.tight_layout(pad=0.02)
     fig.savefig(
         out_path,
         **SAVEFIG_OPTS,
         metadata={
-            "Title": "Selectivity Ratio by Intervention Dose across Probes",
+            "Title": "Normalized Interaction Effect by Dose across Probes",
             "Creator": "Germans Savcisens",
         },
     )

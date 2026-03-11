@@ -169,6 +169,7 @@ def create_pooled_dataset(dose:int=1) -> pd.DataFrame:
                 # New normalized metrics from DiD
                 'norm_interaction': did.get('norm_interaction'),
                 'selectivity_ratio': did.get('selectivity_ratio'),
+                'selectivity_norm': np.abs(did.get('interaction_coef') / (did.get('token_coef', 0) + abs(did.get('translation_coef', 0)) + 1e-8)),
                 
                 # Success metrics
                 'success_rate': success.get('success_rate'),

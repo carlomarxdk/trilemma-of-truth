@@ -672,7 +672,7 @@ def save(
             "n_obs": int(did_result.nobs),
             "n_statements": int(did_result.nobs / 4),  # 4 obs per statement
             "residual_std": float(np.sqrt(did_result.scale)),
-            ## Another KEY metric: normalized interaction
+            ## Key metric: normalized interaction
             "norm_interaction": float(safe_divide(
                 did_result.params["is_correct_token:is_pos_translation"],
                 np.sqrt(did_result.scale))),

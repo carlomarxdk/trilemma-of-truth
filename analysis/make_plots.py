@@ -1,13 +1,4 @@
 """Generate summary figures from probe metrics.
-
-This CLI ports core logic from make_plots.ipynb into modular functions.
-
-Args:
-    None
-
-Returns:
-    None
-
 Example:
     Run from the repo root:
     $ python -m analysis.make_plots
@@ -38,7 +29,7 @@ from misc.probe_data import ExperimentData
 
 from .plots.causal import (
     plot_causal_success_by_probe,
-    plot_selectivity_ration_by_probe
+    plot_interaction_norm_by_probe
 )
 
 from .plots.performance import (
@@ -186,7 +177,7 @@ def collect_generalization_df() -> pd.DataFrame:
                 for subexperiment in generalization_targets:
                     for cond in ["bag", "instance", "instance_tf"]:
                         if probe == "svm":
-                            key_set = [cond, "default", "mcc"]
+                            key_set = [cond, "default", "mcc"] # we look at the SVM without CP (complete ablation)
                         else:
                             key_set = [cond] + keys
                         layer_id = exp_data.best_layer(
@@ -257,10 +248,10 @@ def main() -> None:
         dfs=dff_intervention, dose=dose, save_dir=SAVE_DIR)
     print(f"\tSaved causal-success-by-probe plot to {output_path}")
     
-    print("Generating intervention-selectivity-ratio-by-probe plot...")
-    output_path = plot_selectivity_ration_by_probe(
+    print("Generating intervention-normalized-interaction-by-probe plot...")
+    output_path = plot_interaction_norm_by_probe(
         dfs=dff_intervention, dose=dose, save_dir=SAVE_DIR)
-    print(f"\tSaved intervention-selectivity-ratio-by-probe plot to {output_path}")
+    print(f"\tSaved intervention-normalized-interaction-by-probe plot to {output_path}")
 
 
     # print("Generating intervention-success-average plot...")

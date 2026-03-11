@@ -163,12 +163,12 @@ def _setup_style() -> None:
     matplotlib.rcParams.update(
         {
             "font.family": "sans-serif",
-            "font.size": 8,  # Base font size
-            "axes.labelsize": 8,  # Axis label: 7-9 pt
-            "axes.titlesize": 9,  # Title: 9-10 pt
-            "xtick.labelsize": 7,  # Tick labels: 6-7 pt
-            "ytick.labelsize": 7,
-            "legend.fontsize": 7,  # Legend: 6-8 pt
+            "font.size": 10,  # Base font size
+            "axes.labelsize": 10,  # Axis label: 7-9 pt
+            "axes.titlesize": 10,  # Title: 9-10 pt
+            "xtick.labelsize": 9,  # Tick labels: 6-7 pt
+            "ytick.labelsize": 9,
+            "legend.fontsize": 9,  # Legend: 6-8 pt
             "figure.titlesize": 10,
             "axes.linewidth": 0.8,
             "xtick.major.width": 0.8,
