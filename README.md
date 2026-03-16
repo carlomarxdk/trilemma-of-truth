@@ -15,7 +15,7 @@ Here you’ll find everything needed to
 **Abstract:** We often attribute human characteristics to large language models (LLMs) and claim that they "know" certain things. LLMs have an internal probabilistic knowledge that represents information retained during training. How can we assess the veracity of this knowledge? 
 We examine two common methods for probing the veracity of LLMs and discover several assumptions that are flawed. To address these flawed assumptions, we introduce `sAwMIL` (short for Sparse Aware Multiple-Instance Learning), a probing method that utilizes the internal activations of LLMs to separate statements into *true*, *false*, and *neither*. `sAwMIL` is based on multiple-instance learning and conformal prediction. We evaluate `sAwMIL` on 5 validity criteria across 16 open-source LLMs, including both default and chat-based variants, as well as on 3 new datasets. Among the insights we provide are: (1) the veracity signal is often concentrated in the third quarter of an LLM's depth; (2) truth and falsehood signals are not always symmetric; (3) linear probes perform better on chat models than on default models; (4) nonlinear probes may be required to capture veracity signals for some LLMs with reinforcement learning from human feedback or knowledge distillation; and (5) LLMs capture a third type of signal that is distinct from true and false and is neither true nor false. These findings provide a reliable method for verifying what LLMs "know" and how certain they are of their probabilistic internal knowledge.
 
-![Abstract Pipeline](./docs/figures/flow.svg)
+![Abstract Pipeline](./outputs/figures/flow.svg)
 
 ---
 
@@ -55,7 +55,6 @@ We examine two common methods for probing the veracity of LLMs and discover seve
       - [ArXiv Preprint Version](#arxiv-preprint-version)
     - [Code](#code)
     - [Data](#data)
-  - [📝 To Do](#-to-do)
   - [📃 Licenses](#-licenses)
 
 ## 📘 Repository Overview
@@ -76,11 +75,13 @@ Along with the code, we provide the usage examples and results.
 ### What is not included?
 
 1. Activations and the coefficients for the trained probes (we only include activations for the 13th decoder of the `llama-3-8b` model and `city_locations` dataset)
-2. Codes to generate plots.
+2. Full generated artifacts for every model/configuration run (for example, complete figure/table sets and all intermediate outputs).
+
+Plot generation code is included in `analysis/make_plots.py`, `make_plots.ipynb`, and `make_tables.ipynb`.
 
 ### `sAwMIL` (Sparse Aware Multiple Instance Learning) Implementation
 
-The code for the `sAwMIL` is partially based on the [garydoranjr/misvm](https://github.com/garydoranjr/misvm) repository (contains the `sbMIL` implementation for older versions of Python and [cvxopt](https://cvxopt.org/)). We adapt [MISVM](https://github.com/garydoranjr/misvm) code for `python=3.11.11` and `cvxopt=1.3.2`. The patched code for the `sAwMIL` is located in [probes/sawmil](probes/sawmil.py) script.
+The code for the `sAwMIL` is partially based on the [garydoranjr/misvm](https://github.com/garydoranjr/misvm) repository (contains the `sbMIL` implementation for older versions of Python and [cvxopt](https://cvxopt.org/)). We adapt [MISVM](https://github.com/garydoranjr/misvm) code for `python=3.12` and `cvxopt=1.3.2`. The patched code for the `sAwMIL` is located in [probes/sawmil](probes/sawmil.py) script.
 
 > [!NOTE]
 > The **alpha** standalone `sAwMIL` package is available at [PyPi](https://pypi.org/project/sawmil/) and [carlomarxd/sawmil](https://github.com/carlomarxdk/sawmil).
@@ -199,7 +200,7 @@ python run_training.py \
       search=True
 ```
 
-A small example is provided in the `making_predictions.ipynb` notebook.
+For an example of loading and checking results, see `notebooks/check_results.ipynb`.
 
 #### 4. Single Instance Probe
 
@@ -268,7 +269,6 @@ The code for interventions is located in `run_intervention.py`.
 
 ```bash
 python run_intervention.py \
-      --config-name=interventions.yaml \
       model=llama-3-8b \
       datapack=city_locations \
       task=0
@@ -424,26 +424,6 @@ The citation for the latest version:
 }
 ```
 
-## 📝 To Do
-
-> [!WARNING]
-> We have refactored the code to improve readability. Please let us know if something does not work.
-
-- [x] Check `run_zero_shot.py`
-- [x] Check `collect_activations.py`
-- [x] Check `run_training.py` for SIL probes (SVM and Mean Difference)
-- [x] Check `run_training.py` for `sAwMIL`
-- [x] Add the multiclass SIL and MIL script
-- [x] Check the multiclass SIL (SVM)
-- [x] Check the multiclass MIL (`sAwMIL`)
-- [x] Upload `llama-3-8b` activations for the `city_locations` dataset
-- [x] Add code for interventions and cross-dataset generalization
-- [x] Check the script for the cross-dataset generalization
-- [x] Check the script for the interventions
-- [x] Add scripts/notebooks for plot generation
-- [x] Add examples: data loading
-- [x] Describe the contents of the repository
-
 ## 📃 Licenses
 
 **Contacts**:
@@ -454,3 +434,6 @@ The citation for the latest version:
 > [!IMPORTANT]
 > This **code** is licensed under the MIT License. See [LICENSE](LICENSE) for more information.
 > The **data** is licensed under the [Creative Commons Attribution 4.0 (CC BY 4.0)](https://huggingface.co/datasets/choosealicense/licenses/blob/main/markdown/cc-by-4.0.md).
+
+1. This is research software. While we strive for correctness and reproducibility, please verify results for your specific use case.
+2. GitHub Copilot and Claude contributed to code annotations, docstrings, and formatting. All algorithmic logic, methodological design, and scientific claims were developed and reviewed by the authors.

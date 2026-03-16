@@ -250,3 +250,7 @@ configs/model/base_gemma.yaml
 /outputs/archive
 /outputs/interv-1
 /outputs/interv-3
+rerun_intervention.py
+analyze_intervention.ipynb
+analyze_interventions.ipynb
+explore_pooled_interventions.ipynb
