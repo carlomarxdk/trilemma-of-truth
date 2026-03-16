@@ -253,4 +253,6 @@ analyze_interventions.ipynb
 explore_pooled_interventions.ipynb
 /outputs/figures
 /outputs/probes/**/*.npy
+/outputs/probes/**/**/*.npy
 /outputs/probes/**/*.joblib
+/outputs/probes/**/**/*.joblib
