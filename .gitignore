@@ -192,10 +192,7 @@ outputs/activations/llama-3-8b/city_locations_synthetic/full/layer_7_e.npz
 configs/setup/explorer.yaml
 outputs/experiments.db
 /.bash_scripts
-/outputs/probes
 *.db
-/outputs/probes/sawmil
-/outputs/figures
 
 # keep
 outputs/activations/_llama-3.1-8b/med_indications/full/layer_0_e_temp.npy
@@ -254,3 +251,6 @@ rerun_intervention.py
 analyze_intervention.ipynb
 analyze_interventions.ipynb
 explore_pooled_interventions.ipynb
+/outputs/figures
+/outputs/probes/**/*.npy
+/outputs/probes/**/*.joblib
