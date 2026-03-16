@@ -256,3 +256,4 @@ explore_pooled_interventions.ipynb
 /outputs/probes/**/**/*.npy
 /outputs/probes/**/*.joblib
 /outputs/probes/**/**/*.joblib
+/outputs/probes

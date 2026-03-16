@@ -1,27 +1,20 @@
-# The Trilemma of Truth in Large Language Models
+# Rethinking Veracity in Large Language Models:  Three Flawed Assumptions, One New Probe
 
-[![arXiv](https://img.shields.io/badge/arXiv-2506.23921-b31b1b.svg)](https://arxiv.org/abs/2506.23921)
-[![🤗 Datasets](https://img.shields.io/badge/🤗%20Datasets-trilemma--of--truth-yellow)](https://huggingface.co/datasets/carlomarxx/trilemma-of-truth)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Email](https://img.shields.io/badge/Email-g.savcisens@northeastern.edu-orange)](mailto:g.savcisens@northeastern.edu)
-[![DOI](https://zenodo.org/badge/986600505.svg)](https://doi.org/10.5281/zenodo.15779092)
 
-**This repository** is the codebase for [our paper](https://arxiv.org/abs/2506.23921) on evaluating factual reasoning in large language models.  
+**This repository** is the codebase for evaluating factual reasoning in large language models.  
 Here you’ll find everything needed to  
-1. Generate and inspect our three Trilemma data sets (city locations, drug indications, word definitions),  
+
+1. Generate and inspect our  datasets (city locations, drug indications, word definitions),  
 2. Run zero-shot prompts,  
-3. Train and evaluate a suite of probe models (from mean-difference to our sAwMIL),  
+3. Train and evaluate a suite of probes.
 
-**Abstract:** We often attribute human characteristics to large language models (LLMs) and claim that they "know" certain things. LLMs have an internal probabilistic knowledge that represents information retained during training. How can we assess the veracity of this knowledge? 
-We examine two common methods for probing the veracity of LLMs and discover several assumptions that are flawed. To address these flawed assumptions, we introduce `sAwMIL` (short for Sparse Aware Multiple-Instance Learning), a probing method that utilizes the internal activations of LLMs to separate statements into *true*, *false*, and *neither*. `sAwMIL` is based on multiple-instance learning and conformal prediction. We evaluate `sAwMIL` on 5 validity criteria across 16 open-source LLMs, including both default and chat-based variants, as well as on 3 new datasets. Among the insights we provide are: (1) the veracity signal is often concentrated in the third quarter of an LLM's depth; (2) truth and falsehood signals are not always symmetric; (3) linear probes perform better on chat models than on default models; (4) nonlinear probes may be required to capture veracity signals for some LLMs with reinforcement learning from human feedback or knowledge distillation; and (5) LLMs capture a third type of signal that is distinct from true and false and is neither true nor false. These findings provide a reliable method for verifying what LLMs "know" and how certain they are of their probabilistic internal knowledge.
-
-![Abstract Pipeline](./outputs/figures/flow.svg)
+**Abstract:** The public often attributes human-like qualities to large language models (LLMs), assuming that they ``know'' certain things. In reality, LLMs encode information retained during training as internal probabilistic knowledge. This study examines existing methods for probing the veracity of that knowledge and identifies three flawed underlying assumptions. To address these flaws, we introduce sAwMIL (Sparse-Aware Multiple-Instance Learning), a multiclass probing framework that combines multiple-instance learning with conformal prediction. sAwMIL leverages LLMs' internal representations to classify statements as *true*, *false*, or *neither*. We evaluate sAwMIL across 16 open-source LLMs, including default and chat-based variants, using three new curated datasets. Our results show that (1) common probing methods fail to provide a reliable and transferable veracity direction and, in some settings, perform worse than zero-shot prompting; (2) truth and falsehood are not encoded symmetrically; and (3) LLMs encode a third type of signal that is distinct from both true and false.
 
 ---
 
 ## Table of Contents
 
-- [The Trilemma of Truth in Large Language Models](#the-trilemma-of-truth-in-large-language-models)
+- [Rethinking Veracity in Large Language Models:  Three Flawed Assumptions, One New Probe](#rethinking-veracity-in-large-language-models--three-flawed-assumptions-one-new-probe)
   - [Table of Contents](#table-of-contents)
   - [📘 Repository Overview](#-repository-overview)
     - [What is included?](#what-is-included)
@@ -32,7 +25,6 @@ We examine two common methods for probing the veracity of LLMs and discover seve
     - [Run the Scripts](#run-the-scripts)
       - [0. Return full error log in `Hydra`](#0-return-full-error-log-in-hydra)
       - [1. Collect Hidden Activations](#1-collect-hidden-activations)
-        - [(Optional) Compress the activations](#optional-compress-the-activations)
       - [2. Run zero-shot prompt (and collect scores)](#2-run-zero-shot-prompt-and-collect-scores)
       - [3. Train *sAwMIL* probe](#3-train-sawmil-probe)
         - [3.1. One-vs-all](#31-one-vs-all)
@@ -48,13 +40,6 @@ We examine two common methods for probing the veracity of LLMs and discover seve
   - [🗂️ Dataset](#️-dataset)
     - [Structure](#structure)
     - [Load Data with `DataHandler`](#load-data-with-datahandler)
-    - [Processed Data on Hugging Face 🤗](#processed-data-on-hugging-face-)
-  - [✍️ How to Cite?](#️-how-to-cite)
-    - [Manuscript](#manuscript)
-      - [NeurIPS Workshop Version](#neurips-workshop-version)
-      - [ArXiv Preprint Version](#arxiv-preprint-version)
-    - [Code](#code)
-    - [Data](#data)
   - [📃 Licenses](#-licenses)
 
 ## 📘 Repository Overview
@@ -65,7 +50,7 @@ Along with the code, we provide the usage examples and results.
 ### What is included?
 
 1. [datasets](datasets/) folder contains the datasets (e.g., statement) that we use. The subfolders contain the notebooks that we used to generate datasets, as well as generate the syntehtic entities and statements
-2. [outputs/probes/prompt](outputs/probes/prompt) contains the scores for the *zero-shot prompting* (for every mode, dataset and instruction phrasing). These can be load using the `DataHandler` class. 
+2. [outputs/probes/prompt](outputs/probes/prompt) contains the scores for the *zero-shot prompting* (for every mode, dataset and instruction phrasing). These can be load using the `DataHandler` class.
 3. [outputs/probes/mean_diff](outputs/probes/mean_diff) contains an example of results for the *mean-difference* probe (`Llama-3-8b` model, `city_locations` dataset, based on the activations of the 7th decoder).
 4. [configs](configs/) contains experiment configurations; `Hydra` uses these to run experiments.
 5. [outputs/activations/llama-3-8b](outputs/activations/llama-3-8b) contains activations for the `city_locations` dataset (13th decoder).
@@ -83,35 +68,15 @@ Plot generation code is included in `analysis/make_plots.py`, `make_plots.ipynb`
 
 The code for the `sAwMIL` is partially based on the [garydoranjr/misvm](https://github.com/garydoranjr/misvm) repository (contains the `sbMIL` implementation for older versions of Python and [cvxopt](https://cvxopt.org/)). We adapt [MISVM](https://github.com/garydoranjr/misvm) code for `python=3.12` and `cvxopt=1.3.2`. The patched code for the `sAwMIL` is located in [probes/sawmil](probes/sawmil.py) script.
 
-> [!NOTE]
-> The **alpha** standalone `sAwMIL` package is available at [PyPi](https://pypi.org/project/sawmil/) and [carlomarxd/sawmil](https://github.com/carlomarxdk/sawmil).
+
 
 ## ⚡ Installation
-
-Clone the repository:
-
-```sh
-git clone https://github.com/carlomarxdk/trilemma-of-truth.git
-cd trilemma-of-truth
-```
-
-> [!WARNING]
-> Activation files stored in [outputs/activations/llama-3-8b](outputs/activations/llama-3-8b) might take up to 4GB (you may decide to exclude them when cloning the repository). These files are stored using the [GitHub LFS](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-git-large-file-storage), you can *ignore* these files while clonning with
-
-```bash
-GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/carlomarxdk/trilemma-of-truth.git
-cd trilemma-of-truth
-### if later you want to load these files, you can run the following:
-# git lfs pull
-```
 
 Install dependencies:
 
 ```sh
 pip install -r requirements.txt
 ```
-
-Additionally, refer to [macOS using Homebrew, Pyenv, and Pipenv](https://medium.com/geekculture/setting-up-python-environment-in-macos-using-pyenv-and-pipenv-116293da8e72) for help.
 
 Get HuggingFace **Access Tokens** for gated models:
 > [!NOTE]
@@ -142,18 +107,6 @@ python collect_activations.py model=llama-3-8b
 # see configs/activations.yaml for all the paramaters
 ```
 
-After you collected the activations, you can load them using the code in [notebooks/load_and_split_dataset](notebooks/load_and_split_dataset.ipynb) notebook.
-
-##### (Optional) Compress the activations
-
-Files that store activations are pretty heavy. You can run `compress_activations.py` to further reduce the size (the `DataHandler` object can handle both uncompressed and compressed activations):
-
-```bash
-python compress_activations.py model=llama-3-8b 
-# see configs/activations.yaml for all the paramaters
-```
-
-This method reduces the size of the file by 15-60% (earlier layers have lower compression rate).
 
 #### 2. Run zero-shot prompt (and collect scores)
 
@@ -200,7 +153,6 @@ python run_training.py \
       search=True
 ```
 
-For an example of loading and checking results, see `notebooks/check_results.ipynb`.
 
 #### 4. Single Instance Probe
 
@@ -325,115 +277,10 @@ dh.assemble(
     # in this case, test size is going to be approximatelly 25% of all the samples. 
 )
 ```
-
-For more usage examples, see the [notebooks/](notebooks/) folder.
-
-### Processed Data on Hugging Face 🤗
-
-The  final preprocessed datasets - including standardized splits - are also available on [Hugging Face Datasets](https://huggingface.co/datasets/carlomarxx/trilemma-of-truth). These are ideal if you want to skip local preprocessing and directly load ready-to-use datasets into your workflow. They follow the same structure and splitting scheme we use internally. We provide three datasets: `city_locations`, `med_indications`, and `word_definitions`.
-
-> [!IMPORTANT]
-> **Note I:** These Hugging Face -- hosted datasets are *not* used in our experiments.  
-> 
-> **Note II**: All experiments in this repository (e.g., `collect_activations.py`, probe evaluations) rely on the `DataHandler` class, which assembles the datasets locally from the `datasets/` folder.
-> 
-> **Note III:** The calibration split is labeled as `validation`, following Hugging Face naming conventions (`train`, `validation`, `test`).
-
-**How to use HF?** First, install the 🤗 Datasets and `pandas` libraries:
-
-```bash
-pip install datasets pandas
-```
-
-Then load the data with the `datasets` package. The dataset identifier is `carlomarxx/trilemma-of-truth`.
-
-```python
-from datasets import load_dataset
-
-# 1. Load the full dataset with train/validation/test splits
-ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions")
-
-# Convert to pandas
-df = ds["train"].to_pandas()
-
-# Access the first example
-print(ds["train"][0])
-
-# 2. Load a specific split [train, validation, test]
-ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split="train")
-```
-
-## ✍️ How to Cite?
-
-### Manuscript
-
-#### NeurIPS Workshop Version
-
-*Version accepted to the [Mechanistic Interpretability Workshop at NeurIPS 2025](https://mechinterpworkshop.com/)*:
-
-```bibtex
-@inproceedings{
-savcisens2025trilemma,
-title={Trilemma of Truth in Large Language Models: Preliminary Findings},
-author={Germans Savcisens and Tina Eliassi-Rad},
-booktitle={Mechanistic Interpretability Workshop at NeurIPS 2025},
-year={2025},
-url={https://openreview.net/forum?id=z7dLG2ycRf}
-}
-```
-
-#### ArXiv Preprint Version
-
-```bibtex
-@inproceedings{trilemma2025preprint,
-      title={The Trilemma of Truth in Large Language Models},
-      author={Savcisens, Germans and Eliassi‐Rad, Tina},
-      booktitle={arXiv preprint arXiv:2506.23921},
-      year={2025}
-    }
-```
-
-### Code
-
-The citation for the latest version:
-
-```bibtex
-@software{trilemma2025code,
-  author       = {Savcisens, Germans and
-                  Eliassi-Rad, Tina},
-  title        = {carlomarxdk/trilemma-of-truth: SEE VERSION AT THE TOP OF THE REPOSITORY}, #example: v0.5.1
-  month        = aug,
-  year         = 2025,
-  publisher    = {Zenodo},
-  version      = {SEE VERSION AT THE TOP OF THE REPOSITORY},  #example: v0.5.1
-  doi          = {INSERT ZENODO DOI AT THE TOP}, #example: 10.5281/zenodo.15779092
-  url          = {https://doi.org/_INSERT ZENODO DOI AT THE TOP_}, #example: 10.5281/zenodo.15779092
-}
-```
-
-### Data
-
-```bibtex
-@misc{trilemma2025data,
-  author       = { Germans Savcisens and Tina Eliassi-Rad },
-  title        = { trilemma-of-truth (Revision cd49e0e) },
-  year         = 2025,
-  url          = { https://huggingface.co/datasets/carlomarxx/trilemma-of-truth },
-  doi          = { 10.57967/hf/5900 },
-  publisher    = { Hugging Face }
-}
-```
-
 ## 📃 Licenses
-
-**Contacts**:
-
-- [Germans Savcisens](https://savcisens.com/) (@carlomarxdk)
-- [Tina Eliassi-Rad](https://eliassi.org/) (@eliassi)
 
 > [!IMPORTANT]
 > This **code** is licensed under the MIT License. See [LICENSE](LICENSE) for more information.
-> The **data** is licensed under the [Creative Commons Attribution 4.0 (CC BY 4.0)](https://huggingface.co/datasets/choosealicense/licenses/blob/main/markdown/cc-by-4.0.md).
 
 1. This is research software. While we strive for correctness and reproducibility, please verify results for your specific use case.
 2. GitHub Copilot and Claude contributed to code annotations, docstrings, and formatting. All algorithmic logic, methodological design, and scientific claims were developed and reviewed by the authors.
