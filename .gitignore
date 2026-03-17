@@ -242,3 +242,16 @@ configs/datapack/_med_indications.yaml
 /outputs/interv
 configs/model/base_gemma.yaml
 /.github
+/outputs/interv_wrong
+/outputs/archive/interv-1
+/outputs/archive/interv-3
+/outputs/archive/interv-3b
+/outputs/archive/interv-5
+/outputs/archive
+/outputs/interv-1
+/outputs/interv-3
+rerun_intervention.py
+analyze_intervention.ipynb
+analyze_interventions.ipynb
+explore_pooled_interventions.ipynb
+Pipfile

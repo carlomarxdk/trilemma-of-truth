@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from scipy.stats import bootstrap
+
 import warnings
 from pathlib import Path
 
@@ -24,19 +26,84 @@ from .constants import (
 )
 
 
-def _summarize(df: pd.DataFrame) -> pd.DataFrame:
-    """Compute mean and standard error of MCC per datapack/probe pair."""
-
-    out = (
-        df.groupby(["datapack", "probe"])
-        .agg(mean=("mcc", "mean"), sem=("mcc", "sem"))
-        .reset_index()
-    )
+def _summarize(df: pd.DataFrame,
+               n_boot: int = 2000,
+               ci: float = 0.95,
+               rng=None) -> pd.DataFrame:
+    """Compute mean and CIs of MCC per datapack/probe pair."""
+    if rng is None:
+        rng = np.random.default_rng(42)
+        
+    records = []
+    for (datapack, probe), grp in df.groupby(["datapack", "probe"]): # type: ignore
+        vals = grp["mcc"].to_numpy()
+        mean = vals.mean()
+        if len(vals) >= 2:
+            res = bootstrap(
+                (vals,),
+                np.mean,
+                n_resamples=n_boot,
+                confidence_level=ci,
+                random_state=rng,
+                method="percentile",
+            )
+            ci_low = res.confidence_interval.low
+            ci_high = res.confidence_interval.high
+        else:
+            ci_low = ci_high = mean  # degenerate: no spread to estimate
+        records.append(
+            {"datapack": datapack, "probe": probe,
+             "mean": mean, "ci_low": ci_low, "ci_high": ci_high}
+        )
+    out = pd.DataFrame(records)
     out["probe"] = pd.Categorical(out["probe"], categories=PROBE_ORDER, ordered=True)
     out["datapack"] = pd.Categorical(
         out["datapack"], categories=DATAPACK_ORDER, ordered=True
     )
     return out.sort_values(["probe", "datapack"])
+
+
+def _summarize_per_condition(df: pd.DataFrame, 
+                             n_boot: int = 2000, 
+                             ci: float = 0.95, 
+                             rng=None) -> pd.DataFrame:
+    """Compute mean and CIs of MCC per probe/condition pair."""
+    if rng is None:
+        rng = np.random.default_rng(42)
+    records = []
+    for (probe, condition), grp in df.groupby(["probe", "condition"]): # type: ignore
+        vals = grp["mcc"].to_numpy()
+        mean = vals.mean()
+        if len(vals) >= 2:
+            res = bootstrap(
+                (vals,),
+                np.mean,
+                n_resamples=n_boot,
+                confidence_level=ci,
+                random_state=rng,
+                method="percentile",
+            )
+            ci_low = res.confidence_interval.low
+            ci_high = res.confidence_interval.high
+        else:
+            ci_low = ci_high = mean
+        records.append(
+            {"probe": probe, "condition": condition,
+             "mean": mean, "ci_low": ci_low, "ci_high": ci_high}
+        )
+    out = pd.DataFrame(records)
+    out["probe"] = pd.Categorical(out["probe"], categories=PROBE_ORDER, ordered=True)
+    out["condition"] = pd.Categorical(
+        out["condition"], categories=["instance", "bag"], ordered=True
+    )
+    return out.sort_values(["probe", "condition"])
+
+def _yerr(subset: pd.DataFrame) -> np.ndarray:
+    """Return (2, 1) asymmetric yerr array from ci_low/ci_high columns."""
+    return np.array([
+        [subset["mean"].values[0] - subset["ci_low"].values[0]],
+        [subset["ci_high"].values[0] - subset["mean"].values[0]],
+    ])
 
 
 def plot_performance_by_dataset(
@@ -135,7 +202,7 @@ def plot_performance_by_dataset(
                 inst_pos,
                 inst_subset["mean"],
                 bar_width,
-                yerr=inst_subset["sem"],
+                yerr=_yerr(inst_subset),
                 capsize=3,
                 color=inst_face,
                 hatch="////",
@@ -159,7 +226,7 @@ def plot_performance_by_dataset(
                 bag_pos,
                 bag_subset["mean"],
                 bar_width,
-                yerr=bag_subset["sem"],
+                yerr=_yerr(bag_subset),
                 capsize=3,
                 color=DATASET_COLOR[datapack],
                 linewidth=1,
@@ -180,7 +247,7 @@ def plot_performance_by_dataset(
     ax.set_xticks(xtick_centers)
     probe_labels = [PROBE_NAMES.get(p, p) for p in PROBE_ORDER]
     ax.set_xticklabels(probe_labels, rotation=0, ha="center")
-    ax.set_ylabel("Mean MCC ± SEM")
+    ax.set_ylabel("Mean MCC (95% CI)")
     ax.set_xlabel("Probe")
     ax.set_title("MCC by Probe and Dataset")
     ax.set_ylim(-0.05, 1.00)
@@ -198,7 +265,7 @@ def plot_performance_by_dataset(
     ax.legend(
         legend_handles,
         legend_labels,
-        title="Dataset (Condition)",
+        title="Dataset (Setting)",
         loc="upper left",
         bbox_to_anchor=(0.02, 1.02),
         ncol=2,
@@ -256,11 +323,10 @@ def plot_performance_by_condition(
     if present.empty:
         raise ValueError("No rows with recognized conditions to plot.")
 
-    df_agg = (
-        present.groupby(["probe", "condition"])
-        .agg(mean=("mcc", "mean"), sem=("mcc", "sem"))
-        .reset_index()
-    )
+
+    df_agg = _summarize_per_condition(present)
+    
+    print(df_agg)
 
     probe_order = [p for p in PROBE_ORDER if p in df_agg["probe"].unique()]
     if not probe_order:
@@ -282,7 +348,7 @@ def plot_performance_by_condition(
 
     palette = {cond: CONDITION_COLOR[cond] for cond in condition_order}
 
-    fig, ax = plt.subplots(figsize=(4, 3))
+    fig, ax = plt.subplots(figsize=(4.75, 2.5))
     legend_handles: list[plt.Artist] = []
     legend_labels: list[str] = []
     seen: set[str] = set()
@@ -300,7 +366,7 @@ def plot_performance_by_condition(
                 pos,
                 subset["mean"],
                 bar_width,
-                yerr=subset["sem"],
+                yerr=_yerr(subset),
                 capsize=3,
                 color=palette[cond],
                 linewidth=1.3,
@@ -321,9 +387,9 @@ def plot_performance_by_condition(
     ax.set_xticks(xtick_centers)
     probe_labels = [PROBE_NAMES.get(p, p) for p in probe_order]
     ax.set_xticklabels(probe_labels, rotation=0, ha="center")
-    ax.set_ylabel("Mean MCC ± SEM")
+    ax.set_ylabel("Mean MCC (95% CI)")
     ax.set_xlabel("Probe")
-    ax.set_title("MCC by Condition and Probe")
+    ax.set_title("MCC by Setting and Probe")
     ax.set_ylim(-0.05, 1.00)
     span = bar_width + half_gap
     left_margin = xtick_centers[0] - span - 0.2
@@ -340,7 +406,7 @@ def plot_performance_by_condition(
     ax.legend(
         legend_handles,
         legend_labels,
-        title="Condition",
+        title="Evaluation Setting",
         loc="upper left",
         bbox_to_anchor=(0.02, 1.02),
         ncol=1,
@@ -357,7 +423,7 @@ def plot_performance_by_condition(
         out_path,
         **SAVEFIG_OPTS,
         metadata={
-            "Title": "MCC by condition across probes",
+            "Title": "MCC by setting across probes",
             "Creator": "Germans Savcisens",
         },
     )
@@ -472,7 +538,7 @@ def plot_generalization_by_dataset(
                 inst_pos,
                 inst_subset["mean"],
                 bar_width,
-                yerr=inst_subset["sem"],
+                yerr=_yerr(inst_subset),
                 capsize=3,
                 color=inst_face,
                 hatch="////",
@@ -496,7 +562,7 @@ def plot_generalization_by_dataset(
                 bag_pos,
                 bag_subset["mean"],
                 bar_width,
-                yerr=bag_subset["sem"],
+                yerr=_yerr(bag_subset),
                 capsize=3,
                 color=DATASET_COLOR[datapack],
                 linewidth=1.3,
@@ -517,7 +583,7 @@ def plot_generalization_by_dataset(
     ax.set_xticks(xtick_centers)
     probe_labels = [PROBE_NAMES.get(p, p) for p in probe_order]
     ax.set_xticklabels(probe_labels, rotation=0, ha="center")
-    ax.set_ylabel("Mean MCC ± SEM")
+    ax.set_ylabel("Mean MCC (95% CI)")
     ax.set_xlabel("Probe")
     ax.set_title("Cross-Dataset MCC by Target Dataset and Probe")
     ax.set_ylim(-0.05, 1.00)
@@ -608,12 +674,8 @@ def plot_generalization_by_condition(
     present = present[present["target_datapack"].isin(DATAPACK_ORDER)]
     if present.empty:
         raise ValueError("No cross-dataset rows with bag/instance conditions to plot.")
-
-    df_agg = (
-        present.groupby(["probe", "condition"])
-        .agg(mean=("mcc", "mean"), sem=("mcc", "sem"))
-        .reset_index()
-    )
+    
+    df_agg = _summarize_per_condition(present)
 
     probe_order = [p for p in PROBE_ORDER if p in df_agg["probe"].unique()]
     if not probe_order:
@@ -635,7 +697,7 @@ def plot_generalization_by_condition(
 
     palette = {cond: CONDITION_COLOR[cond] for cond in condition_order}
 
-    fig, ax = plt.subplots(figsize=(4, 3))
+    fig, ax = plt.subplots(figsize=(4.25, 2.5))
     legend_handles: list[plt.Artist] = []
     legend_labels: list[str] = []
     seen: set[str] = set()
@@ -653,7 +715,7 @@ def plot_generalization_by_condition(
                 pos,
                 subset["mean"],
                 bar_width,
-                yerr=subset["sem"],
+                yerr=_yerr(subset),
                 capsize=3,
                 color=palette[cond],
                 linewidth=1.3,
@@ -674,9 +736,9 @@ def plot_generalization_by_condition(
     ax.set_xticks(xtick_centers)
     probe_labels = [PROBE_NAMES.get(p, p) for p in probe_order]
     ax.set_xticklabels(probe_labels, rotation=0, ha="center")
-    ax.set_ylabel("Mean MCC ± SEM")
+    ax.set_ylabel("Mean MCC (95% CI)")
     ax.set_xlabel("Probe")
-    ax.set_title("Cross-Dataset MCC by Condition and Probe")
+    ax.set_title("Cross-Dataset MCC by Setting and Probe")
     ax.set_ylim(-0.05, 1.00)
     span = bar_width + half_gap
     left_margin = xtick_centers[0] - span - 0.2
@@ -693,7 +755,7 @@ def plot_generalization_by_condition(
     ax.legend(
         legend_handles,
         legend_labels,
-        title="Condition",
+        title="Evaluation Setting",
         loc="upper left",
         bbox_to_anchor=(0.02, 1.02),
         ncol=1,
@@ -710,7 +772,7 @@ def plot_generalization_by_condition(
         out_path,
         **SAVEFIG_OPTS,
         metadata={
-            "Title": "Cross-dataset MCC by condition across probes",
+            "Title": "Cross-dataset MCC by setting across probes",
             "Creator": "Germans Savcisens",
         },
     )

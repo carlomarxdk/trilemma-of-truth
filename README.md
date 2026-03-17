@@ -6,16 +6,18 @@
 [![Email](https://img.shields.io/badge/Email-g.savcisens@northeastern.edu-orange)](mailto:g.savcisens@northeastern.edu)
 [![DOI](https://zenodo.org/badge/986600505.svg)](https://doi.org/10.5281/zenodo.15779092)
 
-**This repository** is the codebase for [our paper](https://arxiv.org/abs/2506.23921) on evaluating factual reasoning in large language models.  
+**This repository** is the codebase for [our paper](https://openreview.net/forum?id=z7dLG2ycRf) on evaluating factual reasoning in large language models.  
 Here you’ll find everything needed to  
 1. Generate and inspect our three Trilemma data sets (city locations, drug indications, word definitions),  
-2. Run zero-shot prompts,  
-3. Train and evaluate a suite of probe models (from mean-difference to our sAwMIL),  
+2. Collect hidden activations (and optionally compress them),  
+3. Train and evaluate a suite of probing method (from mean-difference to our sAwMIL),  
+4. Evaluate cross-dataset generalization of trained probes, and  
+5. Run causal intervention experiments on model representations.  
 
 **Abstract:** We often attribute human characteristics to large language models (LLMs) and claim that they "know" certain things. LLMs have an internal probabilistic knowledge that represents information retained during training. How can we assess the veracity of this knowledge? 
 We examine two common methods for probing the veracity of LLMs and discover several assumptions that are flawed. To address these flawed assumptions, we introduce `sAwMIL` (short for Sparse Aware Multiple-Instance Learning), a probing method that utilizes the internal activations of LLMs to separate statements into *true*, *false*, and *neither*. `sAwMIL` is based on multiple-instance learning and conformal prediction. We evaluate `sAwMIL` on 5 validity criteria across 16 open-source LLMs, including both default and chat-based variants, as well as on 3 new datasets. Among the insights we provide are: (1) the veracity signal is often concentrated in the third quarter of an LLM's depth; (2) truth and falsehood signals are not always symmetric; (3) linear probes perform better on chat models than on default models; (4) nonlinear probes may be required to capture veracity signals for some LLMs with reinforcement learning from human feedback or knowledge distillation; and (5) LLMs capture a third type of signal that is distinct from true and false and is neither true nor false. These findings provide a reliable method for verifying what LLMs "know" and how certain they are of their probabilistic internal knowledge.
 
-![Abstract Pipeline](./docs/figures/flow.svg)
+![Abstract Pipeline](./outputs/figures/flow.svg)
 
 ---
 
@@ -41,7 +43,7 @@ We examine two common methods for probing the veracity of LLMs and discover seve
         - [4.1 Train *one-vs-all SVM* probe](#41-train-one-vs-all-svm-probe)
         - [4.2 Train *multiclass SVM* probe](#42-train-multiclass-svm-probe)
         - [4.3 Train binary SIL baselines](#43-train-binary-sil-baselines)
-      - [5. Extra](#5-extra)
+      - [5. Generalization and Interventions](#5-generalization-and-interventions)
         - [5.1 Generalization Performance](#51-generalization-performance)
         - [5.2 Interventions](#52-interventions)
     - [Task specification](#task-specification)
@@ -55,7 +57,6 @@ We examine two common methods for probing the veracity of LLMs and discover seve
       - [ArXiv Preprint Version](#arxiv-preprint-version)
     - [Code](#code)
     - [Data](#data)
-  - [📝 To Do](#-to-do)
   - [📃 Licenses](#-licenses)
 
 ## 📘 Repository Overview
@@ -76,14 +77,13 @@ Along with the code, we provide the usage examples and results.
 ### What is not included?
 
 1. Activations and the coefficients for the trained probes (we only include activations for the 13th decoder of the `llama-3-8b` model and `city_locations` dataset)
-2. Codes to generate plots.
+2. Full generated artifacts for every model/configuration run (for example, complete figure/table sets and all intermediate outputs).
+
+Plot generation code is included in `analysis/make_plots.py`, `make_plots.ipynb`, and `make_tables.ipynb`.
 
 ### `sAwMIL` (Sparse Aware Multiple Instance Learning) Implementation
 
-The code for the `sAwMIL` is partially based on the [garydoranjr/misvm](https://github.com/garydoranjr/misvm) repository (contains the `sbMIL` implementation for older versions of Python and [cvxopt](https://cvxopt.org/)). We adapt [MISVM](https://github.com/garydoranjr/misvm) code for `python=3.11.11` and `cvxopt=1.3.2`. The patched code for the `sAwMIL` is located in [probes/sawmil](probes/sawmil.py) script.
-
-> [!NOTE]
-> The **alpha** standalone `sAwMIL` package is available at [PyPi](https://pypi.org/project/sawmil/) and [carlomarxd/sawmil](https://github.com/carlomarxdk/sawmil).
+The code for the `sAwMIL` is partially based on the [garydoranjr/misvm](https://github.com/garydoranjr/misvm) repository (contains the `sbMIL` implementation for older versions of Python and [cvxopt](https://cvxopt.org/)). We adapt [MISVM](https://github.com/garydoranjr/misvm) code for `python=3.12` and `cvxopt=1.3.2`. The patched code for the `sAwMIL` is located in [probes/sawmil](probes/sawmil.py) script.
 
 ## ⚡ Installation
 
@@ -123,6 +123,13 @@ We use `Hydra` to run and manage our experiments. Refer to [Hydra Documentation]
 
 ### Run the Scripts
 
+All experiments are Hydra-driven. The core workflow in this repository is:
+
+1. Collect activations (`collect_activations.py`)
+2. Train probes (`run_training.py`)
+3. Evaluate generalization (`run_generalization.py`)
+4. Run interventions (`run_intervention.py`)
+
 #### 0. Return full error log in `Hydra`
 
 In `Hydra` you can specify `HYDRA_FULL_ERROR=1` before each command. For example: 
@@ -133,12 +140,12 @@ HYDRA_FULL_ERROR=1 python run_zero_shot.py model=llama-3-8b
 
 #### 1. Collect Hidden Activations
 
-To run experiments (e.g., train probes) on your machine, you need to collect hidden activations. The command below would collect hidden activations for every statement in the datasets, you only have to specify the name of the model, see [configs/activations.yaml](configs/activations.yaml) for more information on the attributes.
+To run probe training, generalization, and intervention experiments, first collect hidden activations. By default, this command collects activations for all datasets listed in [configs/activations.yaml](configs/activations.yaml).
 
 ```bash
-# To collect hidden activations for (every statement) specific model
+# Collect hidden activations for a specific model
 python collect_activations.py model=llama-3-8b 
-# see configs/activations.yaml for all the paramaters
+# See configs/activations.yaml for available overrides
 ```
 
 After you collected the activations, you can load them using the code in [notebooks/load_and_split_dataset](notebooks/load_and_split_dataset.ipynb) notebook.
@@ -149,7 +156,7 @@ Files that store activations are pretty heavy. You can run `compress_activations
 
 ```bash
 python compress_activations.py model=llama-3-8b 
-# see configs/activations.yaml for all the paramaters
+# See configs/activations.yaml for available overrides
 ```
 
 This method reduces the size of the file by 15-60% (earlier layers have lower compression rate).
@@ -164,7 +171,7 @@ python run_zero_shot.py \
       model=llama-3-8b \
       variation=default \
       batch_size=12 
-# see configs/probe_zeroshot.yaml for all the available paramaters
+# See configs/probe_zeroshot.yaml for all available parameters
 ```
 
 Note that we provide scores for every model in [outputs/probes/prompt](outputs/probes/prompt/) folder. We provide an example on how to load the scores from the zero-shot prompting in  [notebooks/load_and_split_dataset](notebooks/load_and_split_dataset.ipynb) notebook.
@@ -173,22 +180,22 @@ Note that we provide scores for every model in [outputs/probes/prompt](outputs/p
 
 ##### 3.1. One-vs-all
 
-Note that you must collect activations before training this probe. Generally, you need to train three SVM probes: one with `task=0`, one with `task=1` and `task=2`, see [Task Specification](#task-specification).
+You must collect activations before training this probe. For one-vs-all training, run one experiment per task (`task=0`, `task=1`, `task=2`), see [Task Specification](#task-specification).
 
 ```bash
-# Train one-vs-all probe (an example without the hyperparameter search)
+# Train one-vs-all sAwMIL probe
 python run_training.py \
       model=llama-3-8b \
       datapack=city_locations \
       probe=sawmil \
       task=0 \
-      search=True # True to activate the parameter search
+      search=True
 ```
 
 ##### 3.2 Multiclass
 
-After you collect all the activations and train three one-vs-all `sAwMIL` probes, you can proceed with training the multiclass one.
-The `run_training.py` runs only with the `task=-1`.
+After collecting activations, train a multiclass probe with `task=-1`.
+For multiclass in this codebase, use `probe=sawmil` (or `probe=svm` for multiclass SVM).
 
 ```bash
 python run_training.py \
@@ -199,7 +206,7 @@ python run_training.py \
       search=True
 ```
 
-A small example is provided in the `making_predictions.ipynb` notebook.
+For an example of loading and checking results, see `notebooks/check_results.ipynb`.
 
 #### 4. Single Instance Probe
 
@@ -228,7 +235,7 @@ python run_training.py \
       model=llama-3-8b \
       datapack=city_locations \
       probe=svm \
-      run_debugging=False \ # True would run the training only on the 13th layer
+      run_debugging=False \
       task=-1
 ```
 
@@ -244,11 +251,11 @@ python run_training.py  \
       task=3
 ```
 
-#### 5. Extra
+#### 5. Generalization and Interventions
 
 ##### 5.1 Generalization Performance
 
-To check the performance of the probe on another dataset you can run `run_generalization.py`. It will load the probe trained on `datapack` and use the test split of the `datapack@datapack_test`.
+To evaluate a trained probe on another dataset, use `run_generalization.py`. It loads probe artifacts from `outputs/probes/...` and evaluates on `datapack@datapack_test`.
 
 ```bash
 python run_generalization.py \
@@ -257,22 +264,33 @@ python run_generalization.py \
       datapack@datapack_test=med_indications \
       probe=sawmil \
       search=True \
-      task=-1 # Generalization of the multiclass sawmil
+      task=0
 ```
 
-Use the task nr that you used to train the probe. For example for `mean_diff` (or any other binary SIL), it is `task=3`.
+Use the same `probe`, `task`, and `search` values that were used during training.
+For multiclass generalization with `sawmil`/`svm`, use `task=-1`.
+For binary SIL baselines (`mean_diff`, `spca`, `ttpd`), use `task=3`.
 
 ##### 5.2 Interventions
 
-The code for interventions is located in `run_intervention.py`.
+The code for interventions is in `run_intervention.py`.
+Interventions require a trained binary probe for the same `model`/`datapack`/`probe`/`task`/`search` setup.
+`task=-1` (multiclass interventions) is not implemented.
 
 ```bash
 python run_intervention.py \
-      --config-name=interventions.yaml \
       model=llama-3-8b \
       datapack=city_locations \
+      probe=sawmil \
+      search=True \
       task=0
 ```
+
+Useful intervention overrides in [configs/interventions.yaml](configs/interventions.yaml):
+
+- `use_best_layers=True num_best_layers=5` to run only top-performing layers
+- `limit_num_statements=1000` to cap runtime
+- `counter_method.scaler=1` to control intervention magnitude
 
 ### Task specification
 
@@ -424,33 +442,13 @@ The citation for the latest version:
 }
 ```
 
-## 📝 To Do
-
-> [!WARNING]
-> We have refactored the code to improve readability. Please let us know if something does not work.
-
-- [x] Check `run_zero_shot.py`
-- [x] Check `collect_activations.py`
-- [x] Check `run_training.py` for SIL probes (SVM and Mean Difference)
-- [x] Check `run_training.py` for `sAwMIL`
-- [x] Add the multiclass SIL and MIL script
-- [x] Check the multiclass SIL (SVM)
-- [x] Check the multiclass MIL (`sAwMIL`)
-- [x] Upload `llama-3-8b` activations for the `city_locations` dataset
-- [x] Add code for interventions and cross-dataset generalization
-- [x] Check the script for the cross-dataset generalization
-- [x] Check the script for the interventions
-- [x] Add scripts/notebooks for plot generation
-- [x] Add examples: data loading
-- [x] Describe the contents of the repository
-
 ## 📃 Licenses
-
-**Contacts**:
-
-- [Germans Savcisens](https://savcisens.com/) (@carlomarxdk)
-- [Tina Eliassi-Rad](https://eliassi.org/) (@eliassi)
 
 > [!IMPORTANT]
 > This **code** is licensed under the MIT License. See [LICENSE](LICENSE) for more information.
 > The **data** is licensed under the [Creative Commons Attribution 4.0 (CC BY 4.0)](https://huggingface.co/datasets/choosealicense/licenses/blob/main/markdown/cc-by-4.0.md).
+
+
+> [!WARNING]
+> 1. This is research software. While we strive for correctness and reproducibility, please verify results for your specific use case.
+> 2. GitHub Copilot and Claude contributed to code annotations, docstrings, and formatting. All algorithmic logic, methodological design, and scientific claims were developed and reviewed by the authors.
