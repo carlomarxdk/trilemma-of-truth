@@ -3,21 +3,21 @@
 [![arXiv](https://img.shields.io/badge/arXiv-2506.23921-b31b1b.svg)](https://arxiv.org/abs/2506.23921)
 [![🤗 Datasets](https://img.shields.io/badge/🤗%20Datasets-trilemma--of--truth-yellow)](https://huggingface.co/datasets/carlomarxx/trilemma-of-truth)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Email](https://img.shields.io/badge/Email-g.savcisens@northeastern.edu-orange)](mailto:g.savcisens@northeastern.edu)
+[![Email](https://img.shields.io/badge/Email-germans@savcisens.com-orange)](mailto:germans@savcisens.com)
 [![DOI](https://zenodo.org/badge/986600505.svg)](https://doi.org/10.5281/zenodo.15779092)
 
-**This repository** is the codebase for [our paper](https://openreview.net/forum?id=z7dLG2ycRf) on evaluating factual reasoning in large language models.  
+**This repository** is the codebase for [our paper](https://arxiv.org/abs/2506.23921) on evaluating factual reasoning in large language models.  
 Here you’ll find everything needed to  
+
 1. Generate and inspect our three Trilemma data sets (city locations, drug indications, word definitions),  
 2. Collect hidden activations (and optionally compress them),  
-3. Train and evaluate a suite of probing method (from mean-difference to our sAwMIL),  
+3. Train and evaluate a suite of probing method (from mean-difference to our `sAwMIL`),  
 4. Evaluate cross-dataset generalization of trained probes, and  
 5. Run causal intervention experiments on model representations.  
 
-**Abstract:** We often attribute human characteristics to large language models (LLMs) and claim that they "know" certain things. LLMs have an internal probabilistic knowledge that represents information retained during training. How can we assess the veracity of this knowledge? 
-We examine two common methods for probing the veracity of LLMs and discover several assumptions that are flawed. To address these flawed assumptions, we introduce `sAwMIL` (short for Sparse Aware Multiple-Instance Learning), a probing method that utilizes the internal activations of LLMs to separate statements into *true*, *false*, and *neither*. `sAwMIL` is based on multiple-instance learning and conformal prediction. We evaluate `sAwMIL` on 5 validity criteria across 16 open-source LLMs, including both default and chat-based variants, as well as on 3 new datasets. Among the insights we provide are: (1) the veracity signal is often concentrated in the third quarter of an LLM's depth; (2) truth and falsehood signals are not always symmetric; (3) linear probes perform better on chat models than on default models; (4) nonlinear probes may be required to capture veracity signals for some LLMs with reinforcement learning from human feedback or knowledge distillation; and (5) LLMs capture a third type of signal that is distinct from true and false and is neither true nor false. These findings provide a reliable method for verifying what LLMs "know" and how certain they are of their probabilistic internal knowledge.
+**Abstract:** The public often attributes human-like qualities to large language models (LLMs), assuming that they "_know_" certain things. In reality, LLMs encode information retained during training as internal probabilistic knowledge. This study examines existing methods for probing the veracity of that knowledge and identifies three flawed underlying assumptions. To address these flaws, we introduce `sAwMIL` (Sparse-Aware Multiple-Instance Learning), a multiclass probing framework that combines multiple-instance learning with conformal prediction. `sAwMIL` leverages LLMs' internal representations to classify statements as **true**, **false**, or **neither**. We evaluate `sAwMIL` across 16 open-source LLMs, including default and chat-based variants, using three new curated datasets. Our results show that (1) common probing methods fail to provide a reliable and transferable veracity direction and, in some settings, perform worse than zero-shot prompting; (2) truth and falsehood are not encoded symmetrically; and (3) LLMs encode a third type of signal that is distinct from both true and false.
 
-![Abstract Pipeline](./docs/figures/flow.svg)
+![Abstract Pipeline](./docs/figures/flow.png)
 
 ---
 
@@ -53,8 +53,8 @@ We examine two common methods for probing the veracity of LLMs and discover seve
     - [Processed Data on Hugging Face 🤗](#processed-data-on-hugging-face-)
   - [✍️ How to Cite?](#️-how-to-cite)
     - [Manuscript](#manuscript)
-      - [NeurIPS Workshop Version](#neurips-workshop-version)
       - [ArXiv Preprint Version](#arxiv-preprint-version)
+      - [NeurIPS Workshop Version](#neurips-workshop-version)
     - [Code](#code)
     - [Data](#data)
   - [📃 Licenses](#-licenses)
@@ -66,7 +66,7 @@ Along with the code, we provide the usage examples and results.
 
 ### What is included?
 
-1. [datasets](datasets/) folder contains the datasets (e.g., statement) that we use. The subfolders contain the notebooks that we used to generate datasets, as well as generate the syntehtic entities and statements
+1. [datasets](datasets/) folder contains the datasets (e.g., statement) that we use. The subfolders contain the notebooks that we used to generate datasets, as well as generate the synthetic entities and statements
 2. [outputs/probes/prompt](outputs/probes/prompt) contains the scores for the *zero-shot prompting* (for every mode, dataset and instruction phrasing). These can be load using the `DataHandler` class. 
 3. [outputs/probes/mean_diff](outputs/probes/mean_diff) contains an example of results for the *mean-difference* probe (`Llama-3-8b` model, `city_locations` dataset, based on the activations of the 7th decoder).
 4. [configs](configs/) contains experiment configurations; `Hydra` uses these to run experiments.
@@ -210,7 +210,6 @@ For an example of loading and checking results, see `notebooks/check_results.ipy
 
 #### 4. Single Instance Probe
 
-These probes use only the last token representation (instead of bags)
 The **Single Instance Learning** probes use only representations of the last tokens (instead of the bags).
 
 ##### 4.1 Train *one-vs-all SVM* probe
@@ -300,7 +299,7 @@ You can train probe using different task configurations (see [misc/task.py](misc
 - **False-vs-All** (`task=1`): Separate *false* instances from all others (*true* and *neither* cases);
 - **Neither-vs-All** (`task=2`): Separate *neither* instances from all others (*true* and *false* cases);
 - **True-vs-False** (`task=3`): Separate *true* and *false* cases (the *neither* statements are filtered out);
-- **Multiclass** (`task=-1`): Multiclass setup, where labels correspond to `0=true`, `1=false` and `2=neither`.
+- **Multiclass** (`task=-1`): Multiclass setup, where labels correspond to `0=false`, `1=true` and `2=neither` (same as `multiclass_label` on Hugging Face).
 
 ## 🗂️ Dataset
 
@@ -312,8 +311,8 @@ The dataset scripts and files are located in the `datasets/` folder. This includ
 2. `datasets/generators/synthetic/`: Contains synthetic object/name lists (`*_raw.txt`) and manually filtered name list (`*_checked.csv`).
 3. `datasets/`: Final preprocessed CSV files used to assemble the following datasets:
    - City Locations: `["city_locations.csv", "city_locations_synthetic.csv"]`
-   - Medical Indications: `["med_indications", "med_indications_synthetic"]`
-   - Word Definitions: `["word_instances", "word_types", "word_synonyms", "word_types_synthetic", "word_instances_synthetic", "word_synonyms_synthetic"]`
+   - Medical Indications: `["med_indications.csv", "med_indications_synthetic.csv"]`
+   - Word Definitions: `["word_instances.csv", "word_types.csv", "word_synonyms.csv", "word_types_synthetic.csv", "word_instances_synthetic.csv", "word_synonyms_synthetic.csv"]`
 
 These datasets are used across our scripts to train probes and evaluate results.
 
@@ -338,9 +337,9 @@ dh.assemble(
     test_size=0.25,
     calibration_size=0.25,
     seed=42,
-    exclusive_split=True      # Ensures entities don’t appear in multiple splits 
-    # `True` would make the train, test and calibartion splits approximately split according to your specifications
-    # in this case, test size is going to be approximatelly 25% of all the samples. 
+    exclusive_split=True      # No (object_1, object_2) pair appears in more than one split
+    # With `exclusive_split=True`, split sizes are approximate:
+    # here, the test split is about 25% of all statements.
 )
 ```
 
@@ -348,14 +347,20 @@ For more usage examples, see the [notebooks/](notebooks/) folder.
 
 ### Processed Data on Hugging Face 🤗
 
-The  final preprocessed datasets - including standardized splits - are also available on [Hugging Face Datasets](https://huggingface.co/datasets/carlomarxx/trilemma-of-truth). These are ideal if you want to skip local preprocessing and directly load ready-to-use datasets into your workflow. They follow the same structure and splitting scheme we use internally. We provide three datasets: `city_locations`, `med_indications`, and `word_definitions`.
+The final datasets, with the same splits used in the paper, are on [Hugging Face Datasets](https://huggingface.co/datasets/carlomarxx/trilemma-of-truth). Use them if you want the data without running the local preprocessing. See the [dataset card](https://huggingface.co/datasets/carlomarxx/trilemma-of-truth) for field descriptions, data sources, and limitations.
+
+| Config | Relation | Source | Train | Validation | Test | Total |
+|---|---|---|---:|---:|---:|---:|
+| `city_locations` | city → country | GeoNames | 3,999 | 1,398 | 1,855 | 7,252 |
+| `med_indications` | drug → disease/condition | DrugBank 5.1.12 | 3,849 | 1,327 | 1,727 | 6,903 |
+| `word_definitions` | noun → synonym / type / instance | WordsAPI | 4,717 | 1,628 | 2,155 | 8,500 |
 
 > [!IMPORTANT]
-> **Note I:** These Hugging Face -- hosted datasets are *not* used in our experiments.  
-> 
-> **Note II**: All experiments in this repository (e.g., `collect_activations.py`, probe evaluations) rely on the `DataHandler` class, which assembles the datasets locally from the `datasets/` folder.
-> 
-> **Note III:** The calibration split is labeled as `validation`, following Hugging Face naming conventions (`train`, `validation`, `test`).
+> **Note I:** The experiment scripts (e.g., `collect_activations.py`, probe training) do not download from Hugging Face. They use the `DataHandler` class, which assembles the datasets locally from the `datasets/` folder.
+>
+> **Note II:** With the default settings in [configs/datapack/base.yaml](configs/datapack/base.yaml) (`test_size=0.25`, `cal_size=0.25`, `exclusive_split=True`, `random_seed=42`), `DataHandler` produces exactly the same train/calibration/test statements as the Hugging Face splits.
+>
+> **Note III:** The calibration split is called `validation` on Hugging Face, following its split naming (`train`, `validation`, `test`).
 
 **How to use HF?** First, install the 🤗 Datasets and `pandas` libraries:
 
@@ -385,30 +390,34 @@ ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split
 
 ### Manuscript
 
-#### NeurIPS Workshop Version
+#### ArXiv Preprint Version
 
-*Version accepted to the [Mechanistic Interpretability Workshop at NeurIPS 2025](https://mechinterpworkshop.com/)*:
+Please cite this version:
 
 ```bibtex
-@inproceedings{
-savcisens2025trilemma,
-title={Trilemma of Truth in Large Language Models: Preliminary Findings},
-author={Germans Savcisens and Tina Eliassi-Rad},
-booktitle={Mechanistic Interpretability Workshop at NeurIPS 2025},
-year={2025},
-url={https://openreview.net/forum?id=z7dLG2ycRf}
+@misc{savcisens2025trilemma,
+  title         = {The Trilemma of Truth in Large Language Models},
+  author        = {Savcisens, Germans and Eliassi-Rad, Tina},
+  year          = {2025},
+  eprint        = {2506.23921},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CL},
+  url           = {https://arxiv.org/abs/2506.23921}
 }
 ```
 
-#### ArXiv Preprint Version
+#### NeurIPS Workshop Version
+
+*Preliminary version accepted to the [Mechanistic Interpretability Workshop at NeurIPS 2025](https://mechinterpworkshop.com/)*:
 
 ```bibtex
-@inproceedings{trilemma2025preprint,
-      title={The Trilemma of Truth in Large Language Models},
-      author={Savcisens, Germans and Eliassi‐Rad, Tina},
-      booktitle={arXiv preprint arXiv:2506.23921},
-      year={2025}
-    }
+@inproceedings{savcisens2025trilemmaworkshop,
+  title     = {Trilemma of Truth in Large Language Models: Preliminary Findings},
+  author    = {Savcisens, Germans and Eliassi-Rad, Tina},
+  booktitle = {Mechanistic Interpretability Workshop at NeurIPS 2025},
+  year      = {2025},
+  url       = {https://openreview.net/forum?id=z7dLG2ycRf}
+}
 ```
 
 ### Code
@@ -432,13 +441,13 @@ The citation for the latest version:
 ### Data
 
 ```bibtex
-@misc{trilemma2025data,
-  author       = { Germans Savcisens and Tina Eliassi-Rad },
-  title        = { trilemma-of-truth (Revision cd49e0e) },
-  year         = 2025,
-  url          = { https://huggingface.co/datasets/carlomarxx/trilemma-of-truth },
-  doi          = { 10.57967/hf/5900 },
-  publisher    = { Hugging Face }
+@misc{savcisens2025trilemmadata,
+  title     = {trilemma-of-truth},
+  author    = {Savcisens, Germans and Eliassi-Rad, Tina},
+  year      = {2025},
+  publisher = {Hugging Face},
+  doi       = {10.57967/hf/5900},
+  url       = {https://huggingface.co/datasets/carlomarxx/trilemma-of-truth}
 }
 ```
 
@@ -446,8 +455,8 @@ The citation for the latest version:
 
 > [!IMPORTANT]
 > This **code** is licensed under the MIT License. See [LICENSE](LICENSE) for more information.
-> The **data** is licensed under the [Creative Commons Attribution 4.0 (CC BY 4.0)](https://huggingface.co/datasets/choosealicense/licenses/blob/main/markdown/cc-by-4.0.md).
-
+> The **data** is licensed under the [Creative Commons Attribution 4.0 (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/).
+> `med_indications` is derived from DrugBank 5.1.12, accessed under DrugBank's academic license. The raw DrugBank data is not included in this repository. To get it, apply for your own license at [go.drugbank.com](https://go.drugbank.com/releases/5-1-12).
 
 > [!WARNING]
 > 1. This is research software. While we strive for correctness and reproducibility, please verify results for your specific use case.
