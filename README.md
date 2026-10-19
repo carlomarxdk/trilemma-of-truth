@@ -313,6 +313,7 @@ The dataset scripts and files are located in the `datasets/` folder. This includ
    - City Locations: `["city_locations.csv", "city_locations_synthetic.csv"]`
    - Medical Indications: `["med_indications.csv", "med_indications_synthetic.csv"]`
    - Word Definitions: `["word_instances.csv", "word_types.csv", "word_synonyms.csv", "word_types_synthetic.csv", "word_instances_synthetic.csv", "word_synonyms_synthetic.csv"]`
+4. `datasets/disjointed/`: builds the optional entity-disjoint splits (not used in the paper; see below).
 
 These datasets are used across our scripts to train probes and evaluate results.
 
@@ -347,7 +348,9 @@ For more usage examples, see the [notebooks/](notebooks/) folder.
 
 ### Processed Data on Hugging Face 🤗
 
-The final datasets, with the same splits used in the paper, are on [Hugging Face Datasets](https://huggingface.co/datasets/carlomarxx/trilemma-of-truth). Use them if you want the data without running the local preprocessing. See the [dataset card](https://huggingface.co/datasets/carlomarxx/trilemma-of-truth) for field descriptions, data sources, and limitations.
+The final datasets are on [Hugging Face Datasets](https://huggingface.co/datasets/carlomarxx/trilemma-of-truth). Use them if you want the data without running the local preprocessing. See the [dataset card](https://huggingface.co/datasets/carlomarxx/trilemma-of-truth) for field descriptions, data sources, and limitations.
+
+The configs below are the splits used in the paper. No (`object_1`, `object_2`) pair appears in more than one split.
 
 | Config | Relation | Source | Train | Validation | Test | Total |
 |---|---|---|---:|---:|---:|---:|
@@ -355,10 +358,12 @@ The final datasets, with the same splits used in the paper, are on [Hugging Face
 | `med_indications` | drug → disease/condition | DrugBank 5.1.12 | 3,849 | 1,327 | 1,727 | 6,903 |
 | `word_definitions` | noun → synonym / type / instance | WordsAPI | 4,717 | 1,628 | 2,155 | 8,500 |
 
+The Hugging Face repo also has `*_disjoint` configs (e.g. `city_locations_disjoint`), released after the paper. In them no entity appears in more than one split. They are built with `uv run python datasets/disjointed/make_splits.py`; see [datasets/disjointed/DOCS.md](datasets/disjointed/DOCS.md).
+
 > [!IMPORTANT]
 > **Note I:** The experiment scripts (e.g., `collect_activations.py`, probe training) do not download from Hugging Face. They use the `DataHandler` class, which assembles the datasets locally from the `datasets/` folder.
 >
-> **Note II:** With the default settings in [configs/datapack/base.yaml](configs/datapack/base.yaml) (`test_size=0.25`, `cal_size=0.25`, `exclusive_split=True`, `random_seed=42`), `DataHandler` produces exactly the same train/calibration/test statements as the Hugging Face splits.
+> **Note II:** With the default settings in [configs/datapack/base.yaml](configs/datapack/base.yaml) (`test_size=0.25`, `cal_size=0.25`, `exclusive_split=True`, `random_seed=42`), `DataHandler` produces exactly the same train/calibration/test statements as the paper configs on Hugging Face. It does **not** produce the `*_disjoint` configs.
 >
 > **Note III:** The calibration split is called `validation` on Hugging Face, following its split naming (`train`, `validation`, `test`).
 
@@ -374,7 +379,8 @@ Then load the data with the `datasets` package. The dataset identifier is `carlo
 from datasets import load_dataset
 
 # 1. Load the full dataset with train/validation/test splits
-ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions")
+# (keep_default_na=False keeps the word "nan" as text instead of a missing value)
+ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", keep_default_na=False, na_values=[])
 
 # Convert to pandas
 df = ds["train"].to_pandas()
@@ -383,7 +389,7 @@ df = ds["train"].to_pandas()
 print(ds["train"][0])
 
 # 2. Load a specific split [train, validation, test]
-ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split="train")
+ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split="train", keep_default_na=False, na_values=[])
 ```
 
 ## ✍️ How to Cite?

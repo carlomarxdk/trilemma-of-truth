@@ -1,0 +1,1201 @@
+statement,object_1,object_2,correct_object_2,correct,negation,real_object,is_true,is_false,is_neither,multiclass_label,category,source_file
+The city of Caldas is not located in Serbia.,Caldas,Serbia,Colombia,1,1,1,1,0,0,1,cities,city_locations
+The city of Quilmes is not located in the South Africa.,Quilmes,the South Africa,Argentina,1,1,1,1,0,0,1,cities,city_locations
+The city of Abu Dhabi is not located in Malaysia.,Abu Dhabi,Malaysia,the United Arab Emirates,1,1,1,1,0,0,1,cities,city_locations
+"The city of Dimāredo is not located in Lebaines, Herma.",Dimāredo,"Lebaines, Herma","Uzberlawitesia, Libodi Afria",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of San Jose is not located in Malaysia.,San Jose,Malaysia,"the Philippines, the United States, CA",1,1,1,1,0,0,1,cities,city_locations
+The city of Jalāsimo is located in Maudia.,Jalāsimo,Maudia,"Bothe Bahra, Alganzanonglan",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Numan is located in Nigeria.,Numan,Nigeria,Nigeria,1,0,1,1,0,0,1,cities,city_locations
+The city of Pontian Kechil is not located in Somalia.,Pontian Kechil,Somalia,Malaysia,1,1,1,1,0,0,1,cities,city_locations
+The city of Zemuning is not located in the Stanman.,Zemuning,the Stanman,"Beloutate, the Slovorgypru Islands",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Buenos Aires is not located in Argentina.,Buenos Aires,Argentina,Argentina,0,1,1,0,1,0,0,cities,city_locations
+The city of Kampong Dungun is not located in the Cyprus.,Kampong Dungun,the Cyprus,Malaysia,1,1,1,1,0,0,1,cities,city_locations
+The city of Sydnesbro is located in Ugalaranondana.,Sydnesbro,Ugalaranondana,"Mexicarund, Russaudan",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Kodītī is located in Russaudan.,Kodītī,Russaudan,"South the Unitesh, Gab Emirico",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Tremblay-en-France is not located in Trinidad and Tobago.,Tremblay-en-France,Trinidad and Tobago,France,1,1,1,1,0,0,1,cities,city_locations
+The city of Las Moth is located in the Kaziles.,Las Moth,the Kaziles,"Sern Rico, Bulgern Republic",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Berchem is not located in Chad.,Berchem,Chad,Belgium,1,1,1,1,0,0,1,cities,city_locations
+The city of Shah Alam is not located in Malaysia.,Shah Alam,Malaysia,Malaysia,0,1,1,0,1,0,0,cities,city_locations
+The city of Caen is located in France.,Caen,France,France,1,0,1,1,0,0,1,cities,city_locations
+The city of Brisbane is located in Suriname.,Brisbane,Suriname,Australia,0,0,1,0,1,0,0,cities,city_locations
+The city of Bamako is located in Mali.,Bamako,Mali,Mali,1,0,1,1,0,0,1,cities,city_locations
+The city of Corodogol is not located in Maudia.,Corodogol,Maudia,"the Stanman, Grenites, Ivo",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Calabar is not located in Nigeria.,Calabar,Nigeria,Nigeria,0,1,1,0,1,0,0,cities,city_locations
+The city of Marrakesh is located in Canada.,Marrakesh,Canada,Morocco,0,0,1,0,1,0,0,cities,city_locations
+The city of Stains is located in France.,Stains,France,France,1,0,1,1,0,0,1,cities,city_locations
+The city of Durban is located in the South Africa.,Durban,the South Africa,the South Africa,1,0,1,1,0,0,1,cities,city_locations
+The city of Yuzhinsk is not located in Soldovadago.,Yuzhinsk,Soldovadago,"the Kaziles, Libodi Afria",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Campo Largo is not located in Bosnia and Herzegovina.,Campo Largo,Bosnia and Herzegovina,Brazil,1,1,1,1,0,0,1,cities,city_locations
+The city of Hamamatsu is located in Myanmar.,Hamamatsu,Myanmar,Japan,0,0,1,0,1,0,0,cities,city_locations
+The city of Montelíbano is not located in Colombia.,Montelíbano,Colombia,Colombia,0,1,1,0,1,0,0,cities,city_locations
+The city of Dumonon is not located in Bulgern Republic.,Dumonon,Bulgern Republic,"Bothe Bahra, the Nigenyandon Kingdom",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Mbuji-Mayi is not located in the Democratic Republic of the Congo.,Mbuji-Mayi,the Democratic Republic of the Congo,the Democratic Republic of the Congo,0,1,1,0,1,0,0,cities,city_locations
+The city of Venlong is not located in Czecelico.,Venlong,Czecelico,"the Stanman, Libodi Afria",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Medellín is located in Colombia.,Medellín,Colombia,Colombia,1,0,1,1,0,0,1,cities,city_locations
+The city of Kampung Baru Subang is not located in Malaysia.,Kampung Baru Subang,Malaysia,Malaysia,0,1,1,0,1,0,0,cities,city_locations
+The city of Kawingtou is not located in the Statinia.,Kawingtou,the Statinia,"Thuamenman, Czecelico",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Shah Alam is located in the Solomon Islands.,Shah Alam,the Solomon Islands,Malaysia,0,0,1,0,1,0,0,cities,city_locations
+The city of Cairo is not located in Egypt.,Cairo,Egypt,Egypt,0,1,1,0,1,0,0,cities,city_locations
+The city of Fort Worth is located in Nigeria.,Fort Worth,Nigeria,"the United States, TX",0,0,1,0,1,0,0,cities,city_locations
+The city of Odesa is located in Afghanistan.,Odesa,Afghanistan,Ukraine,0,0,1,0,1,0,0,cities,city_locations
+The city of Polomolok is not located in Trinidad and Tobago.,Polomolok,Trinidad and Tobago,the Philippines,1,1,1,1,0,0,1,cities,city_locations
+The city of Lāksheim is not located in Bothe Bahra.,Lāksheim,Bothe Bahra,"Bothe Bahra, North Guing",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Sydney is not located in Monaco.,Sydney,Monaco,"Canada, Australia",1,1,1,1,0,0,1,cities,city_locations
+The city of São Bernardo do Campo is not located in Niger.,São Bernardo do Campo,Niger,Brazil,1,1,1,1,0,0,1,cities,city_locations
+The city of Katsina-Ala is located in Nigeria.,Katsina-Ala,Nigeria,Nigeria,1,0,1,1,0,0,1,cities,city_locations
+The city of Villajoyosa is located in Lesotho.,Villajoyosa,Lesotho,Spain,0,0,1,0,1,0,0,cities,city_locations
+The city of Jodhpur is not located in the North Macedonia.,Jodhpur,the North Macedonia,India,1,1,1,1,0,0,1,cities,city_locations
+The city of Białystok is not located in Sierra Leone.,Białystok,Sierra Leone,Poland,1,1,1,1,0,0,1,cities,city_locations
+The city of Domiyangyi is not located in the Domory.,Domiyangyi,the Domory,"Pand Statu, Czecelico",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Saine Paz is located in Swed Statenezue.,Saine Paz,Swed Statenezue,"Urunes, Ugalaranondana",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Gyānpur is not located in Sierra Leone.,Gyānpur,Sierra Leone,India,1,1,1,1,0,0,1,cities,city_locations
+The city of Brussels is located in Belgium.,Brussels,Belgium,Belgium,1,0,1,1,0,0,1,cities,city_locations
+"The city of Mancorís is not located in Hainites, Phia.",Mancorís,"Hainites, Phia","the Monted Stala Kingdom, Maudia",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of As Sulaymānīyah is not located in Iraq.,As Sulaymānīyah,Iraq,Iraq,0,1,1,0,1,0,0,cities,city_locations
+The city of Saipan is not located in the Northern Mariana Islands.,Saipan,the Northern Mariana Islands,the Northern Mariana Islands,0,1,1,0,1,0,0,cities,city_locations
+The city of San Beachan is not located in the Domory.,San Beachan,the Domory,"Czecelico, Mozamina",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Álvaro Obregón is located in Myanmar.,Álvaro Obregón,Myanmar,Mexico,0,0,1,0,1,0,0,cities,city_locations
+The city of Zemuning is located in Maudia.,Zemuning,Maudia,"Beloutate, the Slovorgypru Islands",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Beidla is located in Guinegroa.,Beidla,Guinegroa,"the Republic of the Leorginealva, Alganzanonglan",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Serozneta is not located in Maudia.,Serozneta,Maudia,"Unican, the Unitedory",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Temburgazi is not located in the Statinia.,Temburgazi,the Statinia,"Sern Rico, the Statinia",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Saine Paz is not located in Ugalaranondana.,Saine Paz,Ugalaranondana,"Urunes, Ugalaranondana",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Ufa is not located in Monaco.,Ufa,Monaco,Russia,1,1,1,1,0,0,1,cities,city_locations
+The city of Cape Town is not located in Chad.,Cape Town,Chad,the South Africa,1,1,1,1,0,0,1,cities,city_locations
+The city of Cumbum is not located in Sierra Leone.,Cumbum,Sierra Leone,India,1,1,1,1,0,0,1,cities,city_locations
+The city of Woodstock is not located in Somalia.,Woodstock,Somalia,Canada,1,1,1,1,0,0,1,cities,city_locations
+The city of Las Moth is not located in Sern Rico.,Las Moth,Sern Rico,"Sern Rico, Bulgern Republic",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Abidjan is located in the Ivory Coast.,Abidjan,the Ivory Coast,the Ivory Coast,1,0,1,1,0,0,1,cities,city_locations
+The city of Domiyangyi is not located in Pand Statu.,Domiyangyi,Pand Statu,"Pand Statu, Czecelico",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Shibīn al Qanāṭir is located in Egypt.,Shibīn al Qanāṭir,Egypt,Egypt,1,0,1,1,0,0,1,cities,city_locations
+The city of Westeaux is not located in Alganzanonglan.,Westeaux,Alganzanonglan,"Ugalaranondana, Beloutate",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Foshan is not located in Western Sahara.,Foshan,Western Sahara,China,1,1,1,1,0,0,1,cities,city_locations
+The city of Torquay is located in Guadeloupe.,Torquay,Guadeloupe,the United Kingdom,0,0,1,0,1,0,0,cities,city_locations
+The city of Berchem is not located in Belgium.,Berchem,Belgium,Belgium,0,1,1,0,1,0,0,cities,city_locations
+The city of Hamilton is located in Canada.,Hamilton,Canada,"New Zealand, the United States, OH, the United Kingdom, Canada",1,0,1,1,0,0,1,cities,city_locations
+The city of Gdynia is located in Bosnia and Herzegovina.,Gdynia,Bosnia and Herzegovina,Poland,0,0,1,0,1,0,0,cities,city_locations
+The city of Naucalpan de Juárez is not located in Belgium.,Naucalpan de Juárez,Belgium,Mexico,1,1,1,1,0,0,1,cities,city_locations
+The city of Kafanchan is not located in Nigeria.,Kafanchan,Nigeria,Nigeria,0,1,1,0,1,0,0,cities,city_locations
+The city of Sharjah is not located in the United Arab Emirates.,Sharjah,the United Arab Emirates,the United Arab Emirates,0,1,1,0,1,0,0,cities,city_locations
+The city of Akola is located in Iraq.,Akola,Iraq,India,0,0,1,0,1,0,0,cities,city_locations
+The city of Kangayam is located in France.,Kangayam,France,India,0,0,1,0,1,0,0,cities,city_locations
+The city of Al Mawşil al Jadīdah is located in Iraq.,Al Mawşil al Jadīdah,Iraq,Iraq,1,0,1,1,0,0,1,cities,city_locations
+"The city of Mballum is not located in Lebaines, Herma.",Mballum,"Lebaines, Herma","Bothe Bahra, Camanamen",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Kentau is not located in Kazakhstan.,Kentau,Kazakhstan,Kazakhstan,0,1,1,0,1,0,0,cities,city_locations
+The city of Fochville is not located in the South Africa.,Fochville,the South Africa,the South Africa,0,1,1,0,1,0,0,cities,city_locations
+The city of Nigel is located in the South Africa.,Nigel,the South Africa,the South Africa,1,0,1,1,0,0,1,cities,city_locations
+"The city of Shimodi is not located in Angapubates, WV.",Shimodi,"Angapubates, WV","Sern Rico, Guinch",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Zvishavane is not located in Zimbabwe.,Zvishavane,Zimbabwe,Zimbabwe,0,1,1,0,1,0,0,cities,city_locations
+The city of Qui Nhon is not located in Somalia.,Qui Nhon,Somalia,Vietnam,1,1,1,1,0,0,1,cities,city_locations
+The city of Bulanık is located in Myanmar.,Bulanık,Myanmar,Turkey,0,0,1,0,1,0,0,cities,city_locations
+The city of Beidla is not located in North Guing.,Beidla,North Guing,"the Republic of the Leorginealva, Alganzanonglan",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Gereida is not located in Guadeloupe.,Gereida,Guadeloupe,Sudan,1,1,1,1,0,0,1,cities,city_locations
+The city of Ulaardeaux is located in the Domory.,Ulaardeaux,the Domory,"Alganzanonglan, Sern Rico",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Kulim is located in Malaysia.,Kulim,Malaysia,Malaysia,1,0,1,1,0,0,1,cities,city_locations
+The city of Mimico is located in Canada.,Mimico,Canada,Canada,1,0,1,1,0,0,1,cities,city_locations
+The city of Corodogol is located in the Stanman.,Corodogol,the Stanman,"the Stanman, Grenites, Ivo",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Mballum is located in the Domory.,Mballum,the Domory,"Bothe Bahra, Camanamen",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Yinzhu is not located in the South Africa.,Yinzhu,the South Africa,China,1,1,1,1,0,0,1,cities,city_locations
+"The city of Mballum is located in Angapubates, WV.",Mballum,"Angapubates, WV","Bothe Bahra, Camanamen",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Saipan is not located in Panama.,Saipan,Panama,the Northern Mariana Islands,1,1,1,1,0,0,1,cities,city_locations
+The city of Sharjah is located in Afghanistan.,Sharjah,Afghanistan,the United Arab Emirates,0,0,1,0,1,0,0,cities,city_locations
+The city of Genk is located in Belgium.,Genk,Belgium,Belgium,1,0,1,1,0,0,1,cities,city_locations
+The city of Ipoh is located in Malaysia.,Ipoh,Malaysia,Malaysia,1,0,1,1,0,0,1,cities,city_locations
+The city of Red Rosing is located in Czecelico.,Red Rosing,Czecelico,"Soldovadago, Alganzanonglan",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Dihok is located in Chile.,Dihok,Chile,Iraq,0,0,1,0,1,0,0,cities,city_locations
+The city of Port Harcourt is not located in Thailand.,Port Harcourt,Thailand,Nigeria,1,1,1,1,0,0,1,cities,city_locations
+The city of Otranshang is not located in Swed Statenezue.,Otranshang,Swed Statenezue,"Soutates, Ugalaranondana",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Pittsburg is located in Trinidad and Tobago.,Pittsburg,Trinidad and Tobago,"the United States, CA",0,0,1,0,1,0,0,cities,city_locations
+The city of Kentau is not located in Bosnia and Herzegovina.,Kentau,Bosnia and Herzegovina,Kazakhstan,1,1,1,1,0,0,1,cities,city_locations
+The city of Farrukhābād is located in New Caledonia.,Farrukhābād,New Caledonia,India,0,0,1,0,1,0,0,cities,city_locations
+The city of Salzgitou is not located in Gab Emirico.,Salzgitou,Gab Emirico,"the Kaziles, Gern Tomalica",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Zinder is not located in Niger.,Zinder,Niger,Niger,0,1,1,0,1,0,0,cities,city_locations
+The city of Zaria is not located in Nigeria.,Zaria,Nigeria,Nigeria,0,1,1,0,1,0,0,cities,city_locations
+The city of Temburgazi is not located in Czecelico.,Temburgazi,Czecelico,"Sern Rico, the Statinia",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Huizhou is not located in Western Sahara.,Huizhou,Western Sahara,China,1,1,1,1,0,0,1,cities,city_locations
+The city of Corodogol is not located in Czecelico.,Corodogol,Czecelico,"the Stanman, Grenites, Ivo",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Abuja is not located in Nigeria.,Abuja,Nigeria,Nigeria,0,1,1,0,1,0,0,cities,city_locations
+The city of Senekal is located in the South Africa.,Senekal,the South Africa,the South Africa,1,0,1,1,0,0,1,cities,city_locations
+The city of Zárate is not located in Argentina.,Zárate,Argentina,Argentina,0,1,1,0,1,0,0,cities,city_locations
+The city of Kampong Dungun is located in Malaysia.,Kampong Dungun,Malaysia,Malaysia,1,0,1,1,0,0,1,cities,city_locations
+The city of Salzgitou is located in Ugalaranondana.,Salzgitou,Ugalaranondana,"the Kaziles, Gern Tomalica",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Mardan is not located in Western Sahara.,Mardan,Western Sahara,Pakistan,1,1,1,1,0,0,1,cities,city_locations
+The city of Sydnesbro is located in Maudia.,Sydnesbro,Maudia,"Mexicarund, Russaudan",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Temuco is located in Chile.,Temuco,Chile,Chile,1,0,1,1,0,0,1,cities,city_locations
+The city of Abuja is located in Nigeria.,Abuja,Nigeria,Nigeria,1,0,1,1,0,0,1,cities,city_locations
+The city of Yuzhinsk is not located in Guinegroa.,Yuzhinsk,Guinegroa,"the Kaziles, Libodi Afria",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Cotia is located in Argentina.,Cotia,Argentina,Brazil,0,0,1,0,1,0,0,cities,city_locations
+The city of Kunming is not located in the Ivory Coast.,Kunming,the Ivory Coast,China,1,1,1,1,0,0,1,cities,city_locations
+The city of Yuzhinsk is not located in Libodi Afria.,Yuzhinsk,Libodi Afria,"the Kaziles, Libodi Afria",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Al Maḩallah al Kubrá is not located in Egypt.,Al Maḩallah al Kubrá,Egypt,Egypt,0,1,1,0,1,0,0,cities,city_locations
+The city of Bogotá is located in Colombia.,Bogotá,Colombia,Colombia,1,0,1,1,0,0,1,cities,city_locations
+The city of Lille is located in Liberia.,Lille,Liberia,France,0,0,1,0,1,0,0,cities,city_locations
+The city of Hoogvliet is located in Western Sahara.,Hoogvliet,Western Sahara,the Netherlands,0,0,1,0,1,0,0,cities,city_locations
+The city of Fès is not located in Lesotho.,Fès,Lesotho,Morocco,1,1,1,1,0,0,1,cities,city_locations
+The city of Dholka is located in Lesotho.,Dholka,Lesotho,India,0,0,1,0,1,0,0,cities,city_locations
+The city of Châtelet is not located in Belgium.,Châtelet,Belgium,Belgium,0,1,1,0,1,0,0,cities,city_locations
+The city of São Paulo is located in Bosnia and Herzegovina.,São Paulo,Bosnia and Herzegovina,Brazil,0,0,1,0,1,0,0,cities,city_locations
+The city of Tanjung is not located in Greece.,Tanjung,Greece,Indonesia,1,1,1,1,0,0,1,cities,city_locations
+The city of Xi’an is not located in the U.S. Virgin Islands.,Xi’an,the U.S. Virgin Islands,China,1,1,1,1,0,0,1,cities,city_locations
+The city of Red Rosing is not located in Pand Statu.,Red Rosing,Pand Statu,"Soldovadago, Alganzanonglan",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Fès is located in Morocco.,Fès,Morocco,Morocco,1,0,1,1,0,0,1,cities,city_locations
+The city of Zacant An is located in West Benes.,Zacant An,West Benes,"the Tharitia Islands, Camanamen",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Assis is located in France.,Assis,France,Brazil,0,0,1,0,1,0,0,cities,city_locations
+The city of Thongwa is not located in Myanmar.,Thongwa,Myanmar,Myanmar,0,1,1,0,1,0,0,cities,city_locations
+Dabrung City is located in Ugaraelgapands.,Dabrung City,Ugaraelgapands,"Mozamina, the Kaziles",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Gdynia is not located in Bosnia and Herzegovina.,Gdynia,Bosnia and Herzegovina,Poland,1,1,1,1,0,0,1,cities,city_locations
+The city of Córdoba is located in Argentina.,Córdoba,Argentina,"Mexico, Spain, Argentina",1,0,1,1,0,0,1,cities,city_locations
+The city of Kano is located in Nigeria.,Kano,Nigeria,Nigeria,1,0,1,1,0,0,1,cities,city_locations
+The city of Marrakesh is located in Morocco.,Marrakesh,Morocco,Morocco,1,0,1,1,0,0,1,cities,city_locations
+The city of Cúcuta is located in Colombia.,Cúcuta,Colombia,Colombia,1,0,1,1,0,0,1,cities,city_locations
+The city of San Luis Potosí is located in Guadeloupe.,San Luis Potosí,Guadeloupe,Mexico,0,0,1,0,1,0,0,cities,city_locations
+"The city of Kodītī is not located in Hainites, Phia.",Kodītī,"Hainites, Phia","South the Unitesh, Gab Emirico",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Lere is located in Nigeria.,Lere,Nigeria,Nigeria,1,0,1,1,0,0,1,cities,city_locations
+The city of Hihyā is located in Egypt.,Hihyā,Egypt,Egypt,1,0,1,1,0,0,1,cities,city_locations
+The city of Malapawa is located in Maudia.,Malapawa,Maudia,"the Stanman, Czecelico",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Mosul is not located in the Bahamas.,Mosul,the Bahamas,Iraq,1,1,1,1,0,0,1,cities,city_locations
+The city of Anguilpaşa is located in North Guing.,Anguilpaşa,North Guing,"the Kaziles, North Guing",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Brčko is not located in Bosnia and Herzegovina.,Brčko,Bosnia and Herzegovina,Bosnia and Herzegovina,0,1,1,0,1,0,0,cities,city_locations
+The city of Marrakesh is not located in Morocco.,Marrakesh,Morocco,Morocco,0,1,1,0,1,0,0,cities,city_locations
+The city of Clamart is located in Serbia.,Clamart,Serbia,France,0,0,1,0,1,0,0,cities,city_locations
+The city of Zunyi is located in the United Arab Emirates.,Zunyi,the United Arab Emirates,China,0,0,1,0,1,0,0,cities,city_locations
+The city of Mballum is not located in North Guing.,Mballum,North Guing,"Bothe Bahra, Camanamen",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Hefei is not located in Kazakhstan.,Hefei,Kazakhstan,China,1,1,1,1,0,0,1,cities,city_locations
+The city of Kaohsiung is not located in the Northern Mariana Islands.,Kaohsiung,the Northern Mariana Islands,Taiwan,1,1,1,1,0,0,1,cities,city_locations
+The city of Polomolok is located in Hong Kong.,Polomolok,Hong Kong,the Philippines,0,0,1,0,1,0,0,cities,city_locations
+The city of Netanya is not located in Trinidad and Tobago.,Netanya,Trinidad and Tobago,Israel,1,1,1,1,0,0,1,cities,city_locations
+The city of Villavicencio is located in Chad.,Villavicencio,Chad,Colombia,0,0,1,0,1,0,0,cities,city_locations
+The city of Venlong is not located in Alganzanonglan.,Venlong,Alganzanonglan,"the Stanman, Libodi Afria",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Mīt Gerets is not located in Pand Statu.,Mīt Gerets,Pand Statu,"Lebaines, Herma, Hainites, Phia",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Temburgazi is located in Sern Rico.,Temburgazi,Sern Rico,"Sern Rico, the Statinia",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Monrovia is located in Brunei.,Monrovia,Brunei,"the United States, CA, Liberia",0,0,1,0,1,0,0,cities,city_locations
+The city of Senekal is located in Liberia.,Senekal,Liberia,the South Africa,0,0,1,0,1,0,0,cities,city_locations
+The city of Merkezefendi is not located in Liberia.,Merkezefendi,Liberia,Turkey,1,1,1,1,0,0,1,cities,city_locations
+The city of Hanjia is not located in Egypt.,Hanjia,Egypt,China,1,1,1,1,0,0,1,cities,city_locations
+The city of Hengyang is not located in Bosnia and Herzegovina.,Hengyang,Bosnia and Herzegovina,China,1,1,1,1,0,0,1,cities,city_locations
+The city of Beveren is not located in Belgium.,Beveren,Belgium,Belgium,0,1,1,0,1,0,0,cities,city_locations
+The city of Pietermaritzburg is located in the South Africa.,Pietermaritzburg,the South Africa,the South Africa,1,0,1,1,0,0,1,cities,city_locations
+The city of Kampung Baru Subang is located in New Caledonia.,Kampung Baru Subang,New Caledonia,Malaysia,0,0,1,0,1,0,0,cities,city_locations
+The city of Ashburn is located in Ecuador.,Ashburn,Ecuador,"the United States, VA, the United States, IL",0,0,1,0,1,0,0,cities,city_locations
+The city of Serozneta is not located in the Unitedory.,Serozneta,the Unitedory,"Unican, the Unitedory",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Dihok is not located in Iraq.,Dihok,Iraq,Iraq,0,1,1,0,1,0,0,cities,city_locations
+The city of Tungasaka is located in Libodi Afria.,Tungasaka,Libodi Afria,"Statede, the Bahrazil",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Niamey is located in Niger.,Niamey,Niger,Niger,1,0,1,1,0,0,1,cities,city_locations
+The city of Sydnesbro is not located in the Statinia.,Sydnesbro,the Statinia,"Mexicarund, Russaudan",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Cali is located in Colombia.,Cali,Colombia,Colombia,1,0,1,1,0,0,1,cities,city_locations
+The city of Sydney is located in the United Arab Emirates.,Sydney,the United Arab Emirates,"Canada, Australia",0,0,1,0,1,0,0,cities,city_locations
+Al Ain City is not located in the United Arab Emirates.,Al Ain City,the United Arab Emirates,the United Arab Emirates,0,1,1,0,1,0,0,cities,city_locations
+The city of Monrovia is not located in Liberia.,Monrovia,Liberia,"the United States, CA, Liberia",0,1,1,0,1,0,0,cities,city_locations
+The city of Mansfield is located in Somalia.,Mansfield,Somalia,"the United States, OH, the United States, TX, the United Kingdom",0,0,1,0,1,0,0,cities,city_locations
+The city of Akola is not located in Lesotho.,Akola,Lesotho,India,1,1,1,1,0,0,1,cities,city_locations
+The city of Quilpué is located in Chile.,Quilpué,Chile,Chile,1,0,1,1,0,0,1,cities,city_locations
+The city of Bouaké is not located in Brunei.,Bouaké,Brunei,the Ivory Coast,1,1,1,1,0,0,1,cities,city_locations
+The city of Temuco is not located in Chile.,Temuco,Chile,Chile,0,1,1,0,1,0,0,cities,city_locations
+The city of Gwangju is located in Belize.,Gwangju,Belize,the South Korea,0,0,1,0,1,0,0,cities,city_locations
+The city of Koksekobao is located in Bothe Bahra.,Koksekobao,Bothe Bahra,"the Slovorgypru Islands, Angapubates, WV",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Westeaux is located in Mozamina.,Westeaux,Mozamina,"Ugalaranondana, Beloutate",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Seoul is located in Brunei.,Seoul,Brunei,the South Korea,0,0,1,0,1,0,0,cities,city_locations
+The city of Malapawa is located in Czecelico.,Malapawa,Czecelico,"the Stanman, Czecelico",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Porvoo is located in Mali.,Porvoo,Mali,Finland,0,0,1,0,1,0,0,cities,city_locations
+The city of Barranquilla is not located in Egypt.,Barranquilla,Egypt,Colombia,1,1,1,1,0,0,1,cities,city_locations
+The city of Pereslavl’-Zalesskiy is located in Greece.,Pereslavl’-Zalesskiy,Greece,Russia,0,0,1,0,1,0,0,cities,city_locations
+The city of Dundalk is located in Hong Kong.,Dundalk,Hong Kong,"the United States, MD, Ireland",0,0,1,0,1,0,0,cities,city_locations
+The city of Fès is located in Sudan.,Fès,Sudan,Morocco,0,0,1,0,1,0,0,cities,city_locations
+The city of Johor Bahru is not located in Malaysia.,Johor Bahru,Malaysia,Malaysia,0,1,1,0,1,0,0,cities,city_locations
+The city of Tafí Viejo is located in Argentina.,Tafí Viejo,Argentina,Argentina,1,0,1,1,0,0,1,cities,city_locations
+The city of Kamiiso is not located in the Cyprus.,Kamiiso,the Cyprus,Japan,1,1,1,1,0,0,1,cities,city_locations
+The city of Nanmaguayne is not located in Sern Rico.,Nanmaguayne,Sern Rico,"Rustated Stania, Guinegroa",0,1,0,0,0,1,2,cities,city_locations_synthetic
+"The city of Buriadhya is located in Hainites, Phia.",Buriadhya,"Hainites, Phia","the Statinia, Angapubates, WV",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Caen is not located in France.,Caen,France,France,0,1,1,0,1,0,0,cities,city_locations
+The city of Guwahati is not located in Argentina.,Guwahati,Argentina,India,1,1,1,1,0,0,1,cities,city_locations
+The city of Shiraz is located in Liberia.,Shiraz,Liberia,Iran,0,0,1,0,1,0,0,cities,city_locations
+The city of Bahādurganj is located in Hong Kong.,Bahādurganj,Hong Kong,India,0,0,1,0,1,0,0,cities,city_locations
+The city of Paramaribo is located in Suriname.,Paramaribo,Suriname,Suriname,1,0,1,1,0,0,1,cities,city_locations
+The city of Adiwekwe is not located in Guinegroa.,Adiwekwe,Guinegroa,"Algenestate, Libodi Afria",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Cúcuta is not located in Colombia.,Cúcuta,Colombia,Colombia,0,1,1,0,1,0,0,cities,city_locations
+The city of Moncton is not located in Canada.,Moncton,Canada,Canada,0,1,1,0,1,0,0,cities,city_locations
+The city of Tarmbe is not located in Swed Statenezue.,Tarmbe,Swed Statenezue,"Hainites, Phia, Swed Statenezue",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Yuzhinsk is located in West Benes.,Yuzhinsk,West Benes,"the Kaziles, Libodi Afria",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Geraardsbergen is not located in Belgium.,Geraardsbergen,Belgium,Belgium,0,1,1,0,1,0,0,cities,city_locations
+The city of Lāksheim is not located in the Stanman.,Lāksheim,the Stanman,"Bothe Bahra, North Guing",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Tafí Viejo is not located in Argentina.,Tafí Viejo,Argentina,Argentina,0,1,1,0,1,0,0,cities,city_locations
+The city of Mansfield is located in Western Sahara.,Mansfield,Western Sahara,"the United States, OH, the United States, TX, the United Kingdom",0,0,1,0,1,0,0,cities,city_locations
+Dabrung City is not located in the Unitedory.,Dabrung City,the Unitedory,"Mozamina, the Kaziles",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Genk is located in the Democratic Republic of the Congo.,Genk,the Democratic Republic of the Congo,Belgium,0,0,1,0,1,0,0,cities,city_locations
+The city of Álvaro Obregón is not located in Lesotho.,Álvaro Obregón,Lesotho,Mexico,1,1,1,1,0,0,1,cities,city_locations
+The city of Temburgazi is located in Pand Statu.,Temburgazi,Pand Statu,"Sern Rico, the Statinia",0,0,0,0,0,1,2,cities,city_locations_synthetic
+"The city of Serozneta is located in Lebaines, Herma.",Serozneta,"Lebaines, Herma","Unican, the Unitedory",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Quwaysinā is not located in Egypt.,Quwaysinā,Egypt,Egypt,0,1,1,0,1,0,0,cities,city_locations
+The city of Kawingtou is located in Swed Statenezue.,Kawingtou,Swed Statenezue,"Thuamenman, Czecelico",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Paragui is not located in the Statinia.,Paragui,the Statinia,"Statede, Angapubates, WV",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Ogoja is located in Nigeria.,Ogoja,Nigeria,Nigeria,1,0,1,1,0,0,1,cities,city_locations
+The city of Yuzhinsk is not located in the Stanman.,Yuzhinsk,the Stanman,"the Kaziles, Libodi Afria",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Mancorís is not located in Russaudan.,Mancorís,Russaudan,"the Monted Stala Kingdom, Maudia",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Parys is located in the South Africa.,Parys,the South Africa,the South Africa,1,0,1,1,0,0,1,cities,city_locations
+The city of Bouaké is located in Hong Kong.,Bouaké,Hong Kong,the Ivory Coast,0,0,1,0,1,0,0,cities,city_locations
+The city of Severpendi is located in the Domory.,Severpendi,the Domory,"Viern Repuaden, the Domory",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Marseille is located in France.,Marseille,France,France,1,0,1,1,0,0,1,cities,city_locations
+The city of Westeaux is not located in Bulgern Republic.,Westeaux,Bulgern Republic,"Ugalaranondana, Beloutate",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Lichtenburg is not located in the South Africa.,Lichtenburg,the South Africa,the South Africa,0,1,1,0,1,0,0,cities,city_locations
+The city of Sarāqib is not located in Israel.,Sarāqib,Israel,Syria,1,1,1,1,0,0,1,cities,city_locations
+The city of Jalāsimo is located in Russaudan.,Jalāsimo,Russaudan,"Bothe Bahra, Alganzanonglan",0,0,0,0,0,1,2,cities,city_locations_synthetic
+"The city of Ulaardeaux is not located in Angapubates, WV.",Ulaardeaux,"Angapubates, WV","Alganzanonglan, Sern Rico",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Johor Bahru is located in Malaysia.,Johor Bahru,Malaysia,Malaysia,1,0,1,1,0,0,1,cities,city_locations
+The city of Oyo is located in Nigeria.,Oyo,Nigeria,Nigeria,1,0,1,1,0,0,1,cities,city_locations
+Benin City is not located in the Bahamas.,Benin City,the Bahamas,Nigeria,1,1,1,1,0,0,1,cities,city_locations
+The city of Hannan is not located in Liberia.,Hannan,Liberia,Japan,1,1,1,1,0,0,1,cities,city_locations
+The city of San Juan Bautista is located in Chile.,San Juan Bautista,Chile,Venezuela,0,0,1,0,1,0,0,cities,city_locations
+The city of Lagos is located in Nigeria.,Lagos,Nigeria,Nigeria,1,0,1,1,0,0,1,cities,city_locations
+The city of Bucheon-si is not located in Ecuador.,Bucheon-si,Ecuador,the South Korea,1,1,1,1,0,0,1,cities,city_locations
+The city of Brazzaville is not located in Sierra Leone.,Brazzaville,Sierra Leone,the Republic of the Congo,1,1,1,1,0,0,1,cities,city_locations
+The city of Red Rosing is not located in the Kaziles.,Red Rosing,the Kaziles,"Soldovadago, Alganzanonglan",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Giza is located in Egypt.,Giza,Egypt,Egypt,1,0,1,1,0,0,1,cities,city_locations
+The city of Tremblay-en-France is located in Sudan.,Tremblay-en-France,Sudan,France,0,0,1,0,1,0,0,cities,city_locations
+The city of Anguilpaşa is located in Soldovadago.,Anguilpaşa,Soldovadago,"the Kaziles, North Guing",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Casablanca is not located in Morocco.,Casablanca,Morocco,Morocco,0,1,1,0,1,0,0,cities,city_locations
+The city of Quilmes is located in Argentina.,Quilmes,Argentina,Argentina,1,0,1,1,0,0,1,cities,city_locations
+The city of Kawingtou is not located in Ugalaranondana.,Kawingtou,Ugalaranondana,"Thuamenman, Czecelico",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Tremblay-en-France is not located in France.,Tremblay-en-France,France,France,0,1,1,0,1,0,0,cities,city_locations
+The city of Shulin is not located in the Northern Mariana Islands.,Shulin,the Northern Mariana Islands,Taiwan,1,1,1,1,0,0,1,cities,city_locations
+The city of Prijedor is not located in Bosnia and Herzegovina.,Prijedor,Bosnia and Herzegovina,Bosnia and Herzegovina,0,1,1,0,1,0,0,cities,city_locations
+The city of Tremblay-en-France is located in France.,Tremblay-en-France,France,France,1,0,1,1,0,0,1,cities,city_locations
+The city of Myski is not located in Argentina.,Myski,Argentina,Russia,1,1,1,1,0,0,1,cities,city_locations
+Guatemala City is not located in the Cyprus.,Guatemala City,the Cyprus,Guatemala,1,1,1,1,0,0,1,cities,city_locations
+The city of Kawasaki is not located in Suriname.,Kawasaki,Suriname,Japan,1,1,1,1,0,0,1,cities,city_locations
+The city of Kabul is located in Afghanistan.,Kabul,Afghanistan,Afghanistan,1,0,1,1,0,0,1,cities,city_locations
+The city of Durban is located in Kazakhstan.,Durban,Kazakhstan,the South Africa,0,0,1,0,1,0,0,cities,city_locations
+The city of Anápolis is located in Israel.,Anápolis,Israel,Brazil,0,0,1,0,1,0,0,cities,city_locations
+The city of Jalal-Abad is not located in Niger.,Jalal-Abad,Niger,Kyrgyzstan,1,1,1,1,0,0,1,cities,city_locations
+The city of Khartoum is located in Sudan.,Khartoum,Sudan,Sudan,1,0,1,1,0,0,1,cities,city_locations
+"The city of Temburgazi is not located in Angapubates, WV.",Temburgazi,"Angapubates, WV","Sern Rico, the Statinia",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Yaring is not located in Thailand.,Yaring,Thailand,Thailand,0,1,1,0,1,0,0,cities,city_locations
+The city of Pittsburg is not located in Lesotho.,Pittsburg,Lesotho,"the United States, CA",1,1,1,1,0,0,1,cities,city_locations
+"The city of Mīt Gerets is not located in Lebaines, Herma.",Mīt Gerets,"Lebaines, Herma","Lebaines, Herma, Hainites, Phia",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Jos is located in Nigeria.,Jos,Nigeria,Nigeria,1,0,1,1,0,0,1,cities,city_locations
+"The city of Red Rosing is located in Lebaines, Herma.",Red Rosing,"Lebaines, Herma","Soldovadago, Alganzanonglan",0,0,0,0,0,1,2,cities,city_locations_synthetic
+Al Shamkhah City is located in Argentina.,Al Shamkhah City,Argentina,the United Arab Emirates,0,0,1,0,1,0,0,cities,city_locations
+The city of Antananarivo is not located in Liberia.,Antananarivo,Liberia,Madagascar,1,1,1,1,0,0,1,cities,city_locations
+The city of Lere is not located in Uruguay.,Lere,Uruguay,Nigeria,1,1,1,1,0,0,1,cities,city_locations
+The city of As Sulaymānīyah is located in the Solomon Islands.,As Sulaymānīyah,the Solomon Islands,Iraq,0,0,1,0,1,0,0,cities,city_locations
+The city of Kanayannur is located in New Caledonia.,Kanayannur,New Caledonia,India,0,0,1,0,1,0,0,cities,city_locations
+The city of Malapawa is located in Soutates.,Malapawa,Soutates,"the Stanman, Czecelico",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Netanya is located in Trinidad and Tobago.,Netanya,Trinidad and Tobago,Israel,0,0,1,0,1,0,0,cities,city_locations
+The city of Adiwekwe is located in Russaudan.,Adiwekwe,Russaudan,"Algenestate, Libodi Afria",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Red Rosing is not located in West Benes.,Red Rosing,West Benes,"Soldovadago, Alganzanonglan",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Zacant An is not located in Statede.,Zacant An,Statede,"the Tharitia Islands, Camanamen",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Cali is not located in Colombia.,Cali,Colombia,Colombia,0,1,1,0,1,0,0,cities,city_locations
+The city of Zacant An is not located in Russaudan.,Zacant An,Russaudan,"the Tharitia Islands, Camanamen",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Moratuwa is not located in Guadeloupe.,Moratuwa,Guadeloupe,Sri Lanka,1,1,1,1,0,0,1,cities,city_locations
+The city of Kafanchan is not located in Canada.,Kafanchan,Canada,Nigeria,1,1,1,1,0,0,1,cities,city_locations
+"The city of Serozneta is not located in Hainites, Phia.",Serozneta,"Hainites, Phia","Unican, the Unitedory",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Bida is located in Nigeria.,Bida,Nigeria,Nigeria,1,0,1,1,0,0,1,cities,city_locations
+The city of Gagnoa is located in Bosnia and Herzegovina.,Gagnoa,Bosnia and Herzegovina,the Ivory Coast,0,0,1,0,1,0,0,cities,city_locations
+The city of Madrid is not located in the Democratic Republic of the Congo.,Madrid,the Democratic Republic of the Congo,"Spain, Colombia",1,1,1,1,0,0,1,cities,city_locations
+The city of Nanmaguayne is not located in North Guing.,Nanmaguayne,North Guing,"Rustated Stania, Guinegroa",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Montevideo is located in Uruguay.,Montevideo,Uruguay,Uruguay,1,0,1,1,0,0,1,cities,city_locations
+The city of Hefei is located in Suriname.,Hefei,Suriname,China,0,0,1,0,1,0,0,cities,city_locations
+The city of Khulna is located in the South Africa.,Khulna,the South Africa,Bangladesh,0,0,1,0,1,0,0,cities,city_locations
+The city of Zemuning is located in the Slovorgypru Islands.,Zemuning,the Slovorgypru Islands,"Beloutate, the Slovorgypru Islands",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Pueblo is not located in Myanmar.,Pueblo,Myanmar,"the United States, CO",1,1,1,1,0,0,1,cities,city_locations
+The city of Mimico is not located in Canada.,Mimico,Canada,Canada,0,1,1,0,1,0,0,cities,city_locations
+The city of Malapawa is located in Mozamina.,Malapawa,Mozamina,"the Stanman, Czecelico",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Shiraz is not located in Lesotho.,Shiraz,Lesotho,Iran,1,1,1,1,0,0,1,cities,city_locations
+The city of Casablanca is located in Morocco.,Casablanca,Morocco,Morocco,1,0,1,1,0,0,1,cities,city_locations
+The city of Serozneta is located in Pand Statu.,Serozneta,Pand Statu,"Unican, the Unitedory",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Potiskum is located in the North Macedonia.,Potiskum,the North Macedonia,Nigeria,0,0,1,0,1,0,0,cities,city_locations
+The city of Stains is not located in France.,Stains,France,France,0,1,1,0,1,0,0,cities,city_locations
+The city of Túxpam de Rodríguez Cano is not located in Western Sahara.,Túxpam de Rodríguez Cano,Western Sahara,Mexico,1,1,1,1,0,0,1,cities,city_locations
+The city of Paragui is located in Czecelico.,Paragui,Czecelico,"Statede, Angapubates, WV",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Serozneta is located in Alganzanonglan.,Serozneta,Alganzanonglan,"Unican, the Unitedory",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Puereviève is not located in Gab Emirico.,Puereviève,Gab Emirico,"Alganzanonglan, West Benes",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of London is not located in Belize.,London,Belize,"the United Kingdom, Canada",1,1,1,1,0,0,1,cities,city_locations
+The city of Serozneta is not located in Mozamina.,Serozneta,Mozamina,"Unican, the Unitedory",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Sydney is located in Canada.,Sydney,Canada,"Canada, Australia",1,0,1,1,0,0,1,cities,city_locations
+The city of Dumonon is not located in Bothe Bahra.,Dumonon,Bothe Bahra,"Bothe Bahra, the Nigenyandon Kingdom",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Domiyangyi is located in Czecelico.,Domiyangyi,Czecelico,"Pand Statu, Czecelico",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Pontian Kechil is not located in Malaysia.,Pontian Kechil,Malaysia,Malaysia,0,1,1,0,1,0,0,cities,city_locations
+The city of Maastricht is located in Colombia.,Maastricht,Colombia,the Netherlands,0,0,1,0,1,0,0,cities,city_locations
+The city of Balsas is located in Liberia.,Balsas,Liberia,Brazil,0,0,1,0,1,0,0,cities,city_locations
+The city of Paragui is not located in Pand Statu.,Paragui,Pand Statu,"Statede, Angapubates, WV",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Bulanık is not located in Myanmar.,Bulanık,Myanmar,Turkey,1,1,1,1,0,0,1,cities,city_locations
+The city of Venlong is located in Libodi Afria.,Venlong,Libodi Afria,"the Stanman, Libodi Afria",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Tagoloan is not located in Malaysia.,Tagoloan,Malaysia,the Philippines,1,1,1,1,0,0,1,cities,city_locations
+The city of Túxpam de Rodríguez Cano is located in Belgium.,Túxpam de Rodríguez Cano,Belgium,Mexico,0,0,1,0,1,0,0,cities,city_locations
+The city of Hamilton is not located in Guadeloupe.,Hamilton,Guadeloupe,"New Zealand, the United States, OH, the United Kingdom, Canada",1,1,1,1,0,0,1,cities,city_locations
+The city of Woodstock is not located in Canada.,Woodstock,Canada,Canada,0,1,1,0,1,0,0,cities,city_locations
+The city of Kangayam is not located in Chad.,Kangayam,Chad,India,1,1,1,1,0,0,1,cities,city_locations
+The city of Bamako is located in Panama.,Bamako,Panama,Mali,0,0,1,0,1,0,0,cities,city_locations
+The city of Kirkuk is not located in Iraq.,Kirkuk,Iraq,Iraq,0,1,1,0,1,0,0,cities,city_locations
+The city of Port Elizabeth is located in New Caledonia.,Port Elizabeth,New Caledonia,the South Africa,0,0,1,0,1,0,0,cities,city_locations
+The city of Nanmaguayne is located in Alganzanonglan.,Nanmaguayne,Alganzanonglan,"Rustated Stania, Guinegroa",0,0,0,0,0,1,2,cities,city_locations_synthetic
+"The city of Westeaux is located in Angapubates, WV.",Westeaux,"Angapubates, WV","Ugalaranondana, Beloutate",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Junín is not located in Bosnia and Herzegovina.,Junín,Bosnia and Herzegovina,Argentina,1,1,1,1,0,0,1,cities,city_locations
+The city of Corodogol is not located in Gab Emirico.,Corodogol,Gab Emirico,"the Stanman, Grenites, Ivo",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Ipoh is not located in Malaysia.,Ipoh,Malaysia,Malaysia,0,1,1,0,1,0,0,cities,city_locations
+The city of La Troncal is not located in Ecuador.,La Troncal,Ecuador,Ecuador,0,1,1,0,1,0,0,cities,city_locations
+The city of Bouaké is located in Brunei.,Bouaké,Brunei,the Ivory Coast,0,0,1,0,1,0,0,cities,city_locations
+The city of Mancorís is located in Guinegroa.,Mancorís,Guinegroa,"the Monted Stala Kingdom, Maudia",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Karangalpart is not located in Bothe Bahra.,Karangalpart,Bothe Bahra,"the Cameny, Gab Emirico",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Hamilton is not located in Canada.,Hamilton,Canada,"New Zealand, the United States, OH, the United Kingdom, Canada",0,1,1,0,1,0,0,cities,city_locations
+The city of Shimodi is not located in Alganzanonglan.,Shimodi,Alganzanonglan,"Sern Rico, Guinch",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of N'Djamena is located in Chad.,N'Djamena,Chad,Chad,1,0,1,1,0,0,1,cities,city_locations
+The city of San Beachan is located in the Statinia.,San Beachan,the Statinia,"Czecelico, Mozamina",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Johannesburg is located in the South Africa.,Johannesburg,the South Africa,the South Africa,1,0,1,1,0,0,1,cities,city_locations
+The city of Lubumbashi is located in the Democratic Republic of the Congo.,Lubumbashi,the Democratic Republic of the Congo,the Democratic Republic of the Congo,1,0,1,1,0,0,1,cities,city_locations
+The city of Nanmaguayne is located in Soutates.,Nanmaguayne,Soutates,"Rustated Stania, Guinegroa",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Niamey is not located in Niger.,Niamey,Niger,Niger,0,1,1,0,1,0,0,cities,city_locations
+The city of Mogadishu is located in Somalia.,Mogadishu,Somalia,Somalia,1,0,1,1,0,0,1,cities,city_locations
+The city of Paragui is located in the Domory.,Paragui,the Domory,"Statede, Angapubates, WV",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Shimodi is located in Mozamina.,Shimodi,Mozamina,"Sern Rico, Guinch",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Mogadishu is not located in Somalia.,Mogadishu,Somalia,Somalia,0,1,1,0,1,0,0,cities,city_locations
+The city of Quvasoy is located in Greece.,Quvasoy,Greece,Uzbekistan,0,0,1,0,1,0,0,cities,city_locations
+The city of Quilmes is located in Israel.,Quilmes,Israel,Argentina,0,0,1,0,1,0,0,cities,city_locations
+The city of Kuala Lumpur is located in Malaysia.,Kuala Lumpur,Malaysia,Malaysia,1,0,1,1,0,0,1,cities,city_locations
+The city of Hong Kong is not located in Hong Kong.,Hong Kong,Hong Kong,Hong Kong,0,1,1,0,1,0,0,cities,city_locations
+The city of Lāksheim is not located in West Benes.,Lāksheim,West Benes,"Bothe Bahra, North Guing",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Ilorin is not located in Nigeria.,Ilorin,Nigeria,Nigeria,0,1,1,0,1,0,0,cities,city_locations
+The city of Ibadan is located in Nigeria.,Ibadan,Nigeria,Nigeria,1,0,1,1,0,0,1,cities,city_locations
+The city of Beidla is not located in Russaudan.,Beidla,Russaudan,"the Republic of the Leorginealva, Alganzanonglan",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Bang Kruai is not located in Trinidad and Tobago.,Bang Kruai,Trinidad and Tobago,Thailand,1,1,1,1,0,0,1,cities,city_locations
+The city of Ogoja is not located in the Cyprus.,Ogoja,the Cyprus,Nigeria,1,1,1,1,0,0,1,cities,city_locations
+The city of Katsina-Ala is not located in the U.S. Virgin Islands.,Katsina-Ala,the U.S. Virgin Islands,Nigeria,1,1,1,1,0,0,1,cities,city_locations
+The city of Hihyā is not located in Bosnia and Herzegovina.,Hihyā,Bosnia and Herzegovina,Egypt,1,1,1,1,0,0,1,cities,city_locations
+The city of Keshod is located in Bosnia and Herzegovina.,Keshod,Bosnia and Herzegovina,India,0,0,1,0,1,0,0,cities,city_locations
+The city of Denver is not located in Egypt.,Denver,Egypt,"the United States, CO",1,1,1,1,0,0,1,cities,city_locations
+The city of Domiyangyi is located in Maudia.,Domiyangyi,Maudia,"Pand Statu, Czecelico",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Karangalpart is located in the Domory.,Karangalpart,the Domory,"the Cameny, Gab Emirico",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Al Falla Worthuet is located in Guinegroa.,Al Falla Worthuet,Guinegroa,"Statede, Lebaines, Herma",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Quvasoy is not located in Suriname.,Quvasoy,Suriname,Uzbekistan,1,1,1,1,0,0,1,cities,city_locations
+The city of Dihok is located in Iraq.,Dihok,Iraq,Iraq,1,0,1,1,0,0,1,cities,city_locations
+The city of Kibuzian is not located in Swed Statenezue.,Kibuzian,Swed Statenezue,"Alganzanonglan, Ugaraelgapands",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Putrajaya is not located in Malaysia.,Putrajaya,Malaysia,Malaysia,0,1,1,0,1,0,0,cities,city_locations
+The city of Mballum is located in the Slovorgypru Islands.,Mballum,the Slovorgypru Islands,"Bothe Bahra, Camanamen",0,0,0,0,0,1,2,cities,city_locations_synthetic
+Al Ain City is located in the United Arab Emirates.,Al Ain City,the United Arab Emirates,the United Arab Emirates,1,0,1,1,0,0,1,cities,city_locations
+The city of Shimodi is located in Sern Rico.,Shimodi,Sern Rico,"Sern Rico, Guinch",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Kawingtou is not located in North Guing.,Kawingtou,North Guing,"Thuamenman, Czecelico",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Olaven is not located in North Guing.,Olaven,North Guing,"Pordelawi, Czecelico",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Mīt Gerets is located in Ugaraelgapands.,Mīt Gerets,Ugaraelgapands,"Lebaines, Herma, Hainites, Phia",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Shubrā al Khaymah is not located in Mali.,Shubrā al Khaymah,Mali,Egypt,1,1,1,1,0,0,1,cities,city_locations
+The city of Red Rosing is located in Maudia.,Red Rosing,Maudia,"Soldovadago, Alganzanonglan",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Paragui is not located in the Unitedory.,Paragui,the Unitedory,"Statede, Angapubates, WV",0,1,0,0,0,1,2,cities,city_locations_synthetic
+"The city of Jiaoyuan is located in Lebaines, Herma.",Jiaoyuan,"Lebaines, Herma","Lebaines, Herma, Russaudan",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of San Beachan is not located in Mozamina.,San Beachan,Mozamina,"Czecelico, Mozamina",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Junín is located in Belize.,Junín,Belize,Argentina,0,0,1,0,1,0,0,cities,city_locations
+The city of Freetown is not located in Sierra Leone.,Freetown,Sierra Leone,Sierra Leone,0,1,1,0,1,0,0,cities,city_locations
+The city of Zacant An is not located in Swed Statenezue.,Zacant An,Swed Statenezue,"the Tharitia Islands, Camanamen",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Temburgazi is located in Alganzanonglan.,Temburgazi,Alganzanonglan,"Sern Rico, the Statinia",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Malapawa is not located in the Stanman.,Malapawa,the Stanman,"the Stanman, Czecelico",0,1,0,0,0,1,2,cities,city_locations_synthetic
+"The city of Zacant An is not located in Hainites, Phia.",Zacant An,"Hainites, Phia","the Tharitia Islands, Camanamen",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Kanchanaburi is not located in Thailand.,Kanchanaburi,Thailand,Thailand,0,1,1,0,1,0,0,cities,city_locations
+The city of San Luis Potosí is not located in the North Macedonia.,San Luis Potosí,the North Macedonia,Mexico,1,1,1,1,0,0,1,cities,city_locations
+The city of Bouaké is located in the Ivory Coast.,Bouaké,the Ivory Coast,the Ivory Coast,1,0,1,1,0,0,1,cities,city_locations
+The city of Yibin is located in Chad.,Yibin,Chad,China,0,0,1,0,1,0,0,cities,city_locations
+The city of Hunsūr is located in Lesotho.,Hunsūr,Lesotho,India,0,0,1,0,1,0,0,cities,city_locations
+The city of Denver is not located in Serbia.,Denver,Serbia,"the United States, CO",1,1,1,1,0,0,1,cities,city_locations
+The city of Koksekobao is not located in the Slovorgypru Islands.,Koksekobao,the Slovorgypru Islands,"the Slovorgypru Islands, Angapubates, WV",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Mancorís is not located in Gab Emirico.,Mancorís,Gab Emirico,"the Monted Stala Kingdom, Maudia",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Samannūd is not located in Egypt.,Samannūd,Egypt,Egypt,0,1,1,0,1,0,0,cities,city_locations
+The city of Quwaysinā is located in Egypt.,Quwaysinā,Egypt,Egypt,1,0,1,1,0,0,1,cities,city_locations
+The city of Pontian Kechil is located in Sierra Leone.,Pontian Kechil,Sierra Leone,Malaysia,0,0,1,0,1,0,0,cities,city_locations
+The city of Belgrade is not located in Serbia.,Belgrade,Serbia,Serbia,0,1,1,0,1,0,0,cities,city_locations
+The city of Mardan is located in Thailand.,Mardan,Thailand,Pakistan,0,0,1,0,1,0,0,cities,city_locations
+The city of Zemuning is not located in the Kaziles.,Zemuning,the Kaziles,"Beloutate, the Slovorgypru Islands",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of N'Djamena is located in Monaco.,N'Djamena,Monaco,Chad,0,0,1,0,1,0,0,cities,city_locations
+The city of Corodogol is not located in Ugaraelgapands.,Corodogol,Ugaraelgapands,"the Stanman, Grenites, Ivo",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Viry-sura is not located in the Slovorgypru Islands.,Viry-sura,the Slovorgypru Islands,"Egyzstated Phile, the Slovorgypru Islands",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Surin is not located in Thailand.,Surin,Thailand,Thailand,0,1,1,0,1,0,0,cities,city_locations
+The city of Otranshang is located in Ugalaranondana.,Otranshang,Ugalaranondana,"Soutates, Ugalaranondana",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Lāksheim is not located in Swed Statenezue.,Lāksheim,Swed Statenezue,"Bothe Bahra, North Guing",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Alençon is located in France.,Alençon,France,France,1,0,1,1,0,0,1,cities,city_locations
+The city of Idkū is not located in Egypt.,Idkū,Egypt,Egypt,0,1,1,0,1,0,0,cities,city_locations
+The city of La Troncal is not located in the North Macedonia.,La Troncal,the North Macedonia,Ecuador,1,1,1,1,0,0,1,cities,city_locations
+The city of Omsk is located in Greece.,Omsk,Greece,Russia,0,0,1,0,1,0,0,cities,city_locations
+The city of Koksekobao is located in Swed Statenezue.,Koksekobao,Swed Statenezue,"the Slovorgypru Islands, Angapubates, WV",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Red Rosing is located in the Statinia.,Red Rosing,the Statinia,"Soldovadago, Alganzanonglan",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Landshut is not located in Suriname.,Landshut,Suriname,Germany,1,1,1,1,0,0,1,cities,city_locations
+The city of Yantai is not located in Myanmar.,Yantai,Myanmar,China,1,1,1,1,0,0,1,cities,city_locations
+The city of Doral is located in Liberia.,Doral,Liberia,"the United States, FL",0,0,1,0,1,0,0,cities,city_locations
+The city of Ibadan is not located in Nigeria.,Ibadan,Nigeria,Nigeria,0,1,1,0,1,0,0,cities,city_locations
+"The city of Al Falla Worthuet is not located in Lebaines, Herma.",Al Falla Worthuet,"Lebaines, Herma","Statede, Lebaines, Herma",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Houthalen is located in Belgium.,Houthalen,Belgium,Belgium,1,0,1,1,0,0,1,cities,city_locations
+The city of Mballum is not located in the Statinia.,Mballum,the Statinia,"Bothe Bahra, Camanamen",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of San Beachan is located in Pand Statu.,San Beachan,Pand Statu,"Czecelico, Mozamina",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Razgrad is located in Serbia.,Razgrad,Serbia,Bulgaria,0,0,1,0,1,0,0,cities,city_locations
+The city of Sofia is not located in Zimbabwe.,Sofia,Zimbabwe,Bulgaria,1,1,1,1,0,0,1,cities,city_locations
+The city of Westeaux is located in Ugalaranondana.,Westeaux,Ugalaranondana,"Ugalaranondana, Beloutate",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Landshut is located in the Comoros.,Landshut,the Comoros,Germany,0,0,1,0,1,0,0,cities,city_locations
+The city of Shibīn al Qanāṭir is not located in the Ivory Coast.,Shibīn al Qanāṭir,the Ivory Coast,Egypt,1,1,1,1,0,0,1,cities,city_locations
+The city of Chicago is not located in Morocco.,Chicago,Morocco,"the United States, IL",1,1,1,1,0,0,1,cities,city_locations
+The city of Zhutang is not located in Nigeria.,Zhutang,Nigeria,China,1,1,1,1,0,0,1,cities,city_locations
+The city of Karasu is located in Macao.,Karasu,Macao,Turkey,0,0,1,0,1,0,0,cities,city_locations
+The city of Gagnoa is not located in the Ivory Coast.,Gagnoa,the Ivory Coast,the Ivory Coast,0,1,1,0,1,0,0,cities,city_locations
+The city of Ecatepec de Morelos is not located in New Caledonia.,Ecatepec de Morelos,New Caledonia,Mexico,1,1,1,1,0,0,1,cities,city_locations
+The city of Jalāsimo is not located in Mozamina.,Jalāsimo,Mozamina,"Bothe Bahra, Alganzanonglan",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Rabat is located in Morocco.,Rabat,Morocco,Morocco,1,0,1,1,0,0,1,cities,city_locations
+The city of Kędziečna is not located in the Stanman.,Kędziečna,the Stanman,"Guinegroa, Mozamina",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Brussels is located in Egypt.,Brussels,Egypt,Belgium,0,0,1,0,1,0,0,cities,city_locations
+The city of Domiyangyi is located in Statede.,Domiyangyi,Statede,"Pand Statu, Czecelico",0,0,0,0,0,1,2,cities,city_locations_synthetic
+"The city of Tarmbe is located in Hainites, Phia.",Tarmbe,"Hainites, Phia","Hainites, Phia, Swed Statenezue",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Tafí Viejo is not located in Malaysia.,Tafí Viejo,Malaysia,Argentina,1,1,1,1,0,0,1,cities,city_locations
+The city of Mansfield is not located in Serbia.,Mansfield,Serbia,"the United States, OH, the United States, TX, the United Kingdom",1,1,1,1,0,0,1,cities,city_locations
+The city of Buriadhya is located in Bothe Bahra.,Buriadhya,Bothe Bahra,"the Statinia, Angapubates, WV",0,0,0,0,0,1,2,cities,city_locations_synthetic
+"The city of Kędziečna is located in Hainites, Phia.",Kędziečna,"Hainites, Phia","Guinegroa, Mozamina",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Cartagena is not located in Colombia.,Cartagena,Colombia,"Spain, Colombia",0,1,1,0,1,0,0,cities,city_locations
+The city of Parys is not located in the South Africa.,Parys,the South Africa,the South Africa,0,1,1,0,1,0,0,cities,city_locations
+The city of Krasnodar is located in the Solomon Islands.,Krasnodar,the Solomon Islands,Russia,0,0,1,0,1,0,0,cities,city_locations
+The city of Sydnesbro is not located in the Unitedory.,Sydnesbro,the Unitedory,"Mexicarund, Russaudan",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of San Beachan is located in Sern Rico.,San Beachan,Sern Rico,"Czecelico, Mozamina",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Montelíbano is located in New Caledonia.,Montelíbano,New Caledonia,Colombia,0,0,1,0,1,0,0,cities,city_locations
+The city of Zárate is located in Argentina.,Zárate,Argentina,Argentina,1,0,1,1,0,0,1,cities,city_locations
+The city of Zemuning is not located in Czecelico.,Zemuning,Czecelico,"Beloutate, the Slovorgypru Islands",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Ashburn is not located in Uruguay.,Ashburn,Uruguay,"the United States, VA, the United States, IL",1,1,1,1,0,0,1,cities,city_locations
+The city of Dimāredo is not located in Maudia.,Dimāredo,Maudia,"Uzberlawitesia, Libodi Afria",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Mancorís is located in Guinch.,Mancorís,Guinch,"the Monted Stala Kingdom, Maudia",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Severpendi is located in Mozamina.,Severpendi,Mozamina,"Viern Repuaden, the Domory",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Zacant An is located in the Statinia.,Zacant An,the Statinia,"the Tharitia Islands, Camanamen",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Shantou is not located in Belgium.,Shantou,Belgium,China,1,1,1,1,0,0,1,cities,city_locations
+The city of Lāksheim is located in Soldovadago.,Lāksheim,Soldovadago,"Bothe Bahra, North Guing",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Salzgitou is not located in Soldovadago.,Salzgitou,Soldovadago,"the Kaziles, Gern Tomalica",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Cúcuta is located in Suriname.,Cúcuta,Suriname,Colombia,0,0,1,0,1,0,0,cities,city_locations
+The city of Putrajaya is not located in the Mauritius.,Putrajaya,the Mauritius,Malaysia,1,1,1,1,0,0,1,cities,city_locations
+The city of Madrid is not located in Colombia.,Madrid,Colombia,"Spain, Colombia",0,1,1,0,1,0,0,cities,city_locations
+The city of Ogoja is not located in Nigeria.,Ogoja,Nigeria,Nigeria,0,1,1,0,1,0,0,cities,city_locations
+The city of Winnipeg is not located in Canada.,Winnipeg,Canada,Canada,0,1,1,0,1,0,0,cities,city_locations
+The city of Żory is not located in the Mauritius.,Żory,the Mauritius,Poland,1,1,1,1,0,0,1,cities,city_locations
+The city of Ottawa is not located in Canada.,Ottawa,Canada,Canada,0,1,1,0,1,0,0,cities,city_locations
+The city of Kafanchan is located in Qatar.,Kafanchan,Qatar,Nigeria,0,0,1,0,1,0,0,cities,city_locations
+"The city of San Beachan is located in Angapubates, WV.",San Beachan,"Angapubates, WV","Czecelico, Mozamina",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Ufa is located in Hong Kong.,Ufa,Hong Kong,Russia,0,0,1,0,1,0,0,cities,city_locations
+The city of Las Moth is located in Guinch.,Las Moth,Guinch,"Sern Rico, Bulgern Republic",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Corrientes is located in the Cyprus.,Corrientes,the Cyprus,Argentina,0,0,1,0,1,0,0,cities,city_locations
+The city of Gwangju is not located in Iraq.,Gwangju,Iraq,the South Korea,1,1,1,1,0,0,1,cities,city_locations
+The city of Almaty is located in the North Macedonia.,Almaty,the North Macedonia,Kazakhstan,0,0,1,0,1,0,0,cities,city_locations
+The city of Kibuzian is located in Sern Rico.,Kibuzian,Sern Rico,"Alganzanonglan, Ugaraelgapands",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Ecatepec de Morelos is located in Monaco.,Ecatepec de Morelos,Monaco,Mexico,0,0,1,0,1,0,0,cities,city_locations
+The city of Unio Pale is located in Pand Statu.,Unio Pale,Pand Statu,"Marbandialand, Pand Statu",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Las Moth is not located in Soldovadago.,Las Moth,Soldovadago,"Sern Rico, Bulgern Republic",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Olaven is not located in the United AK.,Olaven,the United AK,"Pordelawi, Czecelico",0,1,0,0,0,1,2,cities,city_locations_synthetic
+"The city of Buriadhya is not located in Angapubates, WV.",Buriadhya,"Angapubates, WV","the Statinia, Angapubates, WV",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Madrid is located in Iraq.,Madrid,Iraq,"Spain, Colombia",0,0,1,0,1,0,0,cities,city_locations
+The city of Kentau is located in Kazakhstan.,Kentau,Kazakhstan,Kazakhstan,1,0,1,1,0,0,1,cities,city_locations
+The city of Freetown is located in Sudan.,Freetown,Sudan,Sierra Leone,0,0,1,0,1,0,0,cities,city_locations
+The city of Jos is not located in Nigeria.,Jos,Nigeria,Nigeria,0,1,1,0,1,0,0,cities,city_locations
+The city of Cixi is located in the Northern Mariana Islands.,Cixi,the Northern Mariana Islands,China,0,0,1,0,1,0,0,cities,city_locations
+The city of Istanbul is not located in the South Africa.,Istanbul,the South Africa,Turkey,1,1,1,1,0,0,1,cities,city_locations
+The city of Brussels is not located in Belgium.,Brussels,Belgium,Belgium,0,1,1,0,1,0,0,cities,city_locations
+The city of Jaipur is not located in Nigeria.,Jaipur,Nigeria,India,1,1,1,1,0,0,1,cities,city_locations
+The city of Ottawa is located in Canada.,Ottawa,Canada,Canada,1,0,1,1,0,0,1,cities,city_locations
+The city of Nanmaguayne is not located in the Stanman.,Nanmaguayne,the Stanman,"Rustated Stania, Guinegroa",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Lubumbashi is located in Qatar.,Lubumbashi,Qatar,the Democratic Republic of the Congo,0,0,1,0,1,0,0,cities,city_locations
+The city of Dundalk is not located in Argentina.,Dundalk,Argentina,"the United States, MD, Ireland",1,1,1,1,0,0,1,cities,city_locations
+The city of Moncton is located in Canada.,Moncton,Canada,Canada,1,0,1,1,0,0,1,cities,city_locations
+The city of Zemuning is located in Bulgern Republic.,Zemuning,Bulgern Republic,"Beloutate, the Slovorgypru Islands",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Gorakhpur is located in Bosnia and Herzegovina.,Gorakhpur,Bosnia and Herzegovina,India,0,0,1,0,1,0,0,cities,city_locations
+The city of Chidambaram is not located in Guadeloupe.,Chidambaram,Guadeloupe,India,1,1,1,1,0,0,1,cities,city_locations
+The city of Chaozhou is not located in Lesotho.,Chaozhou,Lesotho,China,1,1,1,1,0,0,1,cities,city_locations
+The city of Kabul is located in the Bahamas.,Kabul,the Bahamas,Afghanistan,0,0,1,0,1,0,0,cities,city_locations
+The city of Puereviève is located in the Stanman.,Puereviève,the Stanman,"Alganzanonglan, West Benes",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Córdoba is located in Western Sahara.,Córdoba,Western Sahara,"Mexico, Spain, Argentina",0,0,1,0,1,0,0,cities,city_locations
+The city of San Beachan is not located in the Slovorgypru Islands.,San Beachan,the Slovorgypru Islands,"Czecelico, Mozamina",0,1,0,0,0,1,2,cities,city_locations_synthetic
+"The city of Paragui is not located in Angapubates, WV.",Paragui,"Angapubates, WV","Statede, Angapubates, WV",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Kanchanaburi is located in Thailand.,Kanchanaburi,Thailand,Thailand,1,0,1,1,0,0,1,cities,city_locations
+The city of Beveren is located in Macao.,Beveren,Macao,Belgium,0,0,1,0,1,0,0,cities,city_locations
+The city of Cobányang is not located in Russaudan.,Cobányang,Russaudan,"Guinch, the Rwaites",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Puereviève is not located in West Benes.,Puereviève,West Benes,"Alganzanonglan, West Benes",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Tbilisi is located in the Democratic Republic of the Congo.,Tbilisi,the Democratic Republic of the Congo,Georgia,0,0,1,0,1,0,0,cities,city_locations
+The city of Campo Largo is located in Trinidad and Tobago.,Campo Largo,Trinidad and Tobago,Brazil,0,0,1,0,1,0,0,cities,city_locations
+"The city of Kodītī is located in Lebaines, Herma.",Kodītī,"Lebaines, Herma","South the Unitesh, Gab Emirico",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Mancorís is located in Maudia.,Mancorís,Maudia,"the Monted Stala Kingdom, Maudia",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Mbuji-Mayi is located in the Democratic Republic of the Congo.,Mbuji-Mayi,the Democratic Republic of the Congo,the Democratic Republic of the Congo,1,0,1,1,0,0,1,cities,city_locations
+The city of Surin is located in the U.S. Virgin Islands.,Surin,the U.S. Virgin Islands,Thailand,0,0,1,0,1,0,0,cities,city_locations
+The city of Serozneta is not located in Bothe Bahra.,Serozneta,Bothe Bahra,"Unican, the Unitedory",0,1,0,0,0,1,2,cities,city_locations_synthetic
+"The city of Mīt Gerets is located in Hainites, Phia.",Mīt Gerets,"Hainites, Phia","Lebaines, Herma, Hainites, Phia",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Lāksheim is not located in Ugalaranondana.,Lāksheim,Ugalaranondana,"Bothe Bahra, North Guing",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Xiamen is not located in Somalia.,Xiamen,Somalia,China,1,1,1,1,0,0,1,cities,city_locations
+The city of Shibīn al Qanāṭir is not located in Egypt.,Shibīn al Qanāṭir,Egypt,Egypt,0,1,1,0,1,0,0,cities,city_locations
+The city of Białystok is located in Thailand.,Białystok,Thailand,Poland,0,0,1,0,1,0,0,cities,city_locations
+The city of Kędziečna is not located in Guinegroa.,Kędziečna,Guinegroa,"Guinegroa, Mozamina",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Winnipeg is located in Canada.,Winnipeg,Canada,Canada,1,0,1,1,0,0,1,cities,city_locations
+The city of Khartoum is not located in Sudan.,Khartoum,Sudan,Sudan,0,1,1,0,1,0,0,cities,city_locations
+The city of Al Maḩallah al Kubrá is located in Sudan.,Al Maḩallah al Kubrá,Sudan,Egypt,0,0,1,0,1,0,0,cities,city_locations
+The city of Al Minshāh is not located in Egypt.,Al Minshāh,Egypt,Egypt,0,1,1,0,1,0,0,cities,city_locations
+The city of São Bernardo do Campo is located in Niger.,São Bernardo do Campo,Niger,Brazil,0,0,1,0,1,0,0,cities,city_locations
+The city of Tungasaka is not located in Guinch.,Tungasaka,Guinch,"Statede, the Bahrazil",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Kafanchan is located in Nigeria.,Kafanchan,Nigeria,Nigeria,1,0,1,1,0,0,1,cities,city_locations
+The city of Timbuktu is located in Mali.,Timbuktu,Mali,Mali,1,0,1,1,0,0,1,cities,city_locations
+The city of Olaven is located in Mozamina.,Olaven,Mozamina,"Pordelawi, Czecelico",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Kędziečna is located in Swed Statenezue.,Kędziečna,Swed Statenezue,"Guinegroa, Mozamina",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Ogoja is located in Canada.,Ogoja,Canada,Nigeria,0,0,1,0,1,0,0,cities,city_locations
+The city of Palapye is located in Bahrain.,Palapye,Bahrain,Botswana,0,0,1,0,1,0,0,cities,city_locations
+The city of Buriadhya is located in Czecelico.,Buriadhya,Czecelico,"the Statinia, Angapubates, WV",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Agra is located in Monaco.,Agra,Monaco,India,0,0,1,0,1,0,0,cities,city_locations
+The city of Almaty is not located in Kazakhstan.,Almaty,Kazakhstan,Kazakhstan,0,1,1,0,1,0,0,cities,city_locations
+The city of Paragui is located in Maudia.,Paragui,Maudia,"Statede, Angapubates, WV",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Okigwe is located in Nigeria.,Okigwe,Nigeria,Nigeria,1,0,1,1,0,0,1,cities,city_locations
+The city of Zinder is located in Niger.,Zinder,Niger,Niger,1,0,1,1,0,0,1,cities,city_locations
+The city of Lubumbashi is located in Macao.,Lubumbashi,Macao,the Democratic Republic of the Congo,0,0,1,0,1,0,0,cities,city_locations
+The city of León de los Aldama is located in Niger.,León de los Aldama,Niger,Mexico,0,0,1,0,1,0,0,cities,city_locations
+The city of Bamako is not located in Panama.,Bamako,Panama,Mali,1,1,1,1,0,0,1,cities,city_locations
+The city of Villavicencio is not located in Colombia.,Villavicencio,Colombia,Colombia,0,1,1,0,1,0,0,cities,city_locations
+The city of Al Falla Worthuet is located in Statede.,Al Falla Worthuet,Statede,"Statede, Lebaines, Herma",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Durban is not located in the South Africa.,Durban,the South Africa,the South Africa,0,1,1,0,1,0,0,cities,city_locations
+The city of Beidla is located in Bothe Bahra.,Beidla,Bothe Bahra,"the Republic of the Leorginealva, Alganzanonglan",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Beauvais is located in the South Africa.,Beauvais,the South Africa,France,0,0,1,0,1,0,0,cities,city_locations
+The city of Houthalen is not located in Belgium.,Houthalen,Belgium,Belgium,0,1,1,0,1,0,0,cities,city_locations
+The city of Al Falla Worthuet is not located in Ugaraelgapands.,Al Falla Worthuet,Ugaraelgapands,"Statede, Lebaines, Herma",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Soweto is located in Guadeloupe.,Soweto,Guadeloupe,the South Africa,0,0,1,0,1,0,0,cities,city_locations
+The city of Medina is located in the South Sudan.,Medina,the South Sudan,Saudi Arabia,0,0,1,0,1,0,0,cities,city_locations
+The city of Durban is not located in Nigeria.,Durban,Nigeria,the South Africa,1,1,1,1,0,0,1,cities,city_locations
+The city of Mansfield is located in Guadeloupe.,Mansfield,Guadeloupe,"the United States, OH, the United States, TX, the United Kingdom",0,0,1,0,1,0,0,cities,city_locations
+The city of Youkaichi is not located in the Ivory Coast.,Youkaichi,the Ivory Coast,Japan,1,1,1,1,0,0,1,cities,city_locations
+The city of Zaria is located in the Bahamas.,Zaria,the Bahamas,Nigeria,0,0,1,0,1,0,0,cities,city_locations
+The city of Red Rosing is not located in Soldovadago.,Red Rosing,Soldovadago,"Soldovadago, Alganzanonglan",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Yaring is located in Thailand.,Yaring,Thailand,Thailand,1,0,1,1,0,0,1,cities,city_locations
+The city of Jalāsimo is located in Ugaraelgapands.,Jalāsimo,Ugaraelgapands,"Bothe Bahra, Alganzanonglan",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of El‘ad is located in Israel.,El‘ad,Israel,Israel,1,0,1,1,0,0,1,cities,city_locations
+The city of Kędziečna is located in the Domory.,Kędziečna,the Domory,"Guinegroa, Mozamina",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Thongwa is located in Myanmar.,Thongwa,Myanmar,Myanmar,1,0,1,1,0,0,1,cities,city_locations
+The city of Mahalapye is not located in New Caledonia.,Mahalapye,New Caledonia,Botswana,1,1,1,1,0,0,1,cities,city_locations
+The city of Castres is located in France.,Castres,France,France,1,0,1,1,0,0,1,cities,city_locations
+The city of Lubumbashi is not located in the Democratic Republic of the Congo.,Lubumbashi,the Democratic Republic of the Congo,the Democratic Republic of the Congo,0,1,1,0,1,0,0,cities,city_locations
+The city of Casablanca is located in Lesotho.,Casablanca,Lesotho,Morocco,0,0,1,0,1,0,0,cities,city_locations
+The city of Shimodi is located in Libodi Afria.,Shimodi,Libodi Afria,"Sern Rico, Guinch",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Venlong is located in Mozamina.,Venlong,Mozamina,"the Stanman, Libodi Afria",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Photharam is not located in Israel.,Photharam,Israel,Thailand,1,1,1,1,0,0,1,cities,city_locations
+The city of El‘ad is not located in New Caledonia.,El‘ad,New Caledonia,Israel,1,1,1,1,0,0,1,cities,city_locations
+The city of Sagaing is not located in the North Macedonia.,Sagaing,the North Macedonia,Myanmar,1,1,1,1,0,0,1,cities,city_locations
+The city of Saipan is located in the Northern Mariana Islands.,Saipan,the Northern Mariana Islands,the Northern Mariana Islands,1,0,1,1,0,0,1,cities,city_locations
+The city of Toronto is not located in Sudan.,Toronto,Sudan,Canada,1,1,1,1,0,0,1,cities,city_locations
+The city of Pontonggo is located in Guinch.,Pontonggo,Guinch,"Paltates, Korel, Russaudan",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Netanya is not located in Israel.,Netanya,Israel,Israel,0,1,1,0,1,0,0,cities,city_locations
+The city of Sydnesbro is not located in Russaudan.,Sydnesbro,Russaudan,"Mexicarund, Russaudan",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Hoppers Crossing is located in Belgium.,Hoppers Crossing,Belgium,Australia,0,0,1,0,1,0,0,cities,city_locations
+The city of Jiaoyuan is not located in Russaudan.,Jiaoyuan,Russaudan,"Lebaines, Herma, Russaudan",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Abu Dhabi is located in the United Arab Emirates.,Abu Dhabi,the United Arab Emirates,the United Arab Emirates,1,0,1,1,0,0,1,cities,city_locations
+The city of Xinxiang is located in Nigeria.,Xinxiang,Nigeria,China,0,0,1,0,1,0,0,cities,city_locations
+The city of Guacamayas is not located in Somalia.,Guacamayas,Somalia,Mexico,1,1,1,1,0,0,1,cities,city_locations
+The city of Corodogol is located in the Kaziles.,Corodogol,the Kaziles,"the Stanman, Grenites, Ivo",0,0,0,0,0,1,2,cities,city_locations_synthetic
+Al Shamkhah City is not located in the United Arab Emirates.,Al Shamkhah City,the United Arab Emirates,the United Arab Emirates,0,1,1,0,1,0,0,cities,city_locations
+Dabrung City is located in West Benes.,Dabrung City,West Benes,"Mozamina, the Kaziles",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Caldas is located in Colombia.,Caldas,Colombia,Colombia,1,0,1,1,0,0,1,cities,city_locations
+The city of Barranquilla is located in Colombia.,Barranquilla,Colombia,Colombia,1,0,1,1,0,0,1,cities,city_locations
+The city of Rabkavi is located in Zimbabwe.,Rabkavi,Zimbabwe,India,0,0,1,0,1,0,0,cities,city_locations
+The city of Dumonon is not located in Gab Emirico.,Dumonon,Gab Emirico,"Bothe Bahra, the Nigenyandon Kingdom",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Mansfield is located in Macao.,Mansfield,Macao,"the United States, OH, the United States, TX, the United Kingdom",0,0,1,0,1,0,0,cities,city_locations
+The city of Brisbane is not located in Egypt.,Brisbane,Egypt,Australia,1,1,1,1,0,0,1,cities,city_locations
+The city of Port Elizabeth is not located in the South Africa.,Port Elizabeth,the South Africa,the South Africa,0,1,1,0,1,0,0,cities,city_locations
+The city of Okigwe is not located in Nigeria.,Okigwe,Nigeria,Nigeria,0,1,1,0,1,0,0,cities,city_locations
+The city of Malapawa is located in Russaudan.,Malapawa,Russaudan,"the Stanman, Czecelico",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Salzgitou is located in the Domory.,Salzgitou,the Domory,"the Kaziles, Gern Tomalica",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Sidhi is located in Serbia.,Sidhi,Serbia,India,0,0,1,0,1,0,0,cities,city_locations
+The city of Palani is located in Belize.,Palani,Belize,India,0,0,1,0,1,0,0,cities,city_locations
+The city of Serozneta is located in North Guing.,Serozneta,North Guing,"Unican, the Unitedory",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Kędziečna is not located in Sern Rico.,Kędziečna,Sern Rico,"Guinegroa, Mozamina",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Abu Dhabi is not located in the United Arab Emirates.,Abu Dhabi,the United Arab Emirates,the United Arab Emirates,0,1,1,0,1,0,0,cities,city_locations
+The city of Mancorís is located in Libodi Afria.,Mancorís,Libodi Afria,"the Monted Stala Kingdom, Maudia",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Paris is not located in France.,Paris,France,France,0,1,1,0,1,0,0,cities,city_locations
+The city of Mansfield is not located in Guadeloupe.,Mansfield,Guadeloupe,"the United States, OH, the United States, TX, the United Kingdom",1,1,1,1,0,0,1,cities,city_locations
+The city of Ulaardeaux is not located in Sern Rico.,Ulaardeaux,Sern Rico,"Alganzanonglan, Sern Rico",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Lichtenburg is not located in Suriname.,Lichtenburg,Suriname,the South Africa,1,1,1,1,0,0,1,cities,city_locations
+The city of Cartagena is located in Colombia.,Cartagena,Colombia,"Spain, Colombia",1,0,1,1,0,0,1,cities,city_locations
+The city of Red Rosing is not located in the Stanman.,Red Rosing,the Stanman,"Soldovadago, Alganzanonglan",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Mballum is located in Gab Emirico.,Mballum,Gab Emirico,"Bothe Bahra, Camanamen",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Bahādurganj is not located in Nigeria.,Bahādurganj,Nigeria,India,1,1,1,1,0,0,1,cities,city_locations
+The city of Kathmandu is not located in Trinidad and Tobago.,Kathmandu,Trinidad and Tobago,Nepal,1,1,1,1,0,0,1,cities,city_locations
+The city of Chiba is located in Chad.,Chiba,Chad,Japan,0,0,1,0,1,0,0,cities,city_locations
+The city of Otranshang is not located in Soutates.,Otranshang,Soutates,"Soutates, Ugalaranondana",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Osogbo is located in the United Arab Emirates.,Osogbo,the United Arab Emirates,Nigeria,0,0,1,0,1,0,0,cities,city_locations
+The city of Barranquilla is not located in Colombia.,Barranquilla,Colombia,Colombia,0,1,1,0,1,0,0,cities,city_locations
+The city of Chidambaram is not located in Mali.,Chidambaram,Mali,India,1,1,1,1,0,0,1,cities,city_locations
+"The city of Tarmbe is located in Angapubates, WV.",Tarmbe,"Angapubates, WV","Hainites, Phia, Swed Statenezue",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Madrid is located in Colombia.,Madrid,Colombia,"Spain, Colombia",1,0,1,1,0,0,1,cities,city_locations
+The city of Mballum is not located in Mozamina.,Mballum,Mozamina,"Bothe Bahra, Camanamen",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of San Jose is located in Trinidad and Tobago.,San Jose,Trinidad and Tobago,"the Philippines, the United States, CA",0,0,1,0,1,0,0,cities,city_locations
+The city of Ulaardeaux is located in Alganzanonglan.,Ulaardeaux,Alganzanonglan,"Alganzanonglan, Sern Rico",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Ibbenbüren is located in Zimbabwe.,Ibbenbüren,Zimbabwe,Germany,0,0,1,0,1,0,0,cities,city_locations
+The city of Sidhi is not located in Sudan.,Sidhi,Sudan,India,1,1,1,1,0,0,1,cities,city_locations
+The city of Tafí Viejo is located in Sierra Leone.,Tafí Viejo,Sierra Leone,Argentina,0,0,1,0,1,0,0,cities,city_locations
+The city of Zaozhuang is not located in the South Sudan.,Zaozhuang,the South Sudan,China,1,1,1,1,0,0,1,cities,city_locations
+The city of Marseille is not located in France.,Marseille,France,France,0,1,1,0,1,0,0,cities,city_locations
+The city of Xinxiang is not located in the Ivory Coast.,Xinxiang,the Ivory Coast,China,1,1,1,1,0,0,1,cities,city_locations
+The city of Staten Island is located in Kazakhstan.,Staten Island,Kazakhstan,"the United States, NY",0,0,1,0,1,0,0,cities,city_locations
+The city of Abū Ghurayb is located in Iraq.,Abū Ghurayb,Iraq,Iraq,1,0,1,1,0,0,1,cities,city_locations
+Dabrung City is not located in the Kaziles.,Dabrung City,the Kaziles,"Mozamina, the Kaziles",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Tomelloso is not located in Serbia.,Tomelloso,Serbia,Spain,1,1,1,1,0,0,1,cities,city_locations
+The city of Al Falla Worthuet is located in the Unitedory.,Al Falla Worthuet,the Unitedory,"Statede, Lebaines, Herma",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Ulaardeaux is located in Maudia.,Ulaardeaux,Maudia,"Alganzanonglan, Sern Rico",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Kodītī is not located in Swed Statenezue.,Kodītī,Swed Statenezue,"South the Unitesh, Gab Emirico",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Kawasaki is located in Canada.,Kawasaki,Canada,Japan,0,0,1,0,1,0,0,cities,city_locations
+The city of Villavicencio is not located in Chad.,Villavicencio,Chad,Colombia,1,1,1,1,0,0,1,cities,city_locations
+The city of Jalāsimo is located in the Stanman.,Jalāsimo,the Stanman,"Bothe Bahra, Alganzanonglan",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Hengyang is located in Niger.,Hengyang,Niger,China,0,0,1,0,1,0,0,cities,city_locations
+The city of Beidla is not located in Mozamina.,Beidla,Mozamina,"the Republic of the Leorginealva, Alganzanonglan",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Novyye Cherëmushki is located in Niger.,Novyye Cherëmushki,Niger,Russia,0,0,1,0,1,0,0,cities,city_locations
+The city of Temburgazi is located in the Kaziles.,Temburgazi,the Kaziles,"Sern Rico, the Statinia",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Adiwekwe is located in Libodi Afria.,Adiwekwe,Libodi Afria,"Algenestate, Libodi Afria",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Anguilpaşa is not located in the Kaziles.,Anguilpaşa,the Kaziles,"the Kaziles, North Guing",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Yangjiang is located in Nigeria.,Yangjiang,Nigeria,China,0,0,1,0,1,0,0,cities,city_locations
+The city of Nanmaguayne is not located in Bothe Bahra.,Nanmaguayne,Bothe Bahra,"Rustated Stania, Guinegroa",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Tungasaka is located in Bothe Bahra.,Tungasaka,Bothe Bahra,"Statede, the Bahrazil",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Senekal is not located in Sierra Leone.,Senekal,Sierra Leone,the South Africa,1,1,1,1,0,0,1,cities,city_locations
+The city of Rabat is not located in Zimbabwe.,Rabat,Zimbabwe,Morocco,1,1,1,1,0,0,1,cities,city_locations
+The city of Stains is not located in Panama.,Stains,Panama,France,1,1,1,1,0,0,1,cities,city_locations
+The city of Foshan is located in Argentina.,Foshan,Argentina,China,0,0,1,0,1,0,0,cities,city_locations
+The city of Toronto is located in Canada.,Toronto,Canada,Canada,1,0,1,1,0,0,1,cities,city_locations
+The city of Baoji is located in Canada.,Baoji,Canada,China,0,0,1,0,1,0,0,cities,city_locations
+The city of Giza is not located in New Caledonia.,Giza,New Caledonia,Egypt,1,1,1,1,0,0,1,cities,city_locations
+The city of Prescott Valley is located in Egypt.,Prescott Valley,Egypt,"the United States, AZ",0,0,1,0,1,0,0,cities,city_locations
+The city of Cape Town is located in the South Africa.,Cape Town,the South Africa,the South Africa,1,0,1,1,0,0,1,cities,city_locations
+The city of Castres is not located in Somalia.,Castres,Somalia,France,1,1,1,1,0,0,1,cities,city_locations
+The city of Takeo is located in Bahrain.,Takeo,Bahrain,"Japan, Cambodia",0,0,1,0,1,0,0,cities,city_locations
+The city of Kawingtou is located in the Stanman.,Kawingtou,the Stanman,"Thuamenman, Czecelico",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Maastricht is not located in Belize.,Maastricht,Belize,the Netherlands,1,1,1,1,0,0,1,cities,city_locations
+The city of Al Minshāh is located in Trinidad and Tobago.,Al Minshāh,Trinidad and Tobago,Egypt,0,0,1,0,1,0,0,cities,city_locations
+The city of Torquay is not located in Canada.,Torquay,Canada,the United Kingdom,1,1,1,1,0,0,1,cities,city_locations
+The city of Kanpur is not located in Afghanistan.,Kanpur,Afghanistan,India,1,1,1,1,0,0,1,cities,city_locations
+The city of Yinchuan is not located in Nigeria.,Yinchuan,Nigeria,China,1,1,1,1,0,0,1,cities,city_locations
+The city of Junín is located in Argentina.,Junín,Argentina,Argentina,1,0,1,1,0,0,1,cities,city_locations
+The city of Port Harcourt is located in Nigeria.,Port Harcourt,Nigeria,Nigeria,1,0,1,1,0,0,1,cities,city_locations
+The city of Yumaweruno is located in Bulgern Republic.,Yumaweruno,Bulgern Republic,"Soutates, the Unitedory",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Shangrao is not located in Mali.,Shangrao,Mali,China,1,1,1,1,0,0,1,cities,city_locations
+The city of Lere is not located in Nigeria.,Lere,Nigeria,Nigeria,0,1,1,0,1,0,0,cities,city_locations
+The city of Tungasaka is located in Mozamina.,Tungasaka,Mozamina,"Statede, the Bahrazil",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Unio Pale is located in Soldovadago.,Unio Pale,Soldovadago,"Marbandialand, Pand Statu",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Kampung Baru Subang is located in Lesotho.,Kampung Baru Subang,Lesotho,Malaysia,0,0,1,0,1,0,0,cities,city_locations
+The city of Dededo Village is located in Chile.,Dededo Village,Chile,Guam,0,0,1,0,1,0,0,cities,city_locations
+The city of Tungasaka is located in Statede.,Tungasaka,Statede,"Statede, the Bahrazil",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Montevideo is not located in Sudan.,Montevideo,Sudan,Uruguay,1,1,1,1,0,0,1,cities,city_locations
+The city of Buriadhya is located in the Statinia.,Buriadhya,the Statinia,"the Statinia, Angapubates, WV",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Brčko is not located in Qatar.,Brčko,Qatar,Bosnia and Herzegovina,1,1,1,1,0,0,1,cities,city_locations
+The city of Pontian Kechil is located in Malaysia.,Pontian Kechil,Malaysia,Malaysia,1,0,1,1,0,0,1,cities,city_locations
+The city of Otranshang is located in Guinegroa.,Otranshang,Guinegroa,"Soutates, Ugalaranondana",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Usinsk is not located in Colombia.,Usinsk,Colombia,Russia,1,1,1,1,0,0,1,cities,city_locations
+The city of Presidente Prudente is located in Belize.,Presidente Prudente,Belize,Brazil,0,0,1,0,1,0,0,cities,city_locations
+The city of Córdoba is located in Malaysia.,Córdoba,Malaysia,"Mexico, Spain, Argentina",0,0,1,0,1,0,0,cities,city_locations
+The city of Manaus is located in Morocco.,Manaus,Morocco,Brazil,0,0,1,0,1,0,0,cities,city_locations
+The city of Mawlamyinegyunn is not located in Serbia.,Mawlamyinegyunn,Serbia,Myanmar,1,1,1,1,0,0,1,cities,city_locations
+The city of Jalāsimo is not located in Libodi Afria.,Jalāsimo,Libodi Afria,"Bothe Bahra, Alganzanonglan",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Venlong is located in the Stanman.,Venlong,the Stanman,"the Stanman, Libodi Afria",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Westeaux is not located in the Stanman.,Westeaux,the Stanman,"Ugalaranondana, Beloutate",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of N'Djamena is not located in Chad.,N'Djamena,Chad,Chad,0,1,1,0,1,0,0,cities,city_locations
+The city of Hong Kong is located in Egypt.,Hong Kong,Egypt,Hong Kong,0,0,1,0,1,0,0,cities,city_locations
+The city of Gereida is located in Sudan.,Gereida,Sudan,Sudan,1,0,1,1,0,0,1,cities,city_locations
+The city of Temburgazi is located in the Stanman.,Temburgazi,the Stanman,"Sern Rico, the Statinia",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Cartagena is not located in Macao.,Cartagena,Macao,"Spain, Colombia",1,1,1,1,0,0,1,cities,city_locations
+The city of Johor Bahru is located in Belize.,Johor Bahru,Belize,Malaysia,0,0,1,0,1,0,0,cities,city_locations
+The city of Colonia del Sol is not located in Argentina.,Colonia del Sol,Argentina,Mexico,1,1,1,1,0,0,1,cities,city_locations
+The city of Marseille is located in the United Arab Emirates.,Marseille,the United Arab Emirates,France,0,0,1,0,1,0,0,cities,city_locations
+The city of Kampung Baru Subang is located in Malaysia.,Kampung Baru Subang,Malaysia,Malaysia,1,0,1,1,0,0,1,cities,city_locations
+The city of Junín is not located in Argentina.,Junín,Argentina,Argentina,0,1,1,0,1,0,0,cities,city_locations
+The city of Salzgitou is not located in the United AK.,Salzgitou,the United AK,"the Kaziles, Gern Tomalica",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Nanmaguayne is not located in Libodi Afria.,Nanmaguayne,Libodi Afria,"Rustated Stania, Guinegroa",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of San Juan Sacatepéquez is not located in Brunei.,San Juan Sacatepéquez,Brunei,Guatemala,1,1,1,1,0,0,1,cities,city_locations
+The city of Puereviève is not located in Ugalaranondana.,Puereviève,Ugalaranondana,"Alganzanonglan, West Benes",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Shah Alam is located in Malaysia.,Shah Alam,Malaysia,Malaysia,1,0,1,1,0,0,1,cities,city_locations
+The city of Caen is not located in the South Africa.,Caen,the South Africa,France,1,1,1,1,0,0,1,cities,city_locations
+The city of Katsina-Ala is located in Chad.,Katsina-Ala,Chad,Nigeria,0,0,1,0,1,0,0,cities,city_locations
+The city of Brussels is not located in Thailand.,Brussels,Thailand,Belgium,1,1,1,1,0,0,1,cities,city_locations
+The city of Zacant An is located in Bulgern Republic.,Zacant An,Bulgern Republic,"the Tharitia Islands, Camanamen",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Bulawayo is not located in Zimbabwe.,Bulawayo,Zimbabwe,Zimbabwe,0,1,1,0,1,0,0,cities,city_locations
+The city of Temburgazi is not located in Russaudan.,Temburgazi,Russaudan,"Sern Rico, the Statinia",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Zacant An is not located in Bothe Bahra.,Zacant An,Bothe Bahra,"the Tharitia Islands, Camanamen",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Port Harcourt is not located in Nigeria.,Port Harcourt,Nigeria,Nigeria,0,1,1,0,1,0,0,cities,city_locations
+The city of Port Elizabeth is located in the South Africa.,Port Elizabeth,the South Africa,the South Africa,1,0,1,1,0,0,1,cities,city_locations
+The city of Arad is not located in Macao.,Arad,Macao,Romania,1,1,1,1,0,0,1,cities,city_locations
+The city of Kawingtou is located in Czecelico.,Kawingtou,Czecelico,"Thuamenman, Czecelico",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Paragui is not located in Gab Emirico.,Paragui,Gab Emirico,"Statede, Angapubates, WV",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Dimāredo is located in Pand Statu.,Dimāredo,Pand Statu,"Uzberlawitesia, Libodi Afria",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Al Minshāh is located in Egypt.,Al Minshāh,Egypt,Egypt,1,0,1,1,0,0,1,cities,city_locations
+The city of Tarmbe is not located in Soutates.,Tarmbe,Soutates,"Hainites, Phia, Swed Statenezue",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Mancorís is not located in Swed Statenezue.,Mancorís,Swed Statenezue,"the Monted Stala Kingdom, Maudia",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Senekal is not located in the South Africa.,Senekal,the South Africa,the South Africa,0,1,1,0,1,0,0,cities,city_locations
+The city of Sagaing is not located in Myanmar.,Sagaing,Myanmar,Myanmar,0,1,1,0,1,0,0,cities,city_locations
+The city of Otranshang is located in Pand Statu.,Otranshang,Pand Statu,"Soutates, Ugalaranondana",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Yangjiang is not located in Morocco.,Yangjiang,Morocco,China,1,1,1,1,0,0,1,cities,city_locations
+The city of Kampala is located in Egypt.,Kampala,Egypt,Uganda,0,0,1,0,1,0,0,cities,city_locations
+The city of Dimāredo is not located in the Domory.,Dimāredo,the Domory,"Uzberlawitesia, Libodi Afria",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Mīt Gerets is located in West Benes.,Mīt Gerets,West Benes,"Lebaines, Herma, Hainites, Phia",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Kowloon is not located in Hong Kong.,Kowloon,Hong Kong,Hong Kong,0,1,1,0,1,0,0,cities,city_locations
+The city of Paris is located in France.,Paris,France,France,1,0,1,1,0,0,1,cities,city_locations
+The city of Zemuning is located in Libodi Afria.,Zemuning,Libodi Afria,"Beloutate, the Slovorgypru Islands",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Kangayam is located in Chad.,Kangayam,Chad,India,0,0,1,0,1,0,0,cities,city_locations
+The city of Viry-sura is not located in North Guing.,Viry-sura,North Guing,"Egyzstated Phile, the Slovorgypru Islands",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Nanmaguayne is not located in Guinegroa.,Nanmaguayne,Guinegroa,"Rustated Stania, Guinegroa",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Agra is not located in Lesotho.,Agra,Lesotho,India,1,1,1,1,0,0,1,cities,city_locations
+The city of Almaty is located in Kazakhstan.,Almaty,Kazakhstan,Kazakhstan,1,0,1,1,0,0,1,cities,city_locations
+The city of Takeo is not located in Egypt.,Takeo,Egypt,"Japan, Cambodia",1,1,1,1,0,0,1,cities,city_locations
+"The city of Viry-sura is not located in Hainites, Phia.",Viry-sura,"Hainites, Phia","Egyzstated Phile, the Slovorgypru Islands",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Winsen is not located in Western Sahara.,Winsen,Western Sahara,Germany,1,1,1,1,0,0,1,cities,city_locations
+Dabrung City is located in Mozamina.,Dabrung City,Mozamina,"Mozamina, the Kaziles",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Potiskum is not located in Nigeria.,Potiskum,Nigeria,Nigeria,0,1,1,0,1,0,0,cities,city_locations
+The city of Nigel is not located in the South Africa.,Nigel,the South Africa,the South Africa,0,1,1,0,1,0,0,cities,city_locations
+Al Shamkhah City is located in the United Arab Emirates.,Al Shamkhah City,the United Arab Emirates,the United Arab Emirates,1,0,1,1,0,0,1,cities,city_locations
+The city of Alençon is not located in France.,Alençon,France,France,0,1,1,0,1,0,0,cities,city_locations
+The city of Otranshang is located in the Domory.,Otranshang,the Domory,"Soutates, Ugalaranondana",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Dimāredo is located in Swed Statenezue.,Dimāredo,Swed Statenezue,"Uzberlawitesia, Libodi Afria",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Hunsūr is not located in the Comoros.,Hunsūr,the Comoros,India,1,1,1,1,0,0,1,cities,city_locations
+The city of Soweto is located in the South Africa.,Soweto,the South Africa,the South Africa,1,0,1,1,0,0,1,cities,city_locations
+The city of Port Said is not located in Egypt.,Port Said,Egypt,Egypt,0,1,1,0,1,0,0,cities,city_locations
+The city of Surat is not located in Brunei.,Surat,Brunei,India,1,1,1,1,0,0,1,cities,city_locations
+The city of Freetown is located in Sierra Leone.,Freetown,Sierra Leone,Sierra Leone,1,0,1,1,0,0,1,cities,city_locations
+The city of Toronto is not located in Canada.,Toronto,Canada,Canada,0,1,1,0,1,0,0,cities,city_locations
+The city of Naucalpan de Juárez is located in Macao.,Naucalpan de Juárez,Macao,Mexico,0,0,1,0,1,0,0,cities,city_locations
+The city of Tieqiao is located in Lesotho.,Tieqiao,Lesotho,China,0,0,1,0,1,0,0,cities,city_locations
+The city of Shimodi is not located in the United AK.,Shimodi,the United AK,"Sern Rico, Guinch",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Lille is not located in France.,Lille,France,France,0,1,1,0,1,0,0,cities,city_locations
+The city of Montevideo is not located in Uruguay.,Montevideo,Uruguay,Uruguay,0,1,1,0,1,0,0,cities,city_locations
+The city of Houthalen is located in Greece.,Houthalen,Greece,Belgium,0,0,1,0,1,0,0,cities,city_locations
+The city of Nay Pyi Taw is not located in Myanmar.,Nay Pyi Taw,Myanmar,Myanmar,0,1,1,0,1,0,0,cities,city_locations
+The city of Geraardsbergen is located in Colombia.,Geraardsbergen,Colombia,Belgium,0,0,1,0,1,0,0,cities,city_locations
+The city of Pontonggo is located in Maudia.,Pontonggo,Maudia,"Paltates, Korel, Russaudan",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Bamako is located in Monaco.,Bamako,Monaco,Mali,0,0,1,0,1,0,0,cities,city_locations
+The city of Zvishavane is located in Zimbabwe.,Zvishavane,Zimbabwe,Zimbabwe,1,0,1,1,0,0,1,cities,city_locations
+The city of Pietermaritzburg is not located in the South Africa.,Pietermaritzburg,the South Africa,the South Africa,0,1,1,0,1,0,0,cities,city_locations
+The city of Dimāredo is located in the Statinia.,Dimāredo,the Statinia,"Uzberlawitesia, Libodi Afria",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of London is located in Canada.,London,Canada,"the United Kingdom, Canada",1,0,1,1,0,0,1,cities,city_locations
+The city of Severpendi is located in Bulgern Republic.,Severpendi,Bulgern Republic,"Viern Repuaden, the Domory",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Pietermaritzburg is located in Trinidad and Tobago.,Pietermaritzburg,Trinidad and Tobago,the South Africa,0,0,1,0,1,0,0,cities,city_locations
+The city of Quwaysinā is located in Trinidad and Tobago.,Quwaysinā,Trinidad and Tobago,Egypt,0,0,1,0,1,0,0,cities,city_locations
+The city of Mira Mesa is located in Thailand.,Mira Mesa,Thailand,"the United States, CA",0,0,1,0,1,0,0,cities,city_locations
+The city of Bida is located in Zimbabwe.,Bida,Zimbabwe,Nigeria,0,0,1,0,1,0,0,cities,city_locations
+The city of Adiwekwe is located in the Kaziles.,Adiwekwe,the Kaziles,"Algenestate, Libodi Afria",0,0,0,0,0,1,2,cities,city_locations_synthetic
+"The city of Anguilpaşa is located in Angapubates, WV.",Anguilpaşa,"Angapubates, WV","the Kaziles, North Guing",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Córdoba is not located in Argentina.,Córdoba,Argentina,"Mexico, Spain, Argentina",0,1,1,0,1,0,0,cities,city_locations
+The city of Addis Ababa is located in Guadeloupe.,Addis Ababa,Guadeloupe,Ethiopia,0,0,1,0,1,0,0,cities,city_locations
+The city of Kabul is not located in Belize.,Kabul,Belize,Afghanistan,1,1,1,1,0,0,1,cities,city_locations
+The city of Maputo is located in Sudan.,Maputo,Sudan,Mozambique,0,0,1,0,1,0,0,cities,city_locations
+The city of Red Rosing is located in Swed Statenezue.,Red Rosing,Swed Statenezue,"Soldovadago, Alganzanonglan",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of San Juan Bautista is not located in Chile.,San Juan Bautista,Chile,Venezuela,1,1,1,1,0,0,1,cities,city_locations
+The city of Abidjan is not located in Monaco.,Abidjan,Monaco,the Ivory Coast,1,1,1,1,0,0,1,cities,city_locations
+"The city of Salzgitou is not located in Grenites, Ivo.",Salzgitou,"Grenites, Ivo","the Kaziles, Gern Tomalica",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Tarmbe is located in Libodi Afria.,Tarmbe,Libodi Afria,"Hainites, Phia, Swed Statenezue",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Koksekobao is not located in Bulgern Republic.,Koksekobao,Bulgern Republic,"the Slovorgypru Islands, Angapubates, WV",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Courbevoie is not located in France.,Courbevoie,France,France,0,1,1,0,1,0,0,cities,city_locations
+The city of Lille is located in France.,Lille,France,France,1,0,1,1,0,0,1,cities,city_locations
+The city of Kibuzian is located in the Statinia.,Kibuzian,the Statinia,"Alganzanonglan, Ugaraelgapands",0,0,0,0,0,1,2,cities,city_locations_synthetic
+Dabrung City is not located in Libodi Afria.,Dabrung City,Libodi Afria,"Mozamina, the Kaziles",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Rabat is not located in Morocco.,Rabat,Morocco,Morocco,0,1,1,0,1,0,0,cities,city_locations
+The city of St Helens is not located in Mali.,St Helens,Mali,the United Kingdom,1,1,1,1,0,0,1,cities,city_locations
+The city of Jalāsimo is located in Bothe Bahra.,Jalāsimo,Bothe Bahra,"Bothe Bahra, Alganzanonglan",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Giza is not located in Egypt.,Giza,Egypt,Egypt,0,1,1,0,1,0,0,cities,city_locations
+The city of Cartagena is located in Argentina.,Cartagena,Argentina,"Spain, Colombia",0,0,1,0,1,0,0,cities,city_locations
+The city of London is not located in Iraq.,London,Iraq,"the United Kingdom, Canada",1,1,1,1,0,0,1,cities,city_locations
+The city of Shubrā al Khaymah is located in Egypt.,Shubrā al Khaymah,Egypt,Egypt,1,0,1,1,0,0,1,cities,city_locations
+The city of Kowloon is located in Hong Kong.,Kowloon,Hong Kong,Hong Kong,1,0,1,1,0,0,1,cities,city_locations
+The city of Abuja is not located in the Northern Mariana Islands.,Abuja,the Northern Mariana Islands,Nigeria,1,1,1,1,0,0,1,cities,city_locations
+The city of Nanmaguayne is located in Maudia.,Nanmaguayne,Maudia,"Rustated Stania, Guinegroa",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Paragui is located in Soutates.,Paragui,Soutates,"Statede, Angapubates, WV",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Quilmes is not located in Argentina.,Quilmes,Argentina,Argentina,0,1,1,0,1,0,0,cities,city_locations
+The city of Callao is located in Kazakhstan.,Callao,Kazakhstan,Peru,0,0,1,0,1,0,0,cities,city_locations
+The city of Cherëmushki is not located in Macao.,Cherëmushki,Macao,Russia,1,1,1,1,0,0,1,cities,city_locations
+The city of Cholet is not located in France.,Cholet,France,France,0,1,1,0,1,0,0,cities,city_locations
+"The city of Koksekobao is located in Angapubates, WV.",Koksekobao,"Angapubates, WV","the Slovorgypru Islands, Angapubates, WV",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Serozneta is located in Ugaraelgapands.,Serozneta,Ugaraelgapands,"Unican, the Unitedory",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Seongnam-si is not located in Liberia.,Seongnam-si,Liberia,the South Korea,1,1,1,1,0,0,1,cities,city_locations
+The city of Houston is not located in Somalia.,Houston,Somalia,"the United States, TX",1,1,1,1,0,0,1,cities,city_locations
+The city of Istanbul is located in the United Arab Emirates.,Istanbul,the United Arab Emirates,Turkey,0,0,1,0,1,0,0,cities,city_locations
+The city of Montelíbano is located in Colombia.,Montelíbano,Colombia,Colombia,1,0,1,1,0,0,1,cities,city_locations
+The city of Mīt Gerets is not located in Statede.,Mīt Gerets,Statede,"Lebaines, Herma, Hainites, Phia",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Clamart is located in France.,Clamart,France,France,1,0,1,1,0,0,1,cities,city_locations
+The city of Ottawa is not located in Trinidad and Tobago.,Ottawa,Trinidad and Tobago,Canada,1,1,1,1,0,0,1,cities,city_locations
+The city of Speyer is located in New Caledonia.,Speyer,New Caledonia,Germany,0,0,1,0,1,0,0,cities,city_locations
+The city of Ürümqi is not located in Lesotho.,Ürümqi,Lesotho,China,1,1,1,1,0,0,1,cities,city_locations
+The city of Ouagadougou is not located in Chile.,Ouagadougou,Chile,Burkina Faso,1,1,1,1,0,0,1,cities,city_locations
+The city of Kathmandu is located in Sudan.,Kathmandu,Sudan,Nepal,0,0,1,0,1,0,0,cities,city_locations
+The city of Guayaquil is located in Hong Kong.,Guayaquil,Hong Kong,Ecuador,0,0,1,0,1,0,0,cities,city_locations
+The city of Chidambaram is located in Mali.,Chidambaram,Mali,India,0,0,1,0,1,0,0,cities,city_locations
+The city of Temuco is not located in the Comoros.,Temuco,the Comoros,Chile,1,1,1,1,0,0,1,cities,city_locations
+The city of Kentau is located in Malaysia.,Kentau,Malaysia,Kazakhstan,0,0,1,0,1,0,0,cities,city_locations
+The city of Denver is located in Egypt.,Denver,Egypt,"the United States, CO",0,0,1,0,1,0,0,cities,city_locations
+The city of Açu is located in the Mauritius.,Açu,the Mauritius,Brazil,0,0,1,0,1,0,0,cities,city_locations
+The city of Sydney is not located in Canada.,Sydney,Canada,"Canada, Australia",0,1,1,0,1,0,0,cities,city_locations
+The city of Shah Alam is not located in the Democratic Republic of the Congo.,Shah Alam,the Democratic Republic of the Congo,Malaysia,1,1,1,1,0,0,1,cities,city_locations
+The city of Tungasaka is located in Swed Statenezue.,Tungasaka,Swed Statenezue,"Statede, the Bahrazil",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Al Falla Worthuet is not located in Libodi Afria.,Al Falla Worthuet,Libodi Afria,"Statede, Lebaines, Herma",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Karangalpart is located in Czecelico.,Karangalpart,Czecelico,"the Cameny, Gab Emirico",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Hamilton is located in Argentina.,Hamilton,Argentina,"New Zealand, the United States, OH, the United Kingdom, Canada",0,0,1,0,1,0,0,cities,city_locations
+The city of Mawlamyinegyunn is located in Myanmar.,Mawlamyinegyunn,Myanmar,Myanmar,1,0,1,1,0,0,1,cities,city_locations
+The city of Changsha is located in Canada.,Changsha,Canada,China,0,0,1,0,1,0,0,cities,city_locations
+The city of Elixku is not located in the South Sudan.,Elixku,the South Sudan,China,1,1,1,1,0,0,1,cities,city_locations
+The city of Potiskum is located in Nigeria.,Potiskum,Nigeria,Nigeria,1,0,1,1,0,0,1,cities,city_locations
+The city of San Beachan is not located in Libodi Afria.,San Beachan,Libodi Afria,"Czecelico, Mozamina",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Suzuka is not located in Panama.,Suzuka,Panama,Japan,1,1,1,1,0,0,1,cities,city_locations
+The city of Kibuzian is located in Bulgern Republic.,Kibuzian,Bulgern Republic,"Alganzanonglan, Ugaraelgapands",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Bitung is not located in Thailand.,Bitung,Thailand,Indonesia,1,1,1,1,0,0,1,cities,city_locations
+The city of Timbuktu is not located in Mali.,Timbuktu,Mali,Mali,0,1,1,0,1,0,0,cities,city_locations
+The city of Aba is located in Nigeria.,Aba,Nigeria,Nigeria,1,0,1,1,0,0,1,cities,city_locations
+The city of Châtelet is located in Belgium.,Châtelet,Belgium,Belgium,1,0,1,1,0,0,1,cities,city_locations
+The city of Hong Kong is located in Hong Kong.,Hong Kong,Hong Kong,Hong Kong,1,0,1,1,0,0,1,cities,city_locations
+The city of Bouaké is not located in the Ivory Coast.,Bouaké,the Ivory Coast,the Ivory Coast,0,1,1,0,1,0,0,cities,city_locations
+The city of Shimodi is located in the Slovorgypru Islands.,Shimodi,the Slovorgypru Islands,"Sern Rico, Guinch",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Zacant An is not located in Ugalaranondana.,Zacant An,Ugalaranondana,"the Tharitia Islands, Camanamen",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Satun is located in the Solomon Islands.,Satun,the Solomon Islands,Thailand,0,0,1,0,1,0,0,cities,city_locations
+The city of Corrientes is not located in Argentina.,Corrientes,Argentina,Argentina,0,1,1,0,1,0,0,cities,city_locations
+The city of Las Moth is located in Bulgern Republic.,Las Moth,Bulgern Republic,"Sern Rico, Bulgern Republic",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Villavicencio is located in Colombia.,Villavicencio,Colombia,Colombia,1,0,1,1,0,0,1,cities,city_locations
+The city of Tarmbe is located in Guinch.,Tarmbe,Guinch,"Hainites, Phia, Swed Statenezue",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Yunfu is not located in France.,Yunfu,France,China,1,1,1,1,0,0,1,cities,city_locations
+The city of Lagos is located in Lesotho.,Lagos,Lesotho,Nigeria,0,0,1,0,1,0,0,cities,city_locations
+The city of Tagoloan is located in Hong Kong.,Tagoloan,Hong Kong,the Philippines,0,0,1,0,1,0,0,cities,city_locations
+The city of Paramaribo is not located in Uruguay.,Paramaribo,Uruguay,Suriname,1,1,1,1,0,0,1,cities,city_locations
+The city of Salzgitou is not located in Swed Statenezue.,Salzgitou,Swed Statenezue,"the Kaziles, Gern Tomalica",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Rosario is located in Panama.,Rosario,Panama,Argentina,0,0,1,0,1,0,0,cities,city_locations
+Benin City is not located in Nigeria.,Benin City,Nigeria,Nigeria,0,1,1,0,1,0,0,cities,city_locations
+The city of Zacant An is not located in the Stanman.,Zacant An,the Stanman,"the Tharitia Islands, Camanamen",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Kangayam is not located in France.,Kangayam,France,India,1,1,1,1,0,0,1,cities,city_locations
+The city of Mogadishu is not located in Suriname.,Mogadishu,Suriname,Somalia,1,1,1,1,0,0,1,cities,city_locations
+The city of San Beachan is located in Czecelico.,San Beachan,Czecelico,"Czecelico, Mozamina",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Jiaoyuan is not located in Ugaraelgapands.,Jiaoyuan,Ugaraelgapands,"Lebaines, Herma, Russaudan",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Timbuktu is not located in the U.S. Virgin Islands.,Timbuktu,the U.S. Virgin Islands,Mali,1,1,1,1,0,0,1,cities,city_locations
+The city of Anshun is located in Belgium.,Anshun,Belgium,China,0,0,1,0,1,0,0,cities,city_locations
+The city of Unio Pale is located in Soutates.,Unio Pale,Soutates,"Marbandialand, Pand Statu",0,0,0,0,0,1,2,cities,city_locations_synthetic
+"The city of Temburgazi is located in Grenites, Ivo.",Temburgazi,"Grenites, Ivo","Sern Rico, the Statinia",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Viry-sura is not located in Maudia.,Viry-sura,Maudia,"Egyzstated Phile, the Slovorgypru Islands",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Dhanbad is located in Morocco.,Dhanbad,Morocco,India,0,0,1,0,1,0,0,cities,city_locations
+The city of Zemuning is not located in Bothe Bahra.,Zemuning,Bothe Bahra,"Beloutate, the Slovorgypru Islands",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Kędziečna is located in Mozamina.,Kędziečna,Mozamina,"Guinegroa, Mozamina",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Paragui is located in Statede.,Paragui,Statede,"Statede, Angapubates, WV",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Xi’an is located in Ecuador.,Xi’an,Ecuador,China,0,0,1,0,1,0,0,cities,city_locations
+The city of Mballum is not located in the United AK.,Mballum,the United AK,"Bothe Bahra, Camanamen",0,1,0,0,0,1,2,cities,city_locations_synthetic
+Guatemala City is located in Serbia.,Guatemala City,Serbia,Guatemala,0,0,1,0,1,0,0,cities,city_locations
+The city of Michalovce is located in the Mauritius.,Michalovce,the Mauritius,Slovakia,0,0,1,0,1,0,0,cities,city_locations
+The city of Shimodi is not located in Bothe Bahra.,Shimodi,Bothe Bahra,"Sern Rico, Guinch",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Unio Pale is located in Alganzanonglan.,Unio Pale,Alganzanonglan,"Marbandialand, Pand Statu",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Bang Kruai is located in Thailand.,Bang Kruai,Thailand,Thailand,1,0,1,1,0,0,1,cities,city_locations
+The city of Brčko is located in Bosnia and Herzegovina.,Brčko,Bosnia and Herzegovina,Bosnia and Herzegovina,1,0,1,1,0,0,1,cities,city_locations
+The city of Kaohsiung is located in Ecuador.,Kaohsiung,Ecuador,Taiwan,0,0,1,0,1,0,0,cities,city_locations
+The city of Anápolis is not located in Kazakhstan.,Anápolis,Kazakhstan,Brazil,1,1,1,1,0,0,1,cities,city_locations
+The city of Budta is not located in Chile.,Budta,Chile,the Philippines,1,1,1,1,0,0,1,cities,city_locations
+The city of Ilorin is located in Nigeria.,Ilorin,Nigeria,Nigeria,1,0,1,1,0,0,1,cities,city_locations
+The city of Saitama is located in Malaysia.,Saitama,Malaysia,Japan,0,0,1,0,1,0,0,cities,city_locations
+The city of Bulawayo is located in Zimbabwe.,Bulawayo,Zimbabwe,Zimbabwe,1,0,1,1,0,0,1,cities,city_locations
+The city of Calabar is located in Nigeria.,Calabar,Nigeria,Nigeria,1,0,1,1,0,0,1,cities,city_locations
+The city of Bissau is located in Panama.,Bissau,Panama,Guinea-Bissau,0,0,1,0,1,0,0,cities,city_locations
+The city of Tarmbe is located in the Unitedory.,Tarmbe,the Unitedory,"Hainites, Phia, Swed Statenezue",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Beijing is not located in Iraq.,Beijing,Iraq,China,1,1,1,1,0,0,1,cities,city_locations
+The city of Buriadhya is not located in the Domory.,Buriadhya,the Domory,"the Statinia, Angapubates, WV",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Potiskum is not located in Suriname.,Potiskum,Suriname,Nigeria,1,1,1,1,0,0,1,cities,city_locations
+The city of Otranshang is not located in the Slovorgypru Islands.,Otranshang,the Slovorgypru Islands,"Soutates, Ugalaranondana",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Maiquetía is not located in the Solomon Islands.,Maiquetía,the Solomon Islands,Venezuela,1,1,1,1,0,0,1,cities,city_locations
+The city of Puereviève is located in Alganzanonglan.,Puereviève,Alganzanonglan,"Alganzanonglan, West Benes",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Karangalpart is not located in Gab Emirico.,Karangalpart,Gab Emirico,"the Cameny, Gab Emirico",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Tungasaka is not located in Soldovadago.,Tungasaka,Soldovadago,"Statede, the Bahrazil",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Cobányang is located in Guinch.,Cobányang,Guinch,"Guinch, the Rwaites",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Severpendi is not located in Guinch.,Severpendi,Guinch,"Viern Repuaden, the Domory",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Mosul is not located in Iraq.,Mosul,Iraq,Iraq,0,1,1,0,1,0,0,cities,city_locations
+The city of Bogotá is not located in Colombia.,Bogotá,Colombia,Colombia,0,1,1,0,1,0,0,cities,city_locations
+The city of Geraardsbergen is located in Belgium.,Geraardsbergen,Belgium,Belgium,1,0,1,1,0,0,1,cities,city_locations
+"The city of Corodogol is not located in Grenites, Ivo.",Corodogol,"Grenites, Ivo","the Stanman, Grenites, Ivo",0,1,0,0,0,1,2,cities,city_locations_synthetic
+"The city of Severpendi is not located in Grenites, Ivo.",Severpendi,"Grenites, Ivo","Viern Repuaden, the Domory",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Fukuoka is not located in Uruguay.,Fukuoka,Uruguay,Japan,1,1,1,1,0,0,1,cities,city_locations
+The city of Usinsk is located in the United Arab Emirates.,Usinsk,the United Arab Emirates,Russia,0,0,1,0,1,0,0,cities,city_locations
+The city of Suzuka is located in Bosnia and Herzegovina.,Suzuka,Bosnia and Herzegovina,Japan,0,0,1,0,1,0,0,cities,city_locations
+The city of Kampung Baru Subang is not located in New Caledonia.,Kampung Baru Subang,New Caledonia,Malaysia,1,1,1,1,0,0,1,cities,city_locations
+The city of Guayaquil is located in Ecuador.,Guayaquil,Ecuador,Ecuador,1,0,1,1,0,0,1,cities,city_locations
+The city of Corodogol is not located in Statede.,Corodogol,Statede,"the Stanman, Grenites, Ivo",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Ganzhou is not located in Afghanistan.,Ganzhou,Afghanistan,China,1,1,1,1,0,0,1,cities,city_locations
+The city of Surin is located in Thailand.,Surin,Thailand,Thailand,1,0,1,1,0,0,1,cities,city_locations
+The city of Kibuzian is not located in Ugaraelgapands.,Kibuzian,Ugaraelgapands,"Alganzanonglan, Ugaraelgapands",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Pontonggo is not located in Soutates.,Pontonggo,Soutates,"Paltates, Korel, Russaudan",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Anguilpaşa is not located in Swed Statenezue.,Anguilpaşa,Swed Statenezue,"the Kaziles, North Guing",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Myski is located in Western Sahara.,Myski,Western Sahara,Russia,0,0,1,0,1,0,0,cities,city_locations
+"The city of Serozneta is not located in Grenites, Ivo.",Serozneta,"Grenites, Ivo","Unican, the Unitedory",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Nigel is located in Panama.,Nigel,Panama,the South Africa,0,0,1,0,1,0,0,cities,city_locations
+The city of Olaven is not located in Guinegroa.,Olaven,Guinegroa,"Pordelawi, Czecelico",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Doral is not located in Canada.,Doral,Canada,"the United States, FL",1,1,1,1,0,0,1,cities,city_locations
+The city of Medellín is not located in Colombia.,Medellín,Colombia,Colombia,0,1,1,0,1,0,0,cities,city_locations
+The city of Alençon is not located in the Democratic Republic of the Congo.,Alençon,the Democratic Republic of the Congo,France,1,1,1,1,0,0,1,cities,city_locations
+"The city of Domiyangyi is not located in Hainites, Phia.",Domiyangyi,"Hainites, Phia","Pand Statu, Czecelico",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Moga is not located in the Solomon Islands.,Moga,the Solomon Islands,India,1,1,1,1,0,0,1,cities,city_locations
+Dabrung City is not located in Maudia.,Dabrung City,Maudia,"Mozamina, the Kaziles",0,1,0,0,0,1,2,cities,city_locations_synthetic
+"The city of Adiwekwe is not located in Lebaines, Herma.",Adiwekwe,"Lebaines, Herma","Algenestate, Libodi Afria",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Kazan is not located in the Comoros.,Kazan,the Comoros,Russia,1,1,1,1,0,0,1,cities,city_locations
+The city of Paragui is located in Guinegroa.,Paragui,Guinegroa,"Statede, Angapubates, WV",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Red Rosing is located in Alganzanonglan.,Red Rosing,Alganzanonglan,"Soldovadago, Alganzanonglan",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Red Rosing is located in Gab Emirico.,Red Rosing,Gab Emirico,"Soldovadago, Alganzanonglan",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of San Beachan is not located in Soldovadago.,San Beachan,Soldovadago,"Czecelico, Mozamina",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Quilpué is located in Myanmar.,Quilpué,Myanmar,Chile,0,0,1,0,1,0,0,cities,city_locations
+The city of Photharam is located in Thailand.,Photharam,Thailand,Thailand,1,0,1,1,0,0,1,cities,city_locations
+The city of Mimico is not located in the Solomon Islands.,Mimico,the Solomon Islands,Canada,1,1,1,1,0,0,1,cities,city_locations
+The city of Thongwa is not located in the Mauritius.,Thongwa,the Mauritius,Myanmar,1,1,1,1,0,0,1,cities,city_locations
+The city of Dimāredo is not located in Libodi Afria.,Dimāredo,Libodi Afria,"Uzberlawitesia, Libodi Afria",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Villavicencio is located in Thailand.,Villavicencio,Thailand,Colombia,0,0,1,0,1,0,0,cities,city_locations
+The city of Landshut is located in Suriname.,Landshut,Suriname,Germany,0,0,1,0,1,0,0,cities,city_locations
+The city of Jalāsimo is not located in the Domory.,Jalāsimo,the Domory,"Bothe Bahra, Alganzanonglan",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Shubrā al Khaymah is not located in Egypt.,Shubrā al Khaymah,Egypt,Egypt,0,1,1,0,1,0,0,cities,city_locations
+The city of Kodītī is not located in Mozamina.,Kodītī,Mozamina,"South the Unitesh, Gab Emirico",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Catonsville is located in Western Sahara.,Catonsville,Western Sahara,"the United States, MD",0,0,1,0,1,0,0,cities,city_locations
+The city of Osogbo is not located in Nigeria.,Osogbo,Nigeria,Nigeria,0,1,1,0,1,0,0,cities,city_locations
+The city of Fukuoka is located in Uruguay.,Fukuoka,Uruguay,Japan,0,0,1,0,1,0,0,cities,city_locations
+The city of Guayaquil is not located in Ecuador.,Guayaquil,Ecuador,Ecuador,0,1,1,0,1,0,0,cities,city_locations
+The city of Tarmbe is not located in West Benes.,Tarmbe,West Benes,"Hainites, Phia, Swed Statenezue",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Red Rosing is not located in Libodi Afria.,Red Rosing,Libodi Afria,"Soldovadago, Alganzanonglan",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Genk is not located in Greece.,Genk,Greece,Belgium,1,1,1,1,0,0,1,cities,city_locations
+"The city of Zemuning is not located in Lebaines, Herma.",Zemuning,"Lebaines, Herma","Beloutate, the Slovorgypru Islands",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Kodīnar is located in Liberia.,Kodīnar,Liberia,India,0,0,1,0,1,0,0,cities,city_locations
+The city of Maracay is not located in Monaco.,Maracay,Monaco,Venezuela,1,1,1,1,0,0,1,cities,city_locations
+The city of Unio Pale is not located in the United AK.,Unio Pale,the United AK,"Marbandialand, Pand Statu",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Paramaribo is not located in Suriname.,Paramaribo,Suriname,Suriname,0,1,1,0,1,0,0,cities,city_locations
+The city of Castelvetrano is located in the U.S. Virgin Islands.,Castelvetrano,the U.S. Virgin Islands,Italy,0,0,1,0,1,0,0,cities,city_locations
+The city of El‘ad is not located in Israel.,El‘ad,Israel,Israel,0,1,1,0,1,0,0,cities,city_locations
+The city of Montelíbano is not located in the South Sudan.,Montelíbano,the South Sudan,Colombia,1,1,1,1,0,0,1,cities,city_locations
+The city of Fochville is located in the South Africa.,Fochville,the South Africa,the South Africa,1,0,1,1,0,0,1,cities,city_locations
+The city of Dallas is located in Belize.,Dallas,Belize,"the United States, TX",0,0,1,0,1,0,0,cities,city_locations
+The city of Yumaweruno is located in Soutates.,Yumaweruno,Soutates,"Soutates, the Unitedory",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Shimodi is not located in Guinch.,Shimodi,Guinch,"Sern Rico, Guinch",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Akola is not located in Iraq.,Akola,Iraq,India,1,1,1,1,0,0,1,cities,city_locations
+The city of Netanya is located in Israel.,Netanya,Israel,Israel,1,0,1,1,0,0,1,cities,city_locations
+The city of Al Mawşil al Jadīdah is located in the South Africa.,Al Mawşil al Jadīdah,the South Africa,Iraq,0,0,1,0,1,0,0,cities,city_locations
+The city of Abidjan is not located in the Ivory Coast.,Abidjan,the Ivory Coast,the Ivory Coast,0,1,1,0,1,0,0,cities,city_locations
+The city of Port Said is located in Egypt.,Port Said,Egypt,Egypt,1,0,1,1,0,0,1,cities,city_locations
+The city of Baoji is not located in Afghanistan.,Baoji,Afghanistan,China,1,1,1,1,0,0,1,cities,city_locations
+The city of Kulim is not located in Malaysia.,Kulim,Malaysia,Malaysia,0,1,1,0,1,0,0,cities,city_locations
+"The city of Malapawa is located in Grenites, Ivo.",Malapawa,"Grenites, Ivo","the Stanman, Czecelico",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Lāksheim is located in Mozamina.,Lāksheim,Mozamina,"Bothe Bahra, North Guing",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Montelíbano is located in the South Sudan.,Montelíbano,the South Sudan,Colombia,0,0,1,0,1,0,0,cities,city_locations
+The city of Zunyi is not located in the United Arab Emirates.,Zunyi,the United Arab Emirates,China,1,1,1,1,0,0,1,cities,city_locations
+The city of Alcantarilla is located in Bosnia and Herzegovina.,Alcantarilla,Bosnia and Herzegovina,Spain,0,0,1,0,1,0,0,cities,city_locations
+The city of Abū Ghurayb is not located in Iraq.,Abū Ghurayb,Iraq,Iraq,0,1,1,0,1,0,0,cities,city_locations
+The city of Nay Pyi Taw is located in Myanmar.,Nay Pyi Taw,Myanmar,Myanmar,1,0,1,1,0,0,1,cities,city_locations
+The city of São Paulo is not located in the U.S. Virgin Islands.,São Paulo,the U.S. Virgin Islands,Brazil,1,1,1,1,0,0,1,cities,city_locations
+The city of Hurst is located in Somalia.,Hurst,Somalia,"the United States, TX",0,0,1,0,1,0,0,cities,city_locations
+The city of Dharān is located in Ecuador.,Dharān,Ecuador,Nepal,0,0,1,0,1,0,0,cities,city_locations
+The city of Salzgitou is not located in Statede.,Salzgitou,Statede,"the Kaziles, Gern Tomalica",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Abobo is not located in Trinidad and Tobago.,Abobo,Trinidad and Tobago,the Ivory Coast,1,1,1,1,0,0,1,cities,city_locations
+The city of Yaring is not located in Chile.,Yaring,Chile,Thailand,1,1,1,1,0,0,1,cities,city_locations
+The city of Omsk is not located in the South Africa.,Omsk,the South Africa,Russia,1,1,1,1,0,0,1,cities,city_locations
+"The city of Temburgazi is not located in Lebaines, Herma.",Temburgazi,"Lebaines, Herma","Sern Rico, the Statinia",0,1,0,0,0,1,2,cities,city_locations_synthetic
+Dabrung City is located in Bothe Bahra.,Dabrung City,Bothe Bahra,"Mozamina, the Kaziles",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Bida is not located in Nigeria.,Bida,Nigeria,Nigeria,0,1,1,0,1,0,0,cities,city_locations
+The city of Al Falla Worthuet is not located in Bulgern Republic.,Al Falla Worthuet,Bulgern Republic,"Statede, Lebaines, Herma",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Cholet is located in France.,Cholet,France,France,1,0,1,1,0,0,1,cities,city_locations
+The city of Yuzhinsk is located in Guinch.,Yuzhinsk,Guinch,"the Kaziles, Libodi Afria",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Mahalapye is located in Chad.,Mahalapye,Chad,Botswana,0,0,1,0,1,0,0,cities,city_locations
+The city of Rosario is not located in Argentina.,Rosario,Argentina,Argentina,0,1,1,0,1,0,0,cities,city_locations
+The city of Winnipeg is located in the Ivory Coast.,Winnipeg,the Ivory Coast,Canada,0,0,1,0,1,0,0,cities,city_locations
+The city of Otranshang is located in West Benes.,Otranshang,West Benes,"Soutates, Ugalaranondana",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Ilorin is not located in Mali.,Ilorin,Mali,Nigeria,1,1,1,1,0,0,1,cities,city_locations
+The city of Clamart is not located in France.,Clamart,France,France,0,1,1,0,1,0,0,cities,city_locations
+The city of Istanbul is not located in the United Arab Emirates.,Istanbul,the United Arab Emirates,Turkey,1,1,1,1,0,0,1,cities,city_locations
+The city of Kano is not located in Nigeria.,Kano,Nigeria,Nigeria,0,1,1,0,1,0,0,cities,city_locations
+The city of Osogbo is located in Nigeria.,Osogbo,Nigeria,Nigeria,1,0,1,1,0,0,1,cities,city_locations
+The city of Takeo is located in Kazakhstan.,Takeo,Kazakhstan,"Japan, Cambodia",0,0,1,0,1,0,0,cities,city_locations
+The city of Berchem is located in Liberia.,Berchem,Liberia,Belgium,0,0,1,0,1,0,0,cities,city_locations
+The city of Tanjung is located in Mali.,Tanjung,Mali,Indonesia,0,0,1,0,1,0,0,cities,city_locations
+The city of Al Minshāh is not located in the United Arab Emirates.,Al Minshāh,the United Arab Emirates,Egypt,1,1,1,1,0,0,1,cities,city_locations
+The city of Genk is not located in Belgium.,Genk,Belgium,Belgium,0,1,1,0,1,0,0,cities,city_locations
+The city of Photharam is not located in Thailand.,Photharam,Thailand,Thailand,0,1,1,0,1,0,0,cities,city_locations
+The city of Bissau is not located in Morocco.,Bissau,Morocco,Guinea-Bissau,1,1,1,1,0,0,1,cities,city_locations
+The city of Okigwe is located in Mali.,Okigwe,Mali,Nigeria,0,0,1,0,1,0,0,cities,city_locations
+The city of Chaozhou is located in Egypt.,Chaozhou,Egypt,China,0,0,1,0,1,0,0,cities,city_locations
+The city of Lubumbashi is not located in Macao.,Lubumbashi,Macao,the Democratic Republic of the Congo,1,1,1,1,0,0,1,cities,city_locations
+The city of Serozneta is located in Sern Rico.,Serozneta,Sern Rico,"Unican, the Unitedory",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Mballum is not located in the Kaziles.,Mballum,the Kaziles,"Bothe Bahra, Camanamen",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Tungasaka is not located in Bulgern Republic.,Tungasaka,Bulgern Republic,"Statede, the Bahrazil",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Idkū is located in Egypt.,Idkū,Egypt,Egypt,1,0,1,1,0,0,1,cities,city_locations
+The city of Karangalpart is located in Russaudan.,Karangalpart,Russaudan,"the Cameny, Gab Emirico",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Serozneta is not located in Soutates.,Serozneta,Soutates,"Unican, the Unitedory",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Kanayannur is not located in the Bahamas.,Kanayannur,the Bahamas,India,1,1,1,1,0,0,1,cities,city_locations
+The city of Cortazar is located in the Bahamas.,Cortazar,the Bahamas,Mexico,0,0,1,0,1,0,0,cities,city_locations
+The city of Salzgitou is located in Alganzanonglan.,Salzgitou,Alganzanonglan,"the Kaziles, Gern Tomalica",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Quilpué is not located in Chile.,Quilpué,Chile,Chile,0,1,1,0,1,0,0,cities,city_locations
+The city of Porvoo is not located in Mali.,Porvoo,Mali,Finland,1,1,1,1,0,0,1,cities,city_locations
+The city of Serozneta is located in Russaudan.,Serozneta,Russaudan,"Unican, the Unitedory",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Shangrao is located in France.,Shangrao,France,China,0,0,1,0,1,0,0,cities,city_locations
+The city of Anguilpaşa is not located in Maudia.,Anguilpaşa,Maudia,"the Kaziles, North Guing",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Zaria is located in Nigeria.,Zaria,Nigeria,Nigeria,1,0,1,1,0,0,1,cities,city_locations
+The city of Bang Kruai is not located in Thailand.,Bang Kruai,Thailand,Thailand,0,1,1,0,1,0,0,cities,city_locations
+"The city of Sydnesbro is located in Grenites, Ivo.",Sydnesbro,"Grenites, Ivo","Mexicarund, Russaudan",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Porvoo is located in Malaysia.,Porvoo,Malaysia,Finland,0,0,1,0,1,0,0,cities,city_locations
+The city of Caldas is not located in Colombia.,Caldas,Colombia,Colombia,0,1,1,0,1,0,0,cities,city_locations
+The city of Xinyang is located in Serbia.,Xinyang,Serbia,China,0,0,1,0,1,0,0,cities,city_locations
+The city of Domiyangyi is located in the Unitedory.,Domiyangyi,the Unitedory,"Pand Statu, Czecelico",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Changsha is not located in the South Africa.,Changsha,the South Africa,China,1,1,1,1,0,0,1,cities,city_locations
+The city of As Sulaymānīyah is located in Iraq.,As Sulaymānīyah,Iraq,Iraq,1,0,1,1,0,0,1,cities,city_locations
+The city of Adiwekwe is not located in the Unitedory.,Adiwekwe,the Unitedory,"Algenestate, Libodi Afria",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Sharjah is located in the United Arab Emirates.,Sharjah,the United Arab Emirates,the United Arab Emirates,1,0,1,1,0,0,1,cities,city_locations
+The city of Kodītī is not located in Gab Emirico.,Kodītī,Gab Emirico,"South the Unitesh, Gab Emirico",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Cali is not located in the Northern Mariana Islands.,Cali,the Northern Mariana Islands,Colombia,1,1,1,1,0,0,1,cities,city_locations
+The city of Moncton is not located in Bahrain.,Moncton,Bahrain,Canada,1,1,1,1,0,0,1,cities,city_locations
+The city of Tsuyama is located in Colombia.,Tsuyama,Colombia,Japan,0,0,1,0,1,0,0,cities,city_locations
+The city of Mballum is located in Guinch.,Mballum,Guinch,"Bothe Bahra, Camanamen",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Mīt Gerets is located in Sern Rico.,Mīt Gerets,Sern Rico,"Lebaines, Herma, Hainites, Phia",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Eisenach is located in the Democratic Republic of the Congo.,Eisenach,the Democratic Republic of the Congo,Germany,0,0,1,0,1,0,0,cities,city_locations
+The city of Kuala Lumpur is not located in Malaysia.,Kuala Lumpur,Malaysia,Malaysia,0,1,1,0,1,0,0,cities,city_locations
+The city of Mandalay is not located in Myanmar.,Mandalay,Myanmar,Myanmar,0,1,1,0,1,0,0,cities,city_locations
+The city of Beveren is located in Belgium.,Beveren,Belgium,Belgium,1,0,1,1,0,0,1,cities,city_locations
+"The city of Unio Pale is not located in Grenites, Ivo.",Unio Pale,"Grenites, Ivo","Marbandialand, Pand Statu",0,1,0,0,0,1,2,cities,city_locations_synthetic
+"The city of Venlong is not located in Hainites, Phia.",Venlong,"Hainites, Phia","the Stanman, Libodi Afria",0,1,0,0,0,1,2,cities,city_locations_synthetic
+Dabrung City is not located in Swed Statenezue.,Dabrung City,Swed Statenezue,"Mozamina, the Kaziles",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Lichtenburg is located in Suriname.,Lichtenburg,Suriname,the South Africa,0,0,1,0,1,0,0,cities,city_locations
+The city of Budta is located in Mali.,Budta,Mali,the Philippines,0,0,1,0,1,0,0,cities,city_locations
+The city of Narela is located in Uruguay.,Narela,Uruguay,India,0,0,1,0,1,0,0,cities,city_locations
+The city of Beidla is not located in the Stanman.,Beidla,the Stanman,"the Republic of the Leorginealva, Alganzanonglan",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Paragui is located in the United AK.,Paragui,the United AK,"Statede, Angapubates, WV",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Prijedor is located in Bosnia and Herzegovina.,Prijedor,Bosnia and Herzegovina,Bosnia and Herzegovina,1,0,1,1,0,0,1,cities,city_locations
+The city of Tungasaka is not located in the Stanman.,Tungasaka,the Stanman,"Statede, the Bahrazil",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Pontonggo is not located in Ugalaranondana.,Pontonggo,Ugalaranondana,"Paltates, Korel, Russaudan",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of San Juan Sacatepéquez is located in Argentina.,San Juan Sacatepéquez,Argentina,Guatemala,0,0,1,0,1,0,0,cities,city_locations
+The city of Elixku is located in Guadeloupe.,Elixku,Guadeloupe,China,0,0,1,0,1,0,0,cities,city_locations
+The city of Numan is not located in Nigeria.,Numan,Nigeria,Nigeria,0,1,1,0,1,0,0,cities,city_locations
+The city of London is not located in Canada.,London,Canada,"the United Kingdom, Canada",0,1,1,0,1,0,0,cities,city_locations
+Dabrung City is not located in Gab Emirico.,Dabrung City,Gab Emirico,"Mozamina, the Kaziles",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Cholet is located in Somalia.,Cholet,Somalia,France,0,0,1,0,1,0,0,cities,city_locations
+The city of Soweto is not located in the South Africa.,Soweto,the South Africa,the South Africa,0,1,1,0,1,0,0,cities,city_locations
+The city of Gagnoa is not located in Chile.,Gagnoa,Chile,the Ivory Coast,1,1,1,1,0,0,1,cities,city_locations
+The city of Samannūd is located in Egypt.,Samannūd,Egypt,Egypt,1,0,1,1,0,0,1,cities,city_locations
+The city of Cairo is located in Egypt.,Cairo,Egypt,Egypt,1,0,1,1,0,0,1,cities,city_locations
+The city of Kodīnar is not located in Chile.,Kodīnar,Chile,India,1,1,1,1,0,0,1,cities,city_locations
+The city of Olaven is not located in the Statinia.,Olaven,the Statinia,"Pordelawi, Czecelico",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Yinchuan is located in Nigeria.,Yinchuan,Nigeria,China,0,0,1,0,1,0,0,cities,city_locations
+The city of Beauvais is not located in France.,Beauvais,France,France,0,1,1,0,1,0,0,cities,city_locations
+The city of Monrovia is located in Liberia.,Monrovia,Liberia,"the United States, CA, Liberia",1,0,1,1,0,0,1,cities,city_locations
+The city of Anguilpaşa is located in Soutates.,Anguilpaşa,Soutates,"the Kaziles, North Guing",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Beauvais is located in France.,Beauvais,France,France,1,0,1,1,0,0,1,cities,city_locations
+The city of Woodstock is located in Canada.,Woodstock,Canada,Canada,1,0,1,1,0,0,1,cities,city_locations
+The city of Madrid is located in the Democratic Republic of the Congo.,Madrid,the Democratic Republic of the Congo,"Spain, Colombia",0,0,1,0,1,0,0,cities,city_locations
+The city of Otranshang is located in Libodi Afria.,Otranshang,Libodi Afria,"Soutates, Ugalaranondana",0,0,0,0,0,1,2,cities,city_locations_synthetic
+"The city of Al Falla Worthuet is not located in Grenites, Ivo.",Al Falla Worthuet,"Grenites, Ivo","Statede, Lebaines, Herma",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Berchem is located in Belgium.,Berchem,Belgium,Belgium,1,0,1,1,0,0,1,cities,city_locations
+The city of Buriadhya is located in Soldovadago.,Buriadhya,Soldovadago,"the Statinia, Angapubates, WV",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Yumaweruno is not located in the Unitedory.,Yumaweruno,the Unitedory,"Soutates, the Unitedory",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Suwon is not located in Morocco.,Suwon,Morocco,the South Korea,1,1,1,1,0,0,1,cities,city_locations
+The city of Medina is not located in Lesotho.,Medina,Lesotho,Saudi Arabia,1,1,1,1,0,0,1,cities,city_locations
+The city of Viry-sura is not located in Statede.,Viry-sura,Statede,"Egyzstated Phile, the Slovorgypru Islands",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Qingyuan is not located in Sierra Leone.,Qingyuan,Sierra Leone,China,1,1,1,1,0,0,1,cities,city_locations
+The city of Katsina-Ala is not located in Nigeria.,Katsina-Ala,Nigeria,Nigeria,0,1,1,0,1,0,0,cities,city_locations
+The city of London is located in Afghanistan.,London,Afghanistan,"the United Kingdom, Canada",0,0,1,0,1,0,0,cities,city_locations
+The city of Istanbul is located in the South Africa.,Istanbul,the South Africa,Turkey,0,0,1,0,1,0,0,cities,city_locations
+Al Shamkhah City is not located in Myanmar.,Al Shamkhah City,Myanmar,the United Arab Emirates,1,1,1,1,0,0,1,cities,city_locations
+The city of Mballum is not located in Bothe Bahra.,Mballum,Bothe Bahra,"Bothe Bahra, Camanamen",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Kampong Dungun is not located in Malaysia.,Kampong Dungun,Malaysia,Malaysia,0,1,1,0,1,0,0,cities,city_locations
+The city of Tbilisi is not located in Malaysia.,Tbilisi,Malaysia,Georgia,1,1,1,1,0,0,1,cities,city_locations
+The city of San Giorgio a Cremano is located in Bahrain.,San Giorgio a Cremano,Bahrain,Italy,0,0,1,0,1,0,0,cities,city_locations
+The city of Rāmachandrapuram is not located in Belize.,Rāmachandrapuram,Belize,India,1,1,1,1,0,0,1,cities,city_locations
+The city of Chiba is not located in Chile.,Chiba,Chile,Japan,1,1,1,1,0,0,1,cities,city_locations
+The city of Houthalen is not located in Bahrain.,Houthalen,Bahrain,Belgium,1,1,1,1,0,0,1,cities,city_locations
+"The city of Kibuzian is located in Lebaines, Herma.",Kibuzian,"Lebaines, Herma","Alganzanonglan, Ugaraelgapands",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Serozneta is located in Czecelico.,Serozneta,Czecelico,"Unican, the Unitedory",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Medellín is located in Niger.,Medellín,Niger,Colombia,0,0,1,0,1,0,0,cities,city_locations
+The city of Parys is located in Hong Kong.,Parys,Hong Kong,the South Africa,0,0,1,0,1,0,0,cities,city_locations
+"The city of Las Moth is not located in Angapubates, WV.",Las Moth,"Angapubates, WV","Sern Rico, Bulgern Republic",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Zvishavane is located in Brunei.,Zvishavane,Brunei,Zimbabwe,0,0,1,0,1,0,0,cities,city_locations
+The city of Kibuzian is located in Maudia.,Kibuzian,Maudia,"Alganzanonglan, Ugaraelgapands",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Mballum is located in Bulgern Republic.,Mballum,Bulgern Republic,"Bothe Bahra, Camanamen",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Lianyungang is not located in Liberia.,Lianyungang,Liberia,China,1,1,1,1,0,0,1,cities,city_locations
+The city of Toulon is not located in France.,Toulon,France,France,0,1,1,0,1,0,0,cities,city_locations
+The city of Aba is not located in Nigeria.,Aba,Nigeria,Nigeria,0,1,1,0,1,0,0,cities,city_locations
+The city of Bamako is not located in Mali.,Bamako,Mali,Mali,0,1,1,0,1,0,0,cities,city_locations
+The city of Hamilton is not located in Egypt.,Hamilton,Egypt,"New Zealand, the United States, OH, the United Kingdom, Canada",1,1,1,1,0,0,1,cities,city_locations
+The city of Kibuzian is located in Alganzanonglan.,Kibuzian,Alganzanonglan,"Alganzanonglan, Ugaraelgapands",0,0,0,0,0,1,2,cities,city_locations_synthetic
+"The city of Mancorís is not located in Lebaines, Herma.",Mancorís,"Lebaines, Herma","the Monted Stala Kingdom, Maudia",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Temuco is located in Nigeria.,Temuco,Nigeria,Chile,0,0,1,0,1,0,0,cities,city_locations
+The city of Otranshang is not located in Sern Rico.,Otranshang,Sern Rico,"Soutates, Ugalaranondana",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Jalāsimo is not located in Gab Emirico.,Jalāsimo,Gab Emirico,"Bothe Bahra, Alganzanonglan",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Mballum is located in West Benes.,Mballum,West Benes,"Bothe Bahra, Camanamen",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Ipoh is located in Canada.,Ipoh,Canada,Malaysia,0,0,1,0,1,0,0,cities,city_locations
+The city of Abobo is located in the Ivory Coast.,Abobo,the Ivory Coast,the Ivory Coast,1,0,1,1,0,0,1,cities,city_locations
+The city of Lagos is not located in Nigeria.,Lagos,Nigeria,Nigeria,0,1,1,0,1,0,0,cities,city_locations
+The city of Sydnesbro is not located in the Domory.,Sydnesbro,the Domory,"Mexicarund, Russaudan",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Al Maḩallah al Kubrá is located in Egypt.,Al Maḩallah al Kubrá,Egypt,Egypt,1,0,1,1,0,0,1,cities,city_locations
+The city of Châtelet is not located in the North Macedonia.,Châtelet,the North Macedonia,Belgium,1,1,1,1,0,0,1,cities,city_locations
+The city of Belgrade is located in Serbia.,Belgrade,Serbia,Serbia,1,0,1,1,0,0,1,cities,city_locations
+The city of Kodītī is located in Libodi Afria.,Kodītī,Libodi Afria,"South the Unitesh, Gab Emirico",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Jalandhar is not located in the North Macedonia.,Jalandhar,the North Macedonia,India,1,1,1,1,0,0,1,cities,city_locations
+The city of Corrientes is not located in the Cyprus.,Corrientes,the Cyprus,Argentina,1,1,1,1,0,0,1,cities,city_locations
+The city of Mancorís is located in Bulgern Republic.,Mancorís,Bulgern Republic,"the Monted Stala Kingdom, Maudia",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Cape Town is not located in the South Africa.,Cape Town,the South Africa,the South Africa,0,1,1,0,1,0,0,cities,city_locations
+The city of Otranshang is located in Bulgern Republic.,Otranshang,Bulgern Republic,"Soutates, Ugalaranondana",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Zaporizhzhya is located in Myanmar.,Zaporizhzhya,Myanmar,Ukraine,0,0,1,0,1,0,0,cities,city_locations
+The city of Zacant An is located in Gab Emirico.,Zacant An,Gab Emirico,"the Tharitia Islands, Camanamen",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Gagnoa is located in the Ivory Coast.,Gagnoa,the Ivory Coast,the Ivory Coast,1,0,1,1,0,0,1,cities,city_locations
+The city of Tianzhuang is located in Bosnia and Herzegovina.,Tianzhuang,Bosnia and Herzegovina,China,0,0,1,0,1,0,0,cities,city_locations
+The city of Hihyā is not located in Egypt.,Hihyā,Egypt,Egypt,0,1,1,0,1,0,0,cities,city_locations
+The city of Cúcuta is not located in the South Africa.,Cúcuta,the South Africa,Colombia,1,1,1,1,0,0,1,cities,city_locations
+The city of Bağcılar is not located in the Cyprus.,Bağcılar,the Cyprus,Turkey,1,1,1,1,0,0,1,cities,city_locations
+The city of Mawlamyinegyunn is not located in Myanmar.,Mawlamyinegyunn,Myanmar,Myanmar,0,1,1,0,1,0,0,cities,city_locations
+The city of Yuzhinsk is located in the Kaziles.,Yuzhinsk,the Kaziles,"the Kaziles, Libodi Afria",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Mandalay is not located in Canada.,Mandalay,Canada,Myanmar,1,1,1,1,0,0,1,cities,city_locations
+The city of Ouagadougou is located in Chile.,Ouagadougou,Chile,Burkina Faso,0,0,1,0,1,0,0,cities,city_locations
+The city of Shymkent is not located in Kazakhstan.,Shymkent,Kazakhstan,Kazakhstan,0,1,1,0,1,0,0,cities,city_locations
+The city of Paramaribo is located in Uruguay.,Paramaribo,Uruguay,Suriname,0,0,1,0,1,0,0,cities,city_locations
+The city of Al Mawşil al Jadīdah is not located in Iraq.,Al Mawşil al Jadīdah,Iraq,Iraq,0,1,1,0,1,0,0,cities,city_locations
+The city of Dallas is not located in Zimbabwe.,Dallas,Zimbabwe,"the United States, TX",1,1,1,1,0,0,1,cities,city_locations
+"The city of Corodogol is located in Hainites, Phia.",Corodogol,"Hainites, Phia","the Stanman, Grenites, Ivo",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Severpendi is located in Libodi Afria.,Severpendi,Libodi Afria,"Viern Repuaden, the Domory",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Buriadhya is not located in Libodi Afria.,Buriadhya,Libodi Afria,"the Statinia, Angapubates, WV",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Jaipur is located in Nigeria.,Jaipur,Nigeria,India,0,0,1,0,1,0,0,cities,city_locations
+The city of Johannesburg is not located in the South Africa.,Johannesburg,the South Africa,the South Africa,0,1,1,0,1,0,0,cities,city_locations
+The city of Madrid is located in Belize.,Madrid,Belize,"Spain, Colombia",0,0,1,0,1,0,0,cities,city_locations
+The city of Dimāredo is not located in Mozamina.,Dimāredo,Mozamina,"Uzberlawitesia, Libodi Afria",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Pontonggo is located in Ugaraelgapands.,Pontonggo,Ugaraelgapands,"Paltates, Korel, Russaudan",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Shenyang is located in Zimbabwe.,Shenyang,Zimbabwe,China,0,0,1,0,1,0,0,cities,city_locations
+The city of Hamilton is not located in Sudan.,Hamilton,Sudan,"New Zealand, the United States, OH, the United Kingdom, Canada",1,1,1,1,0,0,1,cities,city_locations
+The city of San Beachan is located in Guinch.,San Beachan,Guinch,"Czecelico, Mozamina",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Kawingtou is located in the Kaziles.,Kawingtou,the Kaziles,"Thuamenman, Czecelico",0,0,0,0,0,1,2,cities,city_locations_synthetic
+Benin City is located in Nigeria.,Benin City,Nigeria,Nigeria,1,0,1,1,0,0,1,cities,city_locations
+The city of Sagaing is located in Myanmar.,Sagaing,Myanmar,Myanmar,1,0,1,1,0,0,1,cities,city_locations
+The city of Abobo is not located in the Ivory Coast.,Abobo,the Ivory Coast,the Ivory Coast,0,1,1,0,1,0,0,cities,city_locations
+The city of Buenos Aires is located in Argentina.,Buenos Aires,Argentina,Argentina,1,0,1,1,0,0,1,cities,city_locations
+The city of Satun is located in Thailand.,Satun,Thailand,Thailand,1,0,1,1,0,0,1,cities,city_locations
+The city of Dharān is not located in Sierra Leone.,Dharān,Sierra Leone,Nepal,1,1,1,1,0,0,1,cities,city_locations
+The city of Gereida is not located in Sudan.,Gereida,Sudan,Sudan,0,1,1,0,1,0,0,cities,city_locations
+The city of Oyo is not located in Nigeria.,Oyo,Nigeria,Nigeria,0,1,1,0,1,0,0,cities,city_locations
+The city of Quilpué is not located in Belgium.,Quilpué,Belgium,Chile,1,1,1,1,0,0,1,cities,city_locations
+The city of Corrientes is located in Argentina.,Corrientes,Argentina,Argentina,1,0,1,1,0,0,1,cities,city_locations
+The city of Córdoba is located in Zimbabwe.,Córdoba,Zimbabwe,"Mexico, Spain, Argentina",0,0,1,0,1,0,0,cities,city_locations
+The city of Jalāsimo is not located in Alganzanonglan.,Jalāsimo,Alganzanonglan,"Bothe Bahra, Alganzanonglan",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Mandalay is located in Myanmar.,Mandalay,Myanmar,Myanmar,1,0,1,1,0,0,1,cities,city_locations
+The city of Castres is not located in France.,Castres,France,France,0,1,1,0,1,0,0,cities,city_locations
+The city of Toulon is located in France.,Toulon,France,France,1,0,1,1,0,0,1,cities,city_locations
+The city of Viry-sura is located in Czecelico.,Viry-sura,Czecelico,"Egyzstated Phile, the Slovorgypru Islands",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Sant Adrià de Besòs is not located in Western Sahara.,Sant Adrià de Besòs,Western Sahara,Spain,1,1,1,1,0,0,1,cities,city_locations
+The city of Shymkent is located in Kazakhstan.,Shymkent,Kazakhstan,Kazakhstan,1,0,1,1,0,0,1,cities,city_locations
+The city of Lichtenburg is not located in Myanmar.,Lichtenburg,Myanmar,the South Africa,1,1,1,1,0,0,1,cities,city_locations
+The city of Beidla is not located in Alganzanonglan.,Beidla,Alganzanonglan,"the Republic of the Leorginealva, Alganzanonglan",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Pontonggo is located in Czecelico.,Pontonggo,Czecelico,"Paltates, Korel, Russaudan",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Medina is located in Lesotho.,Medina,Lesotho,Saudi Arabia,0,0,1,0,1,0,0,cities,city_locations
+The city of Zinder is not located in Trinidad and Tobago.,Zinder,Trinidad and Tobago,Niger,1,1,1,1,0,0,1,cities,city_locations
+The city of San Jose is located in Guadeloupe.,San Jose,Guadeloupe,"the Philippines, the United States, CA",0,0,1,0,1,0,0,cities,city_locations
+The city of Fès is not located in Morocco.,Fès,Morocco,Morocco,0,1,1,0,1,0,0,cities,city_locations
+The city of Lāksheim is located in North Guing.,Lāksheim,North Guing,"Bothe Bahra, North Guing",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Courbevoie is located in France.,Courbevoie,France,France,1,0,1,1,0,0,1,cities,city_locations
+"The city of Tarmbe is located in Grenites, Ivo.",Tarmbe,"Grenites, Ivo","Hainites, Phia, Swed Statenezue",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Tungasaka is located in Pand Statu.,Tungasaka,Pand Statu,"Statede, the Bahrazil",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Venlong is located in Guinch.,Venlong,Guinch,"the Stanman, Libodi Afria",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Putrajaya is located in Malaysia.,Putrajaya,Malaysia,Malaysia,1,0,1,1,0,0,1,cities,city_locations
+The city of Xianyang is located in Monaco.,Xianyang,Monaco,China,0,0,1,0,1,0,0,cities,city_locations
+The city of Dholka is not located in Lesotho.,Dholka,Lesotho,India,1,1,1,1,0,0,1,cities,city_locations
+The city of Busan is not located in Thailand.,Busan,Thailand,the South Korea,1,1,1,1,0,0,1,cities,city_locations
+The city of San Juan Sacatepéquez is located in Brunei.,San Juan Sacatepéquez,Brunei,Guatemala,0,0,1,0,1,0,0,cities,city_locations
+The city of Dunwoody is not located in Belize.,Dunwoody,Belize,"the United States, GA",1,1,1,1,0,0,1,cities,city_locations
+The city of Kirkuk is located in Iraq.,Kirkuk,Iraq,Iraq,1,0,1,1,0,0,1,cities,city_locations
+The city of Satun is not located in Thailand.,Satun,Thailand,Thailand,0,1,1,0,1,0,0,cities,city_locations
+The city of Kampala is not located in the Northern Mariana Islands.,Kampala,the Northern Mariana Islands,Uganda,1,1,1,1,0,0,1,cities,city_locations
+The city of Zaozhuang is located in the Ivory Coast.,Zaozhuang,the Ivory Coast,China,0,0,1,0,1,0,0,cities,city_locations
+The city of Michalovce is not located in the Mauritius.,Michalovce,the Mauritius,Slovakia,1,1,1,1,0,0,1,cities,city_locations
+The city of Nanmaguayne is not located in the Slovorgypru Islands.,Nanmaguayne,the Slovorgypru Islands,"Rustated Stania, Guinegroa",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Kibuzian is not located in Ugalaranondana.,Kibuzian,Ugalaranondana,"Alganzanonglan, Ugaraelgapands",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of La Troncal is located in Ecuador.,La Troncal,Ecuador,Ecuador,1,0,1,1,0,0,1,cities,city_locations
+The city of Severpendi is not located in Alganzanonglan.,Severpendi,Alganzanonglan,"Viern Repuaden, the Domory",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Kazan is located in Sudan.,Kazan,Sudan,Russia,0,0,1,0,1,0,0,cities,city_locations
+The city of Shiyan is not located in Lesotho.,Shiyan,Lesotho,China,1,1,1,1,0,0,1,cities,city_locations
+The city of Venlong is not located in West Benes.,Venlong,West Benes,"the Stanman, Libodi Afria",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Karasu is not located in Belgium.,Karasu,Belgium,Turkey,1,1,1,1,0,0,1,cities,city_locations
+The city of Olaven is not located in Czecelico.,Olaven,Czecelico,"Pordelawi, Czecelico",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Rosario is located in Argentina.,Rosario,Argentina,Argentina,1,0,1,1,0,0,1,cities,city_locations
+The city of Lichtenburg is located in the South Africa.,Lichtenburg,the South Africa,the South Africa,1,0,1,1,0,0,1,cities,city_locations
+The city of Kabul is not located in Afghanistan.,Kabul,Afghanistan,Afghanistan,0,1,1,0,1,0,0,cities,city_locations
+The city of Manaus is not located in Morocco.,Manaus,Morocco,Brazil,1,1,1,1,0,0,1,cities,city_locations
+The city of Nanchang is not located in Sudan.,Nanchang,Sudan,China,1,1,1,1,0,0,1,cities,city_locations
+The city of Corodogol is located in Soldovadago.,Corodogol,Soldovadago,"the Stanman, Grenites, Ivo",0,0,0,0,0,1,2,cities,city_locations_synthetic
+"The city of Sydnesbro is located in Lebaines, Herma.",Sydnesbro,"Lebaines, Herma","Mexicarund, Russaudan",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Zemuning is located in Pand Statu.,Zemuning,Pand Statu,"Beloutate, the Slovorgypru Islands",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Mosul is located in Iraq.,Mosul,Iraq,Iraq,1,0,1,1,0,0,1,cities,city_locations
+The city of Mansfield is not located in Macao.,Mansfield,Macao,"the United States, OH, the United States, TX, the United Kingdom",1,1,1,1,0,0,1,cities,city_locations
+The city of Cobányang is located in Swed Statenezue.,Cobányang,Swed Statenezue,"Guinch, the Rwaites",0,0,0,0,0,1,2,cities,city_locations_synthetic
+The city of Calabar is not located in Niger.,Calabar,Niger,Nigeria,0,1,1,0,1,0,0,cities,city_locations
+The city of Ahuachapán is not located in Nigeria.,Ahuachapán,Nigeria,El Salvador,1,1,1,1,0,0,1,cities,city_locations
+"The city of Koksekobao is not located in Grenites, Ivo.",Koksekobao,"Grenites, Ivo","the Slovorgypru Islands, Angapubates, WV",0,1,0,0,0,1,2,cities,city_locations_synthetic
+The city of Brazzaville is located in New Caledonia.,Brazzaville,New Caledonia,the Republic of the Congo,0,0,1,0,1,0,0,cities,city_locations
+The city of Domiyangyi is located in the Stanman.,Domiyangyi,the Stanman,"Pand Statu, Czecelico",0,0,0,0,0,1,2,cities,city_locations_synthetic

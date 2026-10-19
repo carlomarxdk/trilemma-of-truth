@@ -257,3 +257,6 @@ explore_pooled_interventions.ipynb
 Pipfile
 /diff
 /publications
+
+# Local clone of the HF dataset repo (staging, see datasets/disjointed/export_hf.py)
+hf_release/
