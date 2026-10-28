@@ -1,12 +1,12 @@
 # The Trilemma of Truth in Large Language Models
 
-[![arXiv](https://img.shields.io/badge/arXiv-2506.23921-b31b1b.svg)](https://arxiv.org/abs/2506.23921)
+[![EMNLP 2026](https://img.shields.io/badge/EMNLP-2026-990000.svg)](https://aclanthology.org/2026.emnlp-main.7/)
 [![🤗 Datasets](https://img.shields.io/badge/🤗%20Datasets-trilemma--of--truth-yellow)](https://huggingface.co/datasets/carlomarxx/trilemma-of-truth)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Email](https://img.shields.io/badge/Email-germans@savcisens.com-orange)](mailto:germans@savcisens.com)
 [![DOI](https://zenodo.org/badge/986600505.svg)](https://doi.org/10.5281/zenodo.15779092)
 
-**This repository** is the codebase for [our paper](https://arxiv.org/abs/2506.23921) on evaluating factual reasoning in large language models.  
+**This repository** is the codebase for [our paper](https://aclanthology.org/2026.emnlp-main.7/) on evaluating factual reasoning in large language models.  
 Here you’ll find everything needed to  
 
 1. Generate and inspect our three Trilemma data sets (city locations, drug indications, word definitions),  
@@ -396,9 +396,29 @@ ds = load_dataset("carlomarxx/trilemma-of-truth", name="word_definitions", split
 
 ### Manuscript
 
-#### ArXiv Preprint Version
+#### EMNLP 2026 (Final Version)
 
-Please cite this version:
+```bibtex
+@inproceedings{savcisens-eliassi-rad-2026-trilemma,
+    title = "The Trilemma of Truth in Large Language Models",
+    author = "Savcisens, Germans  and
+      Eliassi-Rad, Tina",
+    editor = "Lee, Hung-Yi  and
+      Dev, Sunipa  and
+      Li, Jessy  and
+      Elliott, Desmond",
+    booktitle = "Proceedings of the 2026 Conference on Empirical Methods in Natural Language Processing",
+    month = oct,
+    year = "2026",
+    address = "Budapest, Hungary",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2026.emnlp-main.7/",
+    pages = "120--194",
+    ISBN = "979-8-89176-459-0",
+}
+```
+
+#### ArXiv Preprint Version
 
 ```bibtex
 @misc{savcisens2025trilemma,
@@ -407,11 +427,10 @@ Please cite this version:
   year          = {2025},
   eprint        = {2506.23921},
   archivePrefix = {arXiv},
-  primaryClass  = {cs.CL},
+  doi           = {10.48550/arXiv.2506.23921}
   url           = {https://arxiv.org/abs/2506.23921}
 }
 ```
-
 #### NeurIPS Workshop Version
 
 *Preliminary version accepted to the [Mechanistic Interpretability Workshop at NeurIPS 2025](https://mechinterpworkshop.com/)*:
@@ -447,12 +466,12 @@ The citation for the latest version:
 ### Data
 
 ```bibtex
-@misc{savcisens2025trilemmadata,
-  title     = {trilemma-of-truth},
+@misc{savcisens2026trilemmadata,
+  title     = {Trilemma of Truth Dataset: True, False, and Neither Statements (Revision 09fd397)},
   author    = {Savcisens, Germans and Eliassi-Rad, Tina},
-  year      = {2025},
+  year      = {2026},
   publisher = {Hugging Face},
-  doi       = {10.57967/hf/5900},
+  doi       = {10.57967/hf/11273},
   url       = {https://huggingface.co/datasets/carlomarxx/trilemma-of-truth}
 }
 ```
