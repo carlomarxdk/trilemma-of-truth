@@ -454,8 +454,7 @@ The citation for the latest version:
   author       = {Savcisens, Germans and
                   Eliassi-Rad, Tina},
   title        = {carlomarxdk/trilemma-of-truth: SEE VERSION AT THE TOP OF THE REPOSITORY}, #example: v0.5.1
-  month        = aug,
-  year         = 2025,
+  year         = {2026},
   publisher    = {Zenodo},
   version      = {SEE VERSION AT THE TOP OF THE REPOSITORY},  #example: v0.5.1
   doi          = {INSERT ZENODO DOI AT THE TOP}, #example: 10.5281/zenodo.15779092
